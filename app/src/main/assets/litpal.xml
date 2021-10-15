@@ -3,7 +3,7 @@
     <dbname value="db_sth" />
     <version value="1" />
     <list>
-        <mapping class="" />
+        <mapping class="com.ccg.futurerealization.bean.DoSth" />
     </list>
     <storage value="internal" />
 
