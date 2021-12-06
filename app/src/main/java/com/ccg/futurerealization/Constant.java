@@ -5,4 +5,9 @@ package com.ccg.futurerealization;
  */
 public class Constant {
 
+    /**
+     * 用于权限请求时的requestcode
+     */
+    public static final int PERMISSION_REQUEST_CODE = 1;
+
 }
