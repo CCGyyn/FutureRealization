@@ -1,12 +1,15 @@
 package com.ccg.futurerealization.bean;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.litepal.crud.LitePalSupport;
 
 /**
  * 想要做的事情数据库
  * @author：cgaopeng on 2021/10/15 13:54
  */
-public class DoSth extends LitePalSupport {
+public class DoSth extends LitePalSupport implements Parcelable {
 
     private Long id;
     /**
@@ -23,6 +26,37 @@ public class DoSth extends LitePalSupport {
      * 2：短期实现
      */
     private Integer type;
+
+    public DoSth() {
+    }
+
+    protected DoSth(Parcel in) {
+        if (in.readByte() == 0) {
+            id = null;
+        } else {
+            id = in.readLong();
+        }
+        future_content = in.readString();
+        byte tmpState = in.readByte();
+        state = tmpState == 0 ? null : tmpState == 1;
+        if (in.readByte() == 0) {
+            type = null;
+        } else {
+            type = in.readInt();
+        }
+    }
+
+    public static final Creator<DoSth> CREATOR = new Creator<DoSth>() {
+        @Override
+        public DoSth createFromParcel(Parcel in) {
+            return new DoSth(in);
+        }
+
+        @Override
+        public DoSth[] newArray(int size) {
+            return new DoSth[size];
+        }
+    };
 
     public long getId() {
         return id;
@@ -54,5 +88,18 @@ public class DoSth extends LitePalSupport {
 
     public void setType(Integer type) {
         this.type = type;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(id);
+        dest.writeString(future_content);
+        dest.writeByte((byte)(state ? 1 : 0));
+        dest.writeInt(type);
     }
 }
