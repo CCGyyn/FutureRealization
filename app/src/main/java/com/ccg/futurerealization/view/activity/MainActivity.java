@@ -64,8 +64,8 @@ public class MainActivity extends BaseActivity{
         mFragmentList.add(mainFragment2);
         //test
         mTitles = new ArrayList<>();
-        mTitles.add("Main Page");
-        mTitles.add("Other");
+        mTitles.add(getResources().getText(R.string.main_page_tab).toString());
+        mTitles.add(getResources().getText(R.string.other_page_tab).toString());
 
         MsgPageAdapter msgPageAdapter = new MsgPageAdapter(getSupportFragmentManager(), mFragmentList,
                 mTitles);
@@ -84,7 +84,7 @@ public class MainActivity extends BaseActivity{
         switch (requestCode) {
             case Constant.PERMISSION_REQUEST_CODE: {
                 if (grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "拒绝权限将无法使用程序", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.permission_deny_toast, Toast.LENGTH_SHORT).show();
                 }
                 break;
             }
