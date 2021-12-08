@@ -14,6 +14,7 @@ import com.ccg.futurerealization.aop.PermissionTrace;
 import com.ccg.futurerealization.base.BaseActivity;
 import com.ccg.futurerealization.bean.DoSth;
 import com.ccg.futurerealization.view.fragment.MainFragment;
+import com.ccg.futurerealization.view.fragment.OtherFragment;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
@@ -58,10 +59,9 @@ public class MainActivity extends BaseActivity{
             list.add(doSth);
         }
         MainFragment mainFragment = MainFragment.newInstance(list);
-        //test
-        MainFragment mainFragment2 = MainFragment.newInstance(list);
+        OtherFragment otherFragment = new OtherFragment();
         mFragmentList.add(mainFragment);
-        mFragmentList.add(mainFragment2);
+        mFragmentList.add(otherFragment);
         //test
         mTitles = new ArrayList<>();
         mTitles.add(getResources().getText(R.string.main_page_tab).toString());
