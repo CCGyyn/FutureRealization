@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="raido_btn_type_code">0#1#2</string>
+    <string name="raido_btn_state_code">0#1</string>
+</resources>
