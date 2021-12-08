@@ -25,6 +25,7 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (getOptionsMenuId() != -1) {
+            //指出fragment愿意添加item到选项菜单
             setHasOptionsMenu(true);
         }
         onCreateViewBefore(inflater, container, savedInstanceState);

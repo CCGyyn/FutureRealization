@@ -3,8 +3,10 @@ package com.ccg.futurerealization.view.fragment;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -45,6 +47,11 @@ public class MainFragment extends BaseFragment {
     }
 
     @Override
+    protected int getOptionsMenuId() {
+        return R.menu.main_fragment_menu;
+    }
+
+    @Override
     protected void onCreateViewBefore(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
     }
@@ -62,5 +69,15 @@ public class MainFragment extends BaseFragment {
         MsgAdapter msgAdapter = new MsgAdapter();
         msgAdapter.setDoSthList(list);
         mRecyclerView.setAdapter(msgAdapter);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.add_sth:
+                Toast.makeText(getContext(), "add sth", Toast.LENGTH_SHORT).show();
+            default:
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
