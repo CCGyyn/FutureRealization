@@ -13,6 +13,9 @@ import com.ccg.futurerealization.adapter.MsgPageAdapter;
 import com.ccg.futurerealization.aop.PermissionTrace;
 import com.ccg.futurerealization.base.BaseActivity;
 import com.ccg.futurerealization.bean.DoSth;
+import com.ccg.futurerealization.contract.MainActivityContract;
+import com.ccg.futurerealization.present.MainActivityPresenter;
+import com.ccg.futurerealization.utils.LogUtils;
 import com.ccg.futurerealization.view.fragment.MainFragment;
 import com.ccg.futurerealization.view.fragment.OtherFragment;
 import com.google.android.material.tabs.TabLayout;
@@ -26,13 +29,14 @@ import java.util.List;
  * @CreateDate: 21-12-6 下午4:12
  * @Version: 1.0
  */
-public class MainActivity extends BaseActivity{
+public class MainActivity extends BaseActivity implements MainActivityContract.View {
 
 
     private TabLayout mTabLayout;
     private ViewPager mViewPager;
     private List<Fragment> mFragmentList;
     private List<String> mTitles;
+    private MainActivityContract.Presenter mPresenter;
 
     @Override
     public int getLayoutId() {
@@ -47,30 +51,12 @@ public class MainActivity extends BaseActivity{
 
     @Override
     protected void initData() {
+        mPresenter = new MainActivityPresenter(this);
         mFragmentList = new ArrayList<>();
-        //test
-        List<DoSth> list = new ArrayList<>();
-        for (long i = 0; i < 4; i++) {
-            DoSth doSth = new DoSth();
-            doSth.setId(i);
-            doSth.setFuture_content("1223");
-            doSth.setState(true);
-            doSth.setType(2);
-            list.add(doSth);
-        }
-        MainFragment mainFragment = MainFragment.newInstance(list);
-        OtherFragment otherFragment = new OtherFragment();
-        mFragmentList.add(mainFragment);
-        mFragmentList.add(otherFragment);
-        //test
         mTitles = new ArrayList<>();
         mTitles.add(getResources().getText(R.string.main_page_tab).toString());
         mTitles.add(getResources().getText(R.string.other_page_tab).toString());
-
-        MsgPageAdapter msgPageAdapter = new MsgPageAdapter(getSupportFragmentManager(), mFragmentList,
-                mTitles);
-        mViewPager.setAdapter(msgPageAdapter);
-        mTabLayout.setupWithViewPager(mViewPager);
+        mPresenter.queryDoSthData();
     }
 
     @PermissionTrace
@@ -90,5 +76,24 @@ public class MainActivity extends BaseActivity{
             }
             default:
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        mPresenter.onDestroy();
+        mPresenter = null;
+        super.onDestroy();
+    }
+
+    @Override
+    public void loadData(List<DoSth> list) {
+        MainFragment mainFragment = MainFragment.newInstance(list);
+        OtherFragment otherFragment = new OtherFragment();
+        mFragmentList.add(mainFragment);
+        mFragmentList.add(otherFragment);
+        MsgPageAdapter msgPageAdapter = new MsgPageAdapter(getSupportFragmentManager(), mFragmentList,
+                mTitles);
+        mViewPager.setAdapter(msgPageAdapter);
+        mTabLayout.setupWithViewPager(mViewPager);
     }
 }

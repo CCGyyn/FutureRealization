@@ -102,4 +102,14 @@ public class DoSth extends LitePalSupport implements Parcelable {
         dest.writeByte((byte)(state ? 1 : 0));
         dest.writeInt(type);
     }
+
+    @Override
+    public String toString() {
+        return "DoSth{" +
+                "id=" + id +
+                ", future_content='" + future_content + '\'' +
+                ", state=" + state +
+                ", type=" + type +
+                '}';
+    }
 }

@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -20,6 +21,9 @@ import com.ccg.futurerealization.R;
 import com.ccg.futurerealization.adapter.MsgAdapter;
 import com.ccg.futurerealization.base.BaseFragment;
 import com.ccg.futurerealization.bean.DoSth;
+import com.ccg.futurerealization.contract.MainFragmentContract;
+import com.ccg.futurerealization.present.MainFragmentPresenter;
+import com.ccg.futurerealization.utils.LogUtils;
 import com.ccg.futurerealization.view.widget.RadioGroupButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.dialog.MaterialDialogs;
@@ -35,13 +39,19 @@ import de.mrapp.android.dialog.MaterialDialog;
  * @CreateDate: 21-12-7 上午10:51
  * @Version: 1.0
  */
-public class MainFragment extends BaseFragment {
+public class MainFragment extends BaseFragment implements MainFragmentContract.View {
 
     private static final String DATA_LIST = "data_list";
 
     private RecyclerView mRecyclerView;
 
-    MaterialDialog.Builder mBuilder;
+    private MaterialDialog.Builder mBuilder;
+
+    private MainFragmentContract.Presenter mPresenter;
+
+    private MsgAdapter mMsgAdapter;
+
+    private List<DoSth> mList;
 
     /**
      * 这种方式主要是防止类似竖屏切成横屏时 传过来数据丢失
@@ -63,7 +73,7 @@ public class MainFragment extends BaseFragment {
 
     @Override
     protected void onCreateViewBefore(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
+        mPresenter = new MainFragmentPresenter(this);
     }
 
     @Override
@@ -75,10 +85,10 @@ public class MainFragment extends BaseFragment {
     protected void onCreateViewInit(View rootView) {
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.msg_list);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        List<DoSth> list = getArguments().getParcelableArrayList(DATA_LIST);
-        MsgAdapter msgAdapter = new MsgAdapter();
-        msgAdapter.setDoSthList(list);
-        mRecyclerView.setAdapter(msgAdapter);
+        mList = getArguments().getParcelableArrayList(DATA_LIST);
+        mMsgAdapter = new MsgAdapter();
+        mMsgAdapter.setDoSthList(mList);
+        mRecyclerView.setAdapter(mMsgAdapter);
     }
 
     @Override
@@ -95,8 +105,16 @@ public class MainFragment extends BaseFragment {
 
     @Override
     public void onDestroy() {
+        mPresenter.onDestroy();
+        mPresenter = null;
         mBuilder = null;
         super.onDestroy();
+    }
+
+    @Override
+    public void addMsgSuccess(DoSth doSth) {
+        mList.add(0, doSth);
+        mMsgAdapter.setDoSthList(mList);
     }
 
     /**
@@ -104,20 +122,30 @@ public class MainFragment extends BaseFragment {
      */
     private void showAddMsgDialog() {
         if (mBuilder == null) {
+            DoSth doSth = new DoSth();
             LinearLayout linearLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.add_dosth_dialog, null);
             RadioGroupButton rgType = linearLayout.findViewById(R.id.rg_item_group_type);
             RadioGroupButton rgState = linearLayout.findViewById(R.id.rg_item_group_state);
+            EditText content = linearLayout.findViewById(R.id.future_content);
+            doSth.setType(0);
+            doSth.setState(false);
             rgType.setOnGroupBtnClickListener(code -> {
-                Toast.makeText(getContext(), code, Toast.LENGTH_SHORT).show();
+                doSth.setType(Integer.valueOf(code));
             });
             rgState.setOnGroupBtnClickListener(code -> {
-                Toast.makeText(getContext(), code, Toast.LENGTH_SHORT).show();
+                doSth.setState(Integer.parseInt(code) == 1);
             });
             // https://github.com/michael-rapp/AndroidMaterialDialog
             mBuilder = new MaterialDialog.Builder(getContext())
                 .setView(linearLayout)
                 .setTitle(R.string.add_msg_alerdialog_title)
-                .setPositiveButton(android.R.string.ok, null)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    LogUtils.d("test content = " + content.getEditableText().toString());
+                    doSth.setFuture_content(content.getEditableText().toString());
+                    mPresenter.addDoSth(doSth);
+                    content.setText("");
+                    dialog.dismiss();
+                })
                 .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
                     dialog.dismiss();
                 });
