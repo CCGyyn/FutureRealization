@@ -3,10 +3,6 @@ package com.ccg.futurerealization.view.activity;
 import android.content.pm.PackageManager;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.viewpager.widget.ViewPager;
-
 import com.ccg.futurerealization.Constant;
 import com.ccg.futurerealization.R;
 import com.ccg.futurerealization.adapter.MsgPageAdapter;
@@ -15,13 +11,16 @@ import com.ccg.futurerealization.base.BaseActivity;
 import com.ccg.futurerealization.bean.DoSth;
 import com.ccg.futurerealization.contract.MainActivityContract;
 import com.ccg.futurerealization.present.MainActivityPresenter;
-import com.ccg.futurerealization.utils.LogUtils;
 import com.ccg.futurerealization.view.fragment.MainFragment;
 import com.ccg.futurerealization.view.fragment.OtherFragment;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.viewpager.widget.ViewPager;
 
 /**
  * @Description:主界面
@@ -80,7 +79,7 @@ public class MainActivity extends BaseActivity implements MainActivityContract.V
 
     @Override
     protected void onDestroy() {
-        mPresenter.onDestroy();
+        mPresenter.destroy();
         mPresenter = null;
         super.onDestroy();
     }

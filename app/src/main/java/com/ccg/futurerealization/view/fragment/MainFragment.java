@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,8 +24,6 @@ import com.ccg.futurerealization.contract.MainFragmentContract;
 import com.ccg.futurerealization.present.MainFragmentPresenter;
 import com.ccg.futurerealization.utils.LogUtils;
 import com.ccg.futurerealization.view.widget.RadioGroupButton;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.dialog.MaterialDialogs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,7 +102,7 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
 
     @Override
     public void onDestroy() {
-        mPresenter.onDestroy();
+        mPresenter.destroy();
         mPresenter = null;
         mBuilder = null;
         super.onDestroy();

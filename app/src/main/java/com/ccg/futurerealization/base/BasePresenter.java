@@ -8,5 +8,5 @@ public interface BasePresenter {
     /**
      * view销毁时调用,释放资源,解除绑定等,防止OOM
      */
-    void onDestroy();
+    void destroy();
 }

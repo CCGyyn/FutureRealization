@@ -33,7 +33,7 @@ public class MainActivityPresenter implements MainActivityContract.Presenter {
     }
 
     @Override
-    public void onDestroy() {
+    public void destroy() {
         mView = null;
     }
 

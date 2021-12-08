@@ -66,7 +66,7 @@ public class MainFragmentPresenter implements MainFragmentContract.Presenter {
     }
 
     @Override
-    public void onDestroy() {
+    public void destroy() {
         mView = null;
     }
 }
