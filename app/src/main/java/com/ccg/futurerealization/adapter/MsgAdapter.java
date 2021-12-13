@@ -120,6 +120,12 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.MsgViewHolder> {
                 })
                 .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
                     dialog.dismiss();
+                })
+                .setNeutralButton(R.string.update_dialog_delete_btn, (dialog, which) -> {
+                    mDoSthManager.deleteById(doSthC.getId());
+                    mDoSthList.remove(position);
+                    notifyDataSetChanged();
+                    dialog.dismiss();
                 });
         MaterialDialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
@@ -128,6 +134,7 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.MsgViewHolder> {
         Resources resources = context.getResources();
         dialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(resources.getColor(R.color.material_blue_700));
         dialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(resources.getColor(R.color.material_blue_700));
+        dialog.getButton(DialogInterface.BUTTON_NEUTRAL).setTextColor(resources.getColor(R.color.material_blue_700));
     }
 
     @Override

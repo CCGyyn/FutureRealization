@@ -39,7 +39,7 @@ public class DoSthManagerImpl implements DoSthManager {
     }
 
     @Override
-    public Integer deleteById(int id) {
+    public Integer deleteById(long id) {
         int delete = LitePal.delete(DoSth.class, id);
         return delete;
     }
@@ -57,8 +57,14 @@ public class DoSthManagerImpl implements DoSthManager {
     }
 
     @Override
-    public DoSth queryById(int id) {
+    public DoSth queryById(long id) {
         DoSth doSth = LitePal.find(DoSth.class, id);
         return doSth;
+    }
+
+    @Override
+    public Integer deleteAll() {
+        int i = LitePal.deleteAll(DoSth.class);
+        return i;
     }
 }

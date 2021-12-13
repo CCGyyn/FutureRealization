@@ -6,6 +6,8 @@ import com.ccg.futurerealization.db.DoSthManager;
 import com.ccg.futurerealization.db.DoSthManagerImpl;
 import com.ccg.futurerealization.utils.LogUtils;
 
+import java.util.List;
+
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observable;
@@ -61,6 +63,45 @@ public class MainFragmentPresenter implements MainFragmentContract.Presenter {
                     public void onComplete() {
                         LogUtils.d("onComplete " + doSth.toString());
                         mView.addMsgSuccess(doSth);
+                    }
+                });
+    }
+
+    @Override
+    public void deleteAllDoSth() {
+        Integer i = mDoSthManager.deleteAll();
+        if (i > 0) {
+            queryDoSthData();
+        }
+    }
+
+    @Override
+    public void queryDoSthData() {
+        Observable.create((ObservableOnSubscribe<List<DoSth>>) emitter -> {
+            List<DoSth> list = mDoSthManager.queryAll();
+            emitter.onNext(list);
+            emitter.onComplete();
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<List<DoSth>>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull List<DoSth> list) {
+                        mView.refreshAllMsgItem(list);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
                     }
                 });
     }

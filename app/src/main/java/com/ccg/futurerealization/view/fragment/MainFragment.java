@@ -5,17 +5,21 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.ccg.futurerealization.Constant;
 import com.ccg.futurerealization.R;
 import com.ccg.futurerealization.adapter.MsgAdapter;
 import com.ccg.futurerealization.base.BaseFragment;
@@ -23,10 +27,12 @@ import com.ccg.futurerealization.bean.DoSth;
 import com.ccg.futurerealization.contract.MainFragmentContract;
 import com.ccg.futurerealization.present.MainFragmentPresenter;
 import com.ccg.futurerealization.utils.LogUtils;
+import com.ccg.futurerealization.utils.Utils;
 import com.ccg.futurerealization.view.widget.RadioGroupButton;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import de.mrapp.android.dialog.MaterialDialog;
 
@@ -64,6 +70,14 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
     }
 
     @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        if (Constant.TEST_MAIN_MSG_ADD) {
+            menu.add(0, R.id.test_menu_add, 1, R.string.msg_menu_add_test);
+        }
+    }
+
+    @Override
     protected int getOptionsMenuId() {
         return R.menu.main_fragment_menu;
     }
@@ -95,6 +109,35 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
                 showAddMsgDialog();
                 break;
             }
+            case R.id.delete_all_sth: {
+                MaterialDialog.Builder builder = new MaterialDialog.Builder(getContext())
+                        .setTitle(R.string.delete_all_msg_dialog_title)
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                            mPresenter.deleteAllDoSth();
+                            dialog.dismiss();
+                        })
+                        .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
+                            dialog.dismiss();
+                        });
+                MaterialDialog dialog = builder.create();
+                dialog.show();
+                Resources resources = getContext().getResources();
+                dialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(resources.getColor(R.color.material_blue_700));
+                dialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(resources.getColor(R.color.material_blue_700));
+                break;
+            }
+            case R.id.test_menu_add: {
+                Random random = new Random();
+                int r = 1 + random.nextInt(10);
+                for (int i = 0; i < r; i++) {
+                    DoSth doSth = new DoSth();
+                    doSth.setFuture_content(Utils.getRandomString(random.nextInt(62) + 1));
+                    doSth.setType(random.nextInt(3));
+                    doSth.setState(random.nextBoolean());
+                    mPresenter.addDoSth(doSth);
+                }
+                break;
+            }
             default:
         }
         return super.onOptionsItemSelected(item);
@@ -113,6 +156,13 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
         mList.add(0, doSth);
         mMsgAdapter.setDoSthList(mList);
     }
+
+    @Override
+    public void refreshAllMsgItem(List<DoSth> list) {
+        mList = list;
+        mMsgAdapter.setDoSthList(mList);
+    }
+
 
     /**
      * 显示添加msg的dialog
@@ -153,4 +203,5 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
         dialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(resources.getColor(R.color.material_blue_700));
         dialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(resources.getColor(R.color.material_blue_700));
     }
+
 }

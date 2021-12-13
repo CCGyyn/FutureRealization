@@ -9,12 +9,12 @@ public interface BaseManager<T> {
 
     Boolean insert(T info);
 
-    Integer deleteById(int id);
+    Integer deleteById(long id);
 
     Integer updateInfo(T info);
 
     List<T> queryAll();
 
-    T queryById(int id);
+    T queryById(long id);
 
 }

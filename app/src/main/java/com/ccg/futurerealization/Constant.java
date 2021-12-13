@@ -10,4 +10,9 @@ public class Constant {
      */
     public static final int PERMISSION_REQUEST_CODE = 1;
 
+    /**
+     * 测试用，添加一键生成数据
+     */
+    public static final boolean TEST_MAIN_MSG_ADD = true;
+
 }
