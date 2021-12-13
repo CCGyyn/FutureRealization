@@ -3,13 +3,19 @@ package com.ccg.futurerealization.bean;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+
+import com.ccg.futurerealization.utils.LogUtils;
+
 import org.litepal.crud.LitePalSupport;
 
 /**
  * 想要做的事情数据库
  * @author：cgaopeng on 2021/10/15 13:54
+ *
+ * @update: cgaopeng 2021/12/13 添加原型模式
  */
-public class DoSth extends LitePalSupport implements Parcelable {
+public class DoSth extends LitePalSupport implements Parcelable, Cloneable {
 
     private Long id;
     /**
@@ -111,5 +117,17 @@ public class DoSth extends LitePalSupport implements Parcelable {
                 ", state=" + state +
                 ", type=" + type +
                 '}';
+    }
+
+    @NonNull
+    @Override
+    public DoSth clone() {
+        DoSth doSth = null;
+        try {
+            doSth = (DoSth) super.clone();
+        } catch (CloneNotSupportedException e) {
+            LogUtils.e(e.getMessage());
+        }
+        return doSth;
     }
 }

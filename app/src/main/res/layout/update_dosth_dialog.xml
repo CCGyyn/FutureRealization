@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+    <EditText
+        android:id="@+id/future_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/hint_content"
+        android:minHeight="@dimen/dialog_content_min_height"
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/radio_group_type_text"/>
+        <com.ccg.futurerealization.view.widget.RadioGroupButton
+            android:id="@+id/rg_item_group_type"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:groupBtnCodeText="@string/raido_btn_type_code"
+            app:groupBtnNameText="@string/radio_btn_type_name"/>
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/radio_group_state_text"/>
+        <com.ccg.futurerealization.view.widget.RadioGroupButton
+            android:id="@+id/rg_item_group_state"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:groupBtnCodeText="@string/raido_btn_state_code"
+            app:groupBtnNameText="@string/radio_btn_state_name"/>
+
+    </LinearLayout>
+
+</LinearLayout>

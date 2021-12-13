@@ -17,6 +17,7 @@ import com.ccg.futurerealization.R;
  * @Author: cgaopeng
  * @CreateDate: 21-12-8 下午2:24
  * @Version: 1.0
+ * @update: cgaopeng 21-12-13 添加设置默认raidobutton
  */
 public class RadioGroupButton extends LinearLayout {
 
@@ -99,6 +100,15 @@ public class RadioGroupButton extends LinearLayout {
                 }
             }
         });
+    }
+
+    /**
+     *
+     * @param id radiobutton的id
+     */
+    public void setDefualtSelected(int id) {
+        RadioButton rb = (RadioButton) findViewById(id);
+        rb.setChecked(true);
     }
 
     public interface OnGroupBtnClickListener {

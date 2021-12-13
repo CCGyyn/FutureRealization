@@ -10,4 +10,5 @@
     <string name="radio_group_state_text">实现状态</string>
     <string name="radio_btn_state_name">否#是</string>
     <string name="add_msg_alerdialog_title">添加新的计划</string>
+    <string name="update_msg_alerdialog_title">更新计划</string>
 </resources>

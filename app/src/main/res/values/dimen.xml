@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="item_msg_height">20dp</dimen>
+    <dimen name="item_msg_height">40dp</dimen>
     <dimen name="dialog_content_min_height">50dp</dimen>
+    <dimen name="item_horizontal_line">1px</dimen>
+    <dimen name="item_msg_margin_top">10dp</dimen>
 </resources>

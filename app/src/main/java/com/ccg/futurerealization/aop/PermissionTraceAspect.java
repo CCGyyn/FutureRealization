@@ -50,7 +50,7 @@ public class PermissionTraceAspect {
      */
     @Around("methodAnnotatedWithPermissionTrace()")
     public Object joinPoint(ProceedingJoinPoint joinPoint) throws Throwable {
-        LogUtils.d("joinPoint");
+        LogUtils.v("joinPoint");
         Activity activity = AOPContextHelper.getInstance().getActivity();
         if (null != activity) {
             List<String> permissionsList = new ArrayList<>();

@@ -11,4 +11,5 @@
     <string name="radio_group_state_text">State:</string>
     <string name="radio_btn_state_name">No#Yes</string>
     <string name="add_msg_alerdialog_title">Add new plan</string>
+    <string name="update_msg_alerdialog_title">Update plan</string>
 </resources>

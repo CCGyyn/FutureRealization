@@ -59,7 +59,7 @@ public class MainFragmentPresenter implements MainFragmentContract.Presenter {
 
                     @Override
                     public void onComplete() {
-                        LogUtils.d("onComplete");
+                        LogUtils.d("onComplete " + doSth.toString());
                         mView.addMsgSuccess(doSth);
                     }
                 });

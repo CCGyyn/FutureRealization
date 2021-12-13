@@ -10,6 +10,18 @@ public class LogUtils {
     public static final String TAG = "ccgD";
 
     private static boolean DEBUG = true;
+    private static boolean DEBUG_V = false;
+
+    public static void v(Object s) {
+        if (!DEBUG_V) {
+            return;
+        }
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        String fileName = stackTrace[3].getFileName();
+        String methodName = stackTrace[3].getMethodName();
+        s = "[" +fileName + "] " + "[" + methodName + "] " + s;
+        Log.v(TAG, s + "");
+    }
 
     public static void d(Object s) {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
