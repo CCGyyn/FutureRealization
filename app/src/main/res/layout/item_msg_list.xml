@@ -8,6 +8,7 @@
         android:id="@+id/msg_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textSize="@dimen/item_msg_text_height"
         android:textColor="@drawable/item_msg_click_selector"
         android:clickable="true"
         android:focusable="true" />

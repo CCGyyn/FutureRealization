@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +36,7 @@ import de.mrapp.android.dialog.MaterialDialog;
  * @Version: 1.0
  *
  * @update:cgaopeng 21-12-13 添加每行点击可以更改数据
+ * @update:cgaopeng 21-12-14 更新修改数据方法，添加不同类型的计划表示
  */
 public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.MsgViewHolder> {
 
@@ -64,14 +66,27 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.MsgViewHolder> {
         final DoSth doSth = mDoSthList.get(position);
         int num = position + 1;
         String text = num + "." + doSth.getFuture_content();
-        holder.msgText.setText(text);
+        TextView msgTextView = holder.msgText;
+        msgTextView.setText(text);
         //已实现添加删除线
         if (doSth.getState()) {
-            holder.msgText.setPaintFlags(holder.msgText.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            msgTextView.setPaintFlags(msgTextView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
         }
-        holder.msgText.setOnClickListener(v -> {
+        msgTextView.setOnClickListener(v -> {
            showMsgDialog(v.getContext(), doSth, position);
         });
+        switch (doSth.getType()) {
+            case 1:
+                // long term
+                msgTextView.setBackgroundColor(msgTextView.getContext().getResources().getColor(R.color.long_term_color));
+                break;
+            case 2:
+                // short term
+                msgTextView.setBackgroundColor(msgTextView.getContext().getResources().getColor(R.color.short_term_color));
+                break;
+            default:
+                msgTextView.setBackgroundColor(msgTextView.getContext().getResources().getColor(R.color.white));
+        }
     }
 
     /**
@@ -82,7 +97,20 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.MsgViewHolder> {
     private void updateMsgItem(DoSth doSth, int position) {
         mDoSthList.remove(position);
         mDoSthList.add(position, doSth);
-        notifyDataSetChanged();
+        notifyItemChanged(position);
+    }
+
+    /**
+     * 移除某一行
+     * 但是移除后位置不会更新
+     * 4,5,6 移除5后, 剩下的是4,6 后面不会更改位置
+     * 主要用于前面不加序号的
+     * @param position
+     */
+    @Deprecated
+    private void removeMsgItem(int position) {
+        mDoSthList.remove(position);
+        notifyItemRemoved(position);
     }
 
     /**

@@ -11,4 +11,6 @@
     <color name="tab_indicator_color">@color/black</color>
     <color name="material_blue_700">#3367D6</color>
     <color name="gray_line">#DCDCDC</color>
+    <color name="long_term_color">#00FF00</color>
+    <color name="short_term_color">#DC143C</color>
 </resources>

@@ -2,6 +2,7 @@
 <resources>
     <dimen name="item_msg_height">40dp</dimen>
     <dimen name="dialog_content_min_height">50dp</dimen>
-    <dimen name="item_horizontal_line">1px</dimen>
+    <dimen name="item_horizontal_line">2dp</dimen>
     <dimen name="item_msg_margin_top">10dp</dimen>
+    <dimen name="item_msg_text_height">40px</dimen>
 </resources>
