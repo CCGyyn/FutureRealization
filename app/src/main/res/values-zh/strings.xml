@@ -17,4 +17,5 @@
     <string name="msg_menu_add_test">添加测试</string>
     <string name="delete_all_msg_dialog_title">要全部删除吗？</string>
     <string name="update_dialog_delete_btn">删除</string>
+    <string name="toast_delete_msg_item_success">删除成功</string>
 </resources>

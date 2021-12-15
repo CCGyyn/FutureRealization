@@ -2,6 +2,8 @@ package com.ccg.futurerealization.utils;
 
 import android.util.Log;
 
+import com.ccg.futurerealization.BuildConfig;
+
 /**
  * @author : cgaopeng
  * @description : 封装Log，打印出对应的log的函数
@@ -9,7 +11,7 @@ import android.util.Log;
 public class LogUtils {
     public static final String TAG = "ccgD";
 
-    private static boolean DEBUG = true;
+    private static boolean DEBUG_D = BuildConfig.DEBUG;
     private static boolean DEBUG_V = false;
 
     public static void v(Object s) {
@@ -24,6 +26,9 @@ public class LogUtils {
     }
 
     public static void d(Object s) {
+        if (!DEBUG_D) {
+            return;
+        }
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         String fileName = stackTrace[3].getFileName();
         String methodName = stackTrace[3].getMethodName();

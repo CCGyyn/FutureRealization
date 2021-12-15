@@ -21,6 +21,7 @@ import com.ccg.futurerealization.bean.DoSth;
 import com.ccg.futurerealization.db.DoSthManager;
 import com.ccg.futurerealization.db.DoSthManagerImpl;
 import com.ccg.futurerealization.utils.LogUtils;
+import com.ccg.futurerealization.utils.ToastUtils;
 import com.ccg.futurerealization.view.activity.MsgShowDialogActivity;
 import com.ccg.futurerealization.view.widget.RadioGroupButton;
 
@@ -154,6 +155,7 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.MsgViewHolder> {
                     mDoSthList.remove(position);
                     notifyDataSetChanged();
                     dialog.dismiss();
+                    ToastUtils.success(R.string.toast_delete_msg_item_success);
                 });
         MaterialDialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);

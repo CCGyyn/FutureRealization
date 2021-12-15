@@ -48,6 +48,7 @@ dependencies {
     implementation 'org.aspectj:aspectjrt:1.9.7'
     implementation 'com.github.michael-rapp:android-material-dialog:5.2.3'
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
+    implementation 'com.github.getActivity:XToast:8.5'
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
