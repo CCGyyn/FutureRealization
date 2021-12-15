@@ -29,6 +29,7 @@ public class PermissionTraceAspect {
 
     private String[] PERMISSIONS = {
             Manifest.permission.INTERNET,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
 

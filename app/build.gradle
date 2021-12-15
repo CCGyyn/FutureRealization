@@ -49,6 +49,11 @@ dependencies {
     implementation 'com.github.michael-rapp:android-material-dialog:5.2.3'
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
     implementation 'com.github.getActivity:XToast:8.5'
+    implementation 'org.apache.poi:poi-ooxml:3.17'
+    implementation 'org.apache.xmlbeans:xmlbeans:3.0.0'
+    implementation 'org.dom4j:dom4j:2.0.3'
+    //解决new XSSFWorkbook时 FactoryConfigurationError: Provider com.bea.xml.stream.EventFactory not found
+    implementation 'org.clojars.kjw:wstx-asl:3.2.7'
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'

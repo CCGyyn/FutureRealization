@@ -2,8 +2,10 @@
     <string name="app_name">FutureRealization</string>
 
     <string name="permission_deny_toast">Denying permission will prevent normal use of the program</string>
-    <string name="main_page_tab">Main Page</string>
-    <string name="other_page_tab">Other</string>
+    <string-array name="page_tab_items">
+        <item>Main Page</item>
+        <item>Other</item>
+    </string-array>
     <string name="menu_add_sth">add</string>
     <string name="menu_delete_all_sth">delete all</string>
     <string name="hint_content">Add content here</string>

@@ -16,6 +16,7 @@ import com.ccg.futurerealization.view.fragment.OtherFragment;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -53,8 +54,8 @@ public class MainActivity extends BaseActivity implements MainActivityContract.V
         mPresenter = new MainActivityPresenter(this);
         mFragmentList = new ArrayList<>();
         mTitles = new ArrayList<>();
-        mTitles.add(getResources().getText(R.string.main_page_tab).toString());
-        mTitles.add(getResources().getText(R.string.other_page_tab).toString());
+        String[] pageArray = getResources().getStringArray(R.array.page_tab_items);
+        mTitles.addAll(Arrays.asList(pageArray));
         mPresenter.queryDoSthData();
     }
 
