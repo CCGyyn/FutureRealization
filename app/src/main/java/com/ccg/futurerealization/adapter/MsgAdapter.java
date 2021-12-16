@@ -2,9 +2,7 @@ package com.ccg.futurerealization.adapter;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,11 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.ccg.futurerealization.R;
 import com.ccg.futurerealization.bean.DoSth;
-import com.ccg.futurerealization.db.DoSthManager;
-import com.ccg.futurerealization.db.DoSthManagerImpl;
-import com.ccg.futurerealization.utils.LogUtils;
-import com.ccg.futurerealization.utils.ToastUtils;
-import com.ccg.futurerealization.view.activity.MsgShowDialogActivity;
 import com.ccg.futurerealization.view.widget.RadioGroupButton;
 
 import java.util.ArrayList;
@@ -43,16 +36,19 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.MsgViewHolder> {
 
     private List<DoSth> mDoSthList = new ArrayList<>();
 
-    private DoSthManager mDoSthManager;
+    private Listen mListen;
 
     public MsgAdapter() {
-        mDoSthManager = DoSthManagerImpl.getInstance();
     }
 
     public void setDoSthList(List<? extends DoSth> doSthList) {
         mDoSthList.clear();
         mDoSthList.addAll(doSthList);
         notifyDataSetChanged();
+    }
+
+    public void setListen(Listen listen) {
+        mListen = listen;
     }
 
     @NonNull
@@ -72,6 +68,9 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.MsgViewHolder> {
         //已实现添加删除线
         if (doSth.getState()) {
             msgTextView.setPaintFlags(msgTextView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        } else {
+            //取消删除线
+            msgTextView.setPaintFlags(msgTextView.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
         }
         msgTextView.setOnClickListener(v -> {
            showMsgDialog(v.getContext(), doSth, position);
@@ -90,12 +89,17 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.MsgViewHolder> {
         }
     }
 
+    public void addNewMsgItem(DoSth doSth) {
+        mDoSthList.add(0, doSth);
+        notifyDataSetChanged();
+    }
+
     /**
      * 更新某行数据
      * @param doSth
      * @param position
      */
-    private void updateMsgItem(DoSth doSth, int position) {
+    public void updateMsgItem(DoSth doSth, int position) {
         mDoSthList.remove(position);
         mDoSthList.add(position, doSth);
         notifyItemChanged(position);
@@ -112,6 +116,11 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.MsgViewHolder> {
     private void removeMsgItem(int position) {
         mDoSthList.remove(position);
         notifyItemRemoved(position);
+    }
+
+    public void deleteMsgItem(int position) {
+        mDoSthList.remove(position);
+        notifyDataSetChanged();
     }
 
     /**
@@ -143,19 +152,15 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.MsgViewHolder> {
                 .setView(linearLayout)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                     doSthC.setFuture_content(content.getText().toString());
-                    updateMsgItem(doSthC, position);
-                    mDoSthManager.updateInfo(doSthC);
+                    mListen.updateItem(doSthC, position);
                     dialog.dismiss();
                 })
                 .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
                     dialog.dismiss();
                 })
                 .setNeutralButton(R.string.update_dialog_delete_btn, (dialog, which) -> {
-                    mDoSthManager.deleteById(doSthC.getId());
-                    mDoSthList.remove(position);
-                    notifyDataSetChanged();
+                    mListen.deleteItemById(doSthC.getId(), position);
                     dialog.dismiss();
-                    ToastUtils.success(R.string.toast_delete_msg_item_success);
                 });
         MaterialDialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(false);
@@ -180,5 +185,11 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.MsgViewHolder> {
             super(itemView);
             msgText = (TextView) itemView.findViewById(R.id.msg_text);
         }
+    }
+
+    public interface Listen {
+        void updateItem(DoSth doSth, int position);
+
+        void deleteItemById(Long id, int position);
     }
 }

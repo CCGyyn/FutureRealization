@@ -37,7 +37,7 @@ public class MainFragmentPresenter implements MainFragmentContract.Presenter {
     @Override
     public void addDoSth(DoSth doSth) {
         Observable.create((ObservableOnSubscribe<Boolean>) emitter -> {
-            LogUtils.d("ObservableOnSubscribe");
+            LogUtils.d("ObservableOnSubscribe + " + doSth.toString());
             Boolean ans = mDoSthManager.insert(doSth);
             emitter.onNext(ans);
             emitter.onComplete();
@@ -46,7 +46,7 @@ public class MainFragmentPresenter implements MainFragmentContract.Presenter {
                 .subscribe(new Observer<Boolean>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
-                        LogUtils.d("onSubscribe");
+                        LogUtils.v("onSubscribe");
                     }
 
                     @Override
@@ -56,7 +56,7 @@ public class MainFragmentPresenter implements MainFragmentContract.Presenter {
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-                        LogUtils.d("onError");
+                        LogUtils.v("onError");
                     }
 
                     @Override
@@ -92,6 +92,78 @@ public class MainFragmentPresenter implements MainFragmentContract.Presenter {
                     @Override
                     public void onNext(@NonNull List<DoSth> list) {
                         mView.refreshAllMsgItem(list);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    @Override
+    public void updateDoSth(DoSth doSth, int position) {
+        Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
+            Integer i = mDoSthManager.updateInfo(doSth);
+            emitter.onNext(i);
+            emitter.onComplete();
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Integer>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull Integer i) {
+                        LogUtils.d("onNext " + i + ", sth=" + doSth.toString());
+                        if (i > 0) {
+                            mView.refreshMsgItem(doSth, position);
+                        } else {
+                            mView.actionFailed();
+                        }
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    @Override
+    public void deleteDoSthById(@androidx.annotation.NonNull Long id, int position) {
+        Observable.create((ObservableOnSubscribe<Integer>) emitter -> {
+            Integer i = mDoSthManager.deleteById(id);
+            emitter.onNext(i);
+            emitter.onComplete();
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Integer>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull Integer i) {
+                        LogUtils.d("onNext " + i);
+                        if (i > 0) {
+                            mView.deleteItem(position);
+                        } else {
+                            mView.actionFailed();
+                        }
                     }
 
                     @Override

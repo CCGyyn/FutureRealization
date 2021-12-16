@@ -1,5 +1,7 @@
 package com.ccg.futurerealization.contract;
 
+import androidx.annotation.NonNull;
+
 import com.ccg.futurerealization.base.BasePresenter;
 import com.ccg.futurerealization.base.BaseView;
 import com.ccg.futurerealization.bean.DoSth;
@@ -18,6 +20,12 @@ public interface MainFragmentContract {
         void addMsgSuccess(DoSth doSth);
 
         void refreshAllMsgItem(List<DoSth> list);
+
+        void refreshMsgItem(DoSth doSth, int position);
+
+        void deleteItem(int position);
+
+        void actionFailed();
     }
 
     interface Presenter extends BasePresenter {
@@ -26,5 +34,9 @@ public interface MainFragmentContract {
         void deleteAllDoSth();
 
         void queryDoSthData();
+
+        void updateDoSth(DoSth doSth, int position);
+
+        void deleteDoSthById(@NonNull Long id, int position);
     }
 }

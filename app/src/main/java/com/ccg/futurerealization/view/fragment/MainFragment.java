@@ -27,6 +27,7 @@ import com.ccg.futurerealization.bean.DoSth;
 import com.ccg.futurerealization.contract.MainFragmentContract;
 import com.ccg.futurerealization.present.MainFragmentPresenter;
 import com.ccg.futurerealization.utils.LogUtils;
+import com.ccg.futurerealization.utils.ToastUtils;
 import com.ccg.futurerealization.utils.Utils;
 import com.ccg.futurerealization.view.widget.RadioGroupButton;
 
@@ -53,8 +54,6 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
     private MainFragmentContract.Presenter mPresenter;
 
     private MsgAdapter mMsgAdapter;
-
-    private List<DoSth> mList;
 
     /**
      * 这种方式主要是防止类似竖屏切成横屏时 传过来数据丢失
@@ -96,9 +95,20 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
     protected void onCreateViewInit(View rootView) {
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.msg_list);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mList = getArguments().getParcelableArrayList(DATA_LIST);
+        List<DoSth> list = getArguments().getParcelableArrayList(DATA_LIST);
         mMsgAdapter = new MsgAdapter();
-        mMsgAdapter.setDoSthList(mList);
+        mMsgAdapter.setListen(new MsgAdapter.Listen() {
+            @Override
+            public void updateItem(DoSth doSth, int position) {
+                mPresenter.updateDoSth(doSth, position);
+            }
+
+            @Override
+            public void deleteItemById(Long id, int position) {
+                mPresenter.deleteDoSthById(id, position);
+            }
+        });
+        mMsgAdapter.setDoSthList(list);
         mRecyclerView.setAdapter(mMsgAdapter);
     }
 
@@ -153,14 +163,30 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
 
     @Override
     public void addMsgSuccess(DoSth doSth) {
-        mList.add(0, doSth);
-        mMsgAdapter.setDoSthList(mList);
+        //修复第二次添加时，更改还是用原来的数据，导致后来的修改都是基于第一次添加的
+        mBuilder = null;
+        mMsgAdapter.addNewMsgItem(doSth);
     }
 
     @Override
     public void refreshAllMsgItem(List<DoSth> list) {
-        mList = list;
-        mMsgAdapter.setDoSthList(mList);
+        mMsgAdapter.setDoSthList(list);
+    }
+
+    @Override
+    public void refreshMsgItem(DoSth doSth, int position) {
+        mMsgAdapter.updateMsgItem(doSth, position);
+    }
+
+    @Override
+    public void deleteItem(int position) {
+        mMsgAdapter.deleteMsgItem(position);
+        ToastUtils.success(R.string.toast_delete_msg_item_success);
+    }
+
+    @Override
+    public void actionFailed() {
+        ToastUtils.warn(R.string.toast_action_msg_item_failed);
     }
 
 
