@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <litepal>
     <dbname value="db_sth" />
-    <version value="1" />
+    <version value="2" />
     <list>
         <mapping class="com.ccg.futurerealization.bean.DoSth" />
+        <mapping class="com.ccg.futurerealization.bean.AccountCategory" />
+        <mapping class="com.ccg.futurerealization.bean.Account" />
     </list>
     <storage value="internal" />
 
