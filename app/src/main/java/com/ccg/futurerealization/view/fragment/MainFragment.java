@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.ccg.futurerealization.Constant;
 import com.ccg.futurerealization.R;
@@ -42,6 +43,8 @@ import de.mrapp.android.dialog.MaterialDialog;
  * @Author: cgaopeng
  * @CreateDate: 21-12-7 上午10:51
  * @Version: 1.0
+ *
+ * @update: cgaopeng 21-12-17 添加下拉刷新
  */
 public class MainFragment extends BaseFragment implements MainFragmentContract.View {
 
@@ -54,6 +57,8 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
     private MainFragmentContract.Presenter mPresenter;
 
     private MsgAdapter mMsgAdapter;
+
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     /**
      * 这种方式主要是防止类似竖屏切成横屏时 传过来数据丢失
@@ -93,6 +98,14 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
 
     @Override
     protected void onCreateViewInit(View rootView) {
+        mSwipeRefreshLayout = rootView.findViewById(R.id.swip_refresh_layout);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                LogUtils.v("onRefresh");
+                mPresenter.queryDoSthData();
+            }
+        });
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.msg_list);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         List<DoSth> list = getArguments().getParcelableArrayList(DATA_LIST);
@@ -171,6 +184,9 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
     @Override
     public void refreshAllMsgItem(List<DoSth> list) {
         mMsgAdapter.setDoSthList(list);
+        if (mSwipeRefreshLayout.isRefreshing()) {
+            mSwipeRefreshLayout.setRefreshing(false);
+        }
     }
 
     @Override

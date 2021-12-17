@@ -15,4 +15,9 @@ public class Constant {
      */
     public static final boolean TEST_MAIN_MSG_ADD = true;
 
+    /**
+     * 开启全部等级log打印
+     */
+    public static final boolean DEBUG_ALL = false;
+
 }
