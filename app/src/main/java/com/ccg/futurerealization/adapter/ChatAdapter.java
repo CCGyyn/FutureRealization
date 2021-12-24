@@ -24,6 +24,13 @@ import java.util.List;
  */
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHoder> {
 
+    private static final Integer[] mMsgLayout = new Integer[] {
+            // ChatType.RECEIVE_MSG
+            R.layout.left_chat_msg_layout,
+            // ChatType.SEND_MSG
+            R.layout.right_chat_msg_layout
+    };
+
     private List<ChatMsgEntity> mChatMsgs = new ArrayList<>();
 
 
@@ -36,13 +43,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHoder>
     @NonNull
     @Override
     public ChatViewHoder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view;
-        if (viewType == ChatType.SEND_MSG.getCode()) {
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.right_chat_msg_layout, parent, false);
-        } else {
-            // ChatType.RECEIVE_MSG
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.left_chat_msg_layout, parent, false);
-        }
+        View view = LayoutInflater.from(parent.getContext()).inflate(mMsgLayout[viewType], parent, false);
         return new ChatViewHoder(view);
     }
 
