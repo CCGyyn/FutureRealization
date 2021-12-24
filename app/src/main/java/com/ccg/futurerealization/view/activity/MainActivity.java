@@ -11,6 +11,7 @@ import com.ccg.futurerealization.base.BaseActivity;
 import com.ccg.futurerealization.bean.DoSth;
 import com.ccg.futurerealization.contract.MainActivityContract;
 import com.ccg.futurerealization.present.MainActivityPresenter;
+import com.ccg.futurerealization.view.fragment.BookKeepingFragment;
 import com.ccg.futurerealization.view.fragment.MainFragment;
 import com.ccg.futurerealization.view.fragment.OtherFragment;
 import com.google.android.material.tabs.TabLayout;
@@ -89,11 +90,15 @@ public class MainActivity extends BaseActivity implements MainActivityContract.V
     public void loadData(List<DoSth> list) {
         MainFragment mainFragment = MainFragment.newInstance(list);
         OtherFragment otherFragment = new OtherFragment();
+        BookKeepingFragment bookKeepingFragment = new BookKeepingFragment();
         mFragmentList.add(mainFragment);
+        mFragmentList.add(bookKeepingFragment);
         mFragmentList.add(otherFragment);
         MsgPageAdapter msgPageAdapter = new MsgPageAdapter(getSupportFragmentManager(), mFragmentList,
                 mTitles);
         mViewPager.setAdapter(msgPageAdapter);
         mTabLayout.setupWithViewPager(mViewPager);
+        //设置默认位置
+        mViewPager.setCurrentItem(1);
     }
 }

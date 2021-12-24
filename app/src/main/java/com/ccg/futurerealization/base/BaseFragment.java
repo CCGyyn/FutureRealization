@@ -51,6 +51,12 @@ public abstract class BaseFragment extends Fragment {
         return -1;
     }
 
+    /**
+     * 非必须 一般可能就用来装present
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     */
     protected abstract void onCreateViewBefore(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState);
 
     protected abstract int getContentViewId();

@@ -4,6 +4,7 @@
     <string name="permission_deny_toast">Denying permission will prevent normal use of the program</string>
     <string-array name="page_tab_items">
         <item>Main Page</item>
+        <item>Bookkeeping</item>
         <item>Other</item>
     </string-array>
     <string name="menu_add_sth">add</string>
@@ -20,4 +21,5 @@
     <string name="update_dialog_delete_btn">Delete</string>
     <string name="toast_delete_msg_item_success">Delete success</string>
     <string name="toast_action_msg_item_failed">Operation failed</string>
+    <string name="chat_send_btn">Send</string>
 </resources>

@@ -13,4 +13,8 @@
     <color name="gray_line">#DCDCDC</color>
     <color name="long_term_color">#00FF00</color>
     <color name="short_term_color">#DC143C</color>
+    <!--book keep background-->
+    <color name="book_keep_list">#EDEDED</color>
+    <color name="book_keep_send_layout">#F7F7F7</color>
+    <color name="book_keep_send_text">#FFFFFF</color>
 </resources>
