@@ -1,5 +1,6 @@
 package com.ccg.futurerealization.contract;
 
+import com.ccg.futurerealization.base.BaseApiSubscriber;
 import com.ccg.futurerealization.base.BasePresenter;
 import com.ccg.futurerealization.base.BaseView;
 import com.ccg.futurerealization.bean.DoSth;
@@ -18,10 +19,23 @@ public interface MainActivityContract {
         void loadData(List<DoSth> list);
     }
 
-    interface Presenter extends BasePresenter {
+    abstract class Presenter extends BaseApiSubscriber implements BasePresenter {
+
+        protected View mView;
+
+        public Presenter(View view) {
+            mView = view;
+        }
+
         /**
          * 查找数据
          */
-        void queryDoSthData();
+        abstract public void queryDoSthData();
+
+        @Override
+        public void destroy() {
+            unDisposable();
+            mView = null;
+        }
     }
 }

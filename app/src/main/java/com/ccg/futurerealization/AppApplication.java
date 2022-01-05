@@ -7,12 +7,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.ccg.futurerealization.aop.AOPContextHelper;
+import com.ccg.futurerealization.utils.LogUtils;
 
 import org.litepal.LitePal;
 import org.litepal.LitePalApplication;
 
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.plugins.RxJavaPlugins;
+
 /**
  * @author：cgaopeng on 2021/10/14 21:41
+ * @update 22-1-5 添加rxjava dispose时出错处理
  */
 public class AppApplication extends LitePalApplication {
 
@@ -24,6 +29,7 @@ public class AppApplication extends LitePalApplication {
         //任意地方调一次此方法即创建数据库
         LitePal.getDatabase();
         initActivityLifecycleCallbacks();
+        setRxJavaErrorHandler();
     }
 
     /**
@@ -66,6 +72,20 @@ public class AppApplication extends LitePalApplication {
             @Override
             public void onActivityDestroyed(@NonNull Activity activity) {
 
+            }
+        });
+    }
+
+    /**
+     * RxJava2的一个重要的设计理念是：不吃掉任何一个异常。产生的问题是，当RxJava2“downStream”取消订阅后，
+     * “upStream”仍有可能抛出异常，这时由于已经取消订阅，“downStream”无法处理异常，此时的异常无人处理，
+     * 便会导致程序崩溃。
+     */
+    private void setRxJavaErrorHandler() {
+        RxJavaPlugins.setErrorHandler(new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Throwable {
+                LogUtils.e(throwable.getMessage());
             }
         });
     }

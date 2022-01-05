@@ -2,6 +2,7 @@ package com.ccg.futurerealization.contract;
 
 import androidx.annotation.NonNull;
 
+import com.ccg.futurerealization.base.BaseApiSubscriber;
 import com.ccg.futurerealization.base.BasePresenter;
 import com.ccg.futurerealization.base.BaseView;
 import com.ccg.futurerealization.bean.DoSth;
@@ -28,15 +29,24 @@ public interface MainFragmentContract {
         void actionFailed();
     }
 
-    interface Presenter extends BasePresenter {
-        void addDoSth(DoSth doSth);
+    abstract class Presenter extends BaseApiSubscriber implements BasePresenter {
 
-        void deleteAllDoSth();
+        protected View mView;
 
-        void queryDoSthData();
+        abstract public void addDoSth(DoSth doSth);
 
-        void updateDoSth(DoSth doSth, int position);
+        abstract public void deleteAllDoSth();
 
-        void deleteDoSthById(@NonNull Long id, int position);
+        abstract public void queryDoSthData();
+
+        abstract public void updateDoSth(DoSth doSth, int position);
+
+        abstract public void deleteDoSthById(@NonNull Long id, int position);
+
+        @Override
+        public void destroy() {
+            unDisposable();
+            mView = null;
+        }
     }
 }
