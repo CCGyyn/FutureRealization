@@ -166,7 +166,7 @@ public class MainFragmentPresenter extends MainFragmentContract.Presenter {
                 new Observer<Integer>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
-
+                        addDisposable(d);
                     }
 
                     @Override
