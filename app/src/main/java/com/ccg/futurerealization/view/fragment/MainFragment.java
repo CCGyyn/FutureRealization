@@ -174,6 +174,46 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
         super.onDestroy();
     }
 
+    /**
+     * 显示添加msg的dialog
+     */
+    private void showAddMsgDialog() {
+        if (mBuilder == null) {
+            DoSth doSth = new DoSth();
+            LinearLayout linearLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.add_dosth_dialog, null);
+            RadioGroupButton rgType = linearLayout.findViewById(R.id.rg_item_group_type);
+            RadioGroupButton rgState = linearLayout.findViewById(R.id.rg_item_group_state);
+            EditText content = linearLayout.findViewById(R.id.future_content);
+            doSth.setType(0);
+            doSth.setState(false);
+            rgType.setOnGroupBtnClickListener(code -> {
+                doSth.setType(Integer.valueOf(code));
+            });
+            rgState.setOnGroupBtnClickListener(code -> {
+                doSth.setState(Integer.parseInt(code) == 1);
+            });
+            // https://github.com/michael-rapp/AndroidMaterialDialog
+            mBuilder = new MaterialDialog.Builder(getContext())
+                    .setView(linearLayout)
+                    .setTitle(R.string.add_msg_alerdialog_title)
+                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                        LogUtils.d("test content = " + content.getEditableText().toString());
+                        doSth.setFuture_content(content.getEditableText().toString());
+                        mPresenter.addDoSth(doSth);
+                        content.setText("");
+                        dialog.dismiss();
+                    })
+                    .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
+                        dialog.dismiss();
+                    });
+        }
+        MaterialDialog dialog = mBuilder.create();
+        dialog.show();
+        Resources resources = getContext().getResources();
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(resources.getColor(R.color.material_blue_700));
+        dialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(resources.getColor(R.color.material_blue_700));
+    }
+
     @Override
     public void addMsgSuccess(DoSth doSth) {
         //修复第二次添加时，更改还是用原来的数据，导致后来的修改都是基于第一次添加的
@@ -203,47 +243,6 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
     @Override
     public void actionFailed() {
         ToastUtils.warn(R.string.toast_action_msg_item_failed);
-    }
-
-
-    /**
-     * 显示添加msg的dialog
-     */
-    private void showAddMsgDialog() {
-        if (mBuilder == null) {
-            DoSth doSth = new DoSth();
-            LinearLayout linearLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.add_dosth_dialog, null);
-            RadioGroupButton rgType = linearLayout.findViewById(R.id.rg_item_group_type);
-            RadioGroupButton rgState = linearLayout.findViewById(R.id.rg_item_group_state);
-            EditText content = linearLayout.findViewById(R.id.future_content);
-            doSth.setType(0);
-            doSth.setState(false);
-            rgType.setOnGroupBtnClickListener(code -> {
-                doSth.setType(Integer.valueOf(code));
-            });
-            rgState.setOnGroupBtnClickListener(code -> {
-                doSth.setState(Integer.parseInt(code) == 1);
-            });
-            // https://github.com/michael-rapp/AndroidMaterialDialog
-            mBuilder = new MaterialDialog.Builder(getContext())
-                .setView(linearLayout)
-                .setTitle(R.string.add_msg_alerdialog_title)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    LogUtils.d("test content = " + content.getEditableText().toString());
-                    doSth.setFuture_content(content.getEditableText().toString());
-                    mPresenter.addDoSth(doSth);
-                    content.setText("");
-                    dialog.dismiss();
-                })
-                .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
-                    dialog.dismiss();
-                });
-        }
-        MaterialDialog dialog = mBuilder.create();
-        dialog.show();
-        Resources resources = getContext().getResources();
-        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(resources.getColor(R.color.material_blue_700));
-        dialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(resources.getColor(R.color.material_blue_700));
     }
 
 }
