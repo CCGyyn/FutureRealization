@@ -32,7 +32,7 @@ import androidx.viewpager.widget.ViewPager;
  */
 public class MainActivity extends BaseActivity implements MainActivityContract.View {
 
-
+    private final int CURRENT_ITEM = 1;
     private TabLayout mTabLayout;
     private ViewPager mViewPager;
     private List<Fragment> mFragmentList;
@@ -99,6 +99,6 @@ public class MainActivity extends BaseActivity implements MainActivityContract.V
         mViewPager.setAdapter(msgPageAdapter);
         mTabLayout.setupWithViewPager(mViewPager);
         //设置默认位置
-        mViewPager.setCurrentItem(1);
+        mViewPager.setCurrentItem(CURRENT_ITEM);
     }
 }

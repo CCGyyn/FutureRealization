@@ -1,27 +1,37 @@
 package com.ccg.futurerealization.view.fragment;
 
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
+
 import com.ccg.futurerealization.R;
+import com.ccg.futurerealization.adapter.AccountCategoryPageAdapter;
 import com.ccg.futurerealization.adapter.ChatAdapter;
 import com.ccg.futurerealization.base.BaseFragment;
+import com.ccg.futurerealization.bean.AccountCategory;
+import com.ccg.futurerealization.contract.BookKeepingContract;
 import com.ccg.futurerealization.pojo.ChatMsgEntity;
 import com.ccg.futurerealization.pojo.ChatType;
+import com.ccg.futurerealization.present.BookKeepingPresenter;
+import com.ccg.futurerealization.utils.LogUtils;
+import com.google.android.material.tabs.TabLayout;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @Description: 记账,相关聊天框用draw9patch制作
@@ -29,7 +39,7 @@ import java.sql.Time;
  * @CreateDate: 21-12-20
  * @Version: 1.0
  */
-public class BookKeepingFragment extends BaseFragment {
+public class BookKeepingFragment extends BaseFragment implements BookKeepingContract.View {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -40,6 +50,13 @@ public class BookKeepingFragment extends BaseFragment {
     private Button mSendBtn;
     private EditText mSendText;
     private ChatAdapter mChatAdapter;
+
+    private ViewPager mViewPager;
+    private TabLayout mTabLayout;
+
+    private BookKeepingContract.Present mPresent;
+
+    private List<Fragment> mFragmentList;
 
     public static BookKeepingFragment newInstance(String param1, String param2) {
         BookKeepingFragment fragment = new BookKeepingFragment();
@@ -52,7 +69,7 @@ public class BookKeepingFragment extends BaseFragment {
 
     @Override
     protected void onCreateViewBefore(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
+        mPresent = new BookKeepingPresenter(this, getContext());
     }
 
     @Override
@@ -85,6 +102,24 @@ public class BookKeepingFragment extends BaseFragment {
 
             addNewMsg(chatMsgEntity);
         });
+        mViewPager = rootView.findViewById(R.id.view_list);
+        mTabLayout = rootView.findViewById(R.id.tab_layout);
+        mFragmentList = new ArrayList<>();
+        mPresent.queryAccountCategory();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        if (null != mPresent) {
+            mPresent.destroy();
+            mPresent = null;
+        }
+        super.onDestroy();
     }
 
     /**
@@ -105,5 +140,52 @@ public class BookKeepingFragment extends BaseFragment {
         chatMsgEntity.setTime(new Time(timeMillis));
 
         addNewMsg(chatMsgEntity);
+    }
+
+    /**
+     *
+     * @param titles
+     * @param map
+     */
+    private void setAccountCategoryView(List<AccountCategory> titles,
+                                        Map<Long, List<AccountCategory>> map) {
+        for (AccountCategory ac:titles
+             ) {
+            Long pid = ac.getId();
+            AccountCategoryFragment fragment = AccountCategoryFragment.newInstance(pid, map.get(pid));
+            mFragmentList.add(fragment);
+        }
+        AccountCategoryPageAdapter accountCategoryPageAdapter = new AccountCategoryPageAdapter(
+                getChildFragmentManager(), titles, mFragmentList);
+        mViewPager.setAdapter(accountCategoryPageAdapter);
+        mTabLayout.setupWithViewPager(mViewPager);
+    }
+
+    /**
+     *
+     * @param list 全部
+     */
+    @Override
+    public void loadAccountCategoryData(List<AccountCategory> list) {
+        List<AccountCategory> titles = new ArrayList<>();
+        Map<Long, List<AccountCategory>> map = new HashMap<>();
+        for (AccountCategory ac:list
+             ) {
+            if (0 == ac.getPid()) {
+                titles.add(ac);
+                continue;
+            }
+            Long pid = ac.getPid();
+            List<AccountCategory> acList = map.getOrDefault(pid, new ArrayList<>());
+            acList.add(ac);
+            map.put(pid, acList);
+        }
+        setAccountCategoryView(titles, map);
+    }
+
+    @Override
+    public void loadAccountCategoryData(List<AccountCategory> titles,
+                                        Map<Long, List<AccountCategory>> map) {
+        setAccountCategoryView(titles, map);
     }
 }

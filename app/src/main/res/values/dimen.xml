@@ -5,4 +5,6 @@
     <dimen name="item_horizontal_line">2dp</dimen>
     <dimen name="item_msg_margin_top">10dp</dimen>
     <dimen name="item_msg_text_height">40px</dimen>
+    <dimen name="account_category_viewpager_height">90dp</dimen>
+    <dimen name="account_category_item_text_size">40px</dimen>
 </resources>

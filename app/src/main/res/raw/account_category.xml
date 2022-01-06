@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<category>
+    <type_1 name="食">
+        <type_2 name="早餐" />
+        <type_2 name="中餐" />
+        <type_2 name="晚餐" />
+        <type_2 name="零食" />
+        <type_2 name="饮料" />
+        <type_2 name="水果" />
+    </type_1>
+
+    <type_1 name="其">
+        <type_2 name="其他"/>
+    </type_1>
+
+    <type_1 name="住">
+        <type_2 name="房租" />
+        <type_2 name="水费" />
+    </type_1>
+
+    <type_1 name="收">
+        <type_2 name="收入" />
+        <type_2 name="工资" />
+    </type_1>
+
+    <type_1 name="购">
+        <type_2 name="购物" />
+        <type_2 name="生活用品" />
+        <type_2 name="理发" />
+    </type_1>
+
+    <type_1 name="行">
+        <type_2 name="交通" />
+    </type_1>
+
+    <type_1 name="学">
+        <type_2 name="学费" />
+    </type_1>
+
+    <type_1 name="乐">
+        <type_2 name="娱乐" />
+        <type_2 name="电影" />
+        <type_2 name="游戏" />
+    </type_1>
+</category>
