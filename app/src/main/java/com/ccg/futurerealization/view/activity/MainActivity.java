@@ -100,5 +100,7 @@ public class MainActivity extends BaseActivity implements MainActivityContract.V
         mTabLayout.setupWithViewPager(mViewPager);
         //设置默认位置
         mViewPager.setCurrentItem(CURRENT_ITEM);
+        //解决切换页面时数据丢失 还有一种就是将FragmentPagerAdapter换为FragmentStatePagerAdapter
+        mViewPager.setOffscreenPageLimit(2);
     }
 }
