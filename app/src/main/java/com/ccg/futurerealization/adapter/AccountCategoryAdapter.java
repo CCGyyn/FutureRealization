@@ -10,7 +10,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.ccg.futurerealization.R;
 import com.ccg.futurerealization.bean.AccountCategory;
+import com.ccg.futurerealization.event.BookKeepingEvent;
 import com.ccg.futurerealization.utils.LogUtils;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +39,9 @@ public class AccountCategoryAdapter extends RecyclerView.Adapter<AccountCategory
     public void onBindViewHolder(@NonNull AccountCategoryHoder holder, int position) {
         AccountCategory accountCategory = mAccountCategoryList.get(position);
         holder.setAccountCategoryText(accountCategory.getCategory());
+        holder.setTextClickListen(v -> {
+            EventBus.getDefault().post(BookKeepingEvent.getInstance(accountCategory));
+        });
         LogUtils.d("AccountCategoryAdapter " + position + ", " + accountCategory.getCategory());
     }
 
@@ -60,6 +66,10 @@ public class AccountCategoryAdapter extends RecyclerView.Adapter<AccountCategory
 
         public void setAccountCategoryText(String text) {
             accountCategoryText.setText(text);
+        }
+
+        public void setTextClickListen(View.OnClickListener onClickListener) {
+            accountCategoryText.setOnClickListener(onClickListener);
         }
     }
 }

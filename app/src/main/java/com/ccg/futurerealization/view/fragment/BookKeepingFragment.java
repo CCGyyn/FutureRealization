@@ -6,6 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,13 +20,18 @@ import com.ccg.futurerealization.R;
 import com.ccg.futurerealization.adapter.AccountCategoryPageAdapter;
 import com.ccg.futurerealization.adapter.ChatAdapter;
 import com.ccg.futurerealization.base.BaseFragment;
+import com.ccg.futurerealization.base.EventBusFragment;
 import com.ccg.futurerealization.bean.AccountCategory;
 import com.ccg.futurerealization.contract.BookKeepingContract;
+import com.ccg.futurerealization.event.BookKeepingEvent;
 import com.ccg.futurerealization.pojo.ChatMsgEntity;
 import com.ccg.futurerealization.pojo.ChatType;
 import com.ccg.futurerealization.present.BookKeepingPresenter;
 import com.ccg.futurerealization.utils.LogUtils;
 import com.google.android.material.tabs.TabLayout;
+
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.sql.Date;
 import java.sql.Time;
@@ -38,8 +45,9 @@ import java.util.Map;
  * @Author: cgaopeng
  * @CreateDate: 21-12-20
  * @Version: 1.0
+ * @update 22-01-11 添加发送类型 添加EventBus订阅事件
  */
-public class BookKeepingFragment extends BaseFragment implements BookKeepingContract.View {
+public class BookKeepingFragment extends EventBusFragment implements BookKeepingContract.View {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -49,6 +57,8 @@ public class BookKeepingFragment extends BaseFragment implements BookKeepingCont
     private RecyclerView mRecyclerView;
     private Button mSendBtn;
     private EditText mSendText;
+    private TextView mBookKeepTypeText;
+
     private ChatAdapter mChatAdapter;
 
     private ViewPager mViewPager;
@@ -57,6 +67,8 @@ public class BookKeepingFragment extends BaseFragment implements BookKeepingCont
     private BookKeepingContract.Present mPresent;
 
     private List<Fragment> mFragmentList;
+
+    private AccountCategory mSendCategory;
 
     public static BookKeepingFragment newInstance(String param1, String param2) {
         BookKeepingFragment fragment = new BookKeepingFragment();
@@ -79,9 +91,11 @@ public class BookKeepingFragment extends BaseFragment implements BookKeepingCont
 
     @Override
     protected void onCreateViewInit(View rootView) {
+        LinearLayout sendLayout = rootView.findViewById(R.id.send_layout);
         mRecyclerView = rootView.findViewById(R.id.chat_msg_list);
-        mSendBtn = rootView.findViewById(R.id.send_layout).findViewById(R.id.send_btn);
-        mSendText = rootView.findViewById(R.id.send_layout).findViewById(R.id.send_msg);
+        mSendBtn = sendLayout.findViewById(R.id.send_btn);
+        mSendText = sendLayout.findViewById(R.id.send_msg);
+        mBookKeepTypeText = sendLayout.findViewById(R.id.book_keep_type);
         mChatAdapter = new ChatAdapter();
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -159,6 +173,45 @@ public class BookKeepingFragment extends BaseFragment implements BookKeepingCont
                 getChildFragmentManager(), titles, mFragmentList);
         mViewPager.setAdapter(accountCategoryPageAdapter);
         mTabLayout.setupWithViewPager(mViewPager);
+        if ("".equals(mBookKeepTypeText.getText().toString())) {
+            AccountCategory accountCategory = map.get(titles.get(0).getId()).get(0);
+            setBookKeepTypeText(accountCategory);
+        }
+    }
+
+    /**
+     * 内存中保存记账类型，方便直接获取
+     * @param map 各种记账类型
+     *
+     */
+    @Deprecated
+    private void setAccountCategoryMap(Map<Long, List<AccountCategory>> map) {
+        for (Map.Entry<Long, List<AccountCategory>> entry:map.entrySet()
+             ) {
+            List<AccountCategory> list = entry.getValue();
+            for (AccountCategory accountCategory:list
+                 ) {
+                //mCategoryMap.put(accountCategory.getId(), accountCategory);
+            }
+        }
+    }
+
+    /**
+     * 设置记账类型文本和id
+     * @param accountCategory
+     */
+    private void setBookKeepTypeText(AccountCategory accountCategory) {
+        mSendCategory = accountCategory;
+        if (null != mSendCategory) {
+            mBookKeepTypeText.setText(mSendCategory.getCategory());
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void setAccountCategoryId(BookKeepingEvent bookKeepingEvent) {
+        AccountCategory accountCategory = bookKeepingEvent.getAccountCategory();
+        LogUtils.v("accountCategory = " + accountCategory.toString());
+        setBookKeepTypeText(accountCategory);
     }
 
     /**
