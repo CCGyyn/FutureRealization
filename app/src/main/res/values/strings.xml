@@ -22,4 +22,7 @@
     <string name="toast_delete_msg_item_success">Delete success</string>
     <string name="toast_action_msg_item_failed">Operation failed</string>
     <string name="chat_send_btn">Send</string>
+    <string name="account_type_view_text">expenditure#income</string>
+    <string name="account_type_view_code">1#0</string>
+    <string name="remark_msg_btn">Remark</string>
 </resources>

@@ -5,4 +5,9 @@
         <attr name="groupBtnNameText" format="string"></attr>
         <attr name="groupBtnCodeText" format="string"></attr>
     </declare-styleable>
+
+    <declare-styleable name="AccountTypeTextView">
+        <attr name="nameText" format="string" />
+        <attr name="codeText" format="string" />
+    </declare-styleable>
 </resources>

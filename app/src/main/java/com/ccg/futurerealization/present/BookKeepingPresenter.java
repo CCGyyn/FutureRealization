@@ -4,10 +4,13 @@ import android.content.Context;
 import android.util.Xml;
 
 import com.ccg.futurerealization.R;
+import com.ccg.futurerealization.bean.Account;
 import com.ccg.futurerealization.bean.AccountCategory;
 import com.ccg.futurerealization.contract.BookKeepingContract;
 import com.ccg.futurerealization.db.AccountCategoryManager;
 import com.ccg.futurerealization.db.AccountCategoryManagerImpl;
+import com.ccg.futurerealization.db.AccountManager;
+import com.ccg.futurerealization.db.AccountManagerImpl;
 import com.ccg.futurerealization.utils.LogUtils;
 import com.ccg.futurerealization.utils.Task;
 
@@ -34,9 +37,12 @@ public class BookKeepingPresenter extends BookKeepingContract.Present {
 
     private AccountCategoryManager mAccountCategoryManager;
 
+    private AccountManager mAccountManager;
+
     public BookKeepingPresenter(BookKeepingContract.View view, Context context) {
         super(view, context);
         mAccountCategoryManager = AccountCategoryManagerImpl.getInstance();
+        mAccountManager = AccountManagerImpl.getInstance();
     }
 
     @Override
@@ -165,6 +171,35 @@ public class BookKeepingPresenter extends BookKeepingContract.Present {
                         mView.loadAccountCategoryData(titles, map);
                     }
                 });
+    }
+
+    @Override
+    public void addAccount(Account account) {
+        Task.execute(emmitter -> {
+            Boolean insert = mAccountManager.insert(account);
+            emmitter.onNext(insert);
+            emmitter.onComplete();
+        }, new Observer<Boolean>() {
+            @Override
+            public void onSubscribe(@NonNull Disposable d) {
+                addDisposable(d);
+            }
+
+            @Override
+            public void onNext(@NonNull Boolean b) {
+                mView.addAccountState(b);
+            }
+
+            @Override
+            public void onError(@NonNull Throwable e) {
+
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        });
     }
 
 }

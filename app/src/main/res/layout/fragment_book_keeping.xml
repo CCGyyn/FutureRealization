@@ -4,6 +4,18 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/date_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:textColor="@drawable/item_msg_click_selector"
+            android:focusable="true" />
+    </LinearLayout>
     <androidx.recyclerview.widget.RecyclerView
         android:background="@color/book_keep_list"
         android:id="@+id/chat_msg_list"
@@ -23,15 +35,27 @@
             android:id="@+id/book_keep_type"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+        <com.ccg.futurerealization.view.widget.AccountTypeTextView
+            android:id="@+id/account_type_view"
+            android:textColor="@drawable/item_msg_click_selector"
+            android:layout_marginStart="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
         <EditText
             android:background="@color/book_keep_send_text"
             android:id="@+id/send_msg"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="30dp"
+            android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
+            android:phoneNumber="true"
             />
+        <Button
+            android:id="@+id/remark_msg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/remark_msg_btn"/>
         <Button
             android:id="@+id/send_btn"
             android:layout_width="wrap_content"

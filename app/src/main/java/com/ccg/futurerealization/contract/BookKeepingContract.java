@@ -5,6 +5,7 @@ import android.content.Context;
 import com.ccg.futurerealization.base.BaseApiSubscriber;
 import com.ccg.futurerealization.base.BasePresenter;
 import com.ccg.futurerealization.base.BaseView;
+import com.ccg.futurerealization.bean.Account;
 import com.ccg.futurerealization.bean.AccountCategory;
 
 import java.util.List;
@@ -26,6 +27,8 @@ public interface BookKeepingContract {
         void loadAccountCategoryData(List<AccountCategory> list);
 
         void loadAccountCategoryData(List<AccountCategory> titles, Map<Long, List<AccountCategory>> map);
+
+        void addAccountState(Boolean insert);
     }
 
     abstract class Present extends BaseApiSubscriber implements BasePresenter {
@@ -41,6 +44,8 @@ public interface BookKeepingContract {
         abstract public void queryAccountCategory();
 
         abstract public void initAccountCategory();
+
+        abstract public void addAccount(Account account);
 
         @Override
         public void destroy() {

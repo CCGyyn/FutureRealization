@@ -1,10 +1,18 @@
 package com.ccg.futurerealization.view.fragment;
 
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -19,8 +27,8 @@ import androidx.viewpager.widget.ViewPager;
 import com.ccg.futurerealization.R;
 import com.ccg.futurerealization.adapter.AccountCategoryPageAdapter;
 import com.ccg.futurerealization.adapter.ChatAdapter;
-import com.ccg.futurerealization.base.BaseFragment;
 import com.ccg.futurerealization.base.EventBusFragment;
+import com.ccg.futurerealization.bean.Account;
 import com.ccg.futurerealization.bean.AccountCategory;
 import com.ccg.futurerealization.contract.BookKeepingContract;
 import com.ccg.futurerealization.event.BookKeepingEvent;
@@ -28,17 +36,23 @@ import com.ccg.futurerealization.pojo.ChatMsgEntity;
 import com.ccg.futurerealization.pojo.ChatType;
 import com.ccg.futurerealization.present.BookKeepingPresenter;
 import com.ccg.futurerealization.utils.LogUtils;
+import com.ccg.futurerealization.utils.Utils;
+import com.ccg.futurerealization.view.widget.AccountTypeTextView;
 import com.google.android.material.tabs.TabLayout;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import de.mrapp.android.dialog.MaterialDialog;
 
 /**
  * @Description: 记账,相关聊天框用draw9patch制作
@@ -54,6 +68,13 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
+    private static final int SHOW_INPUT_MSG = 100;
+
+    private static final int SHOW_INPUT_DELAY_TIMES = 2 * 100;
+
+    private static final String SUCCESS_REPLY = "Success.";
+    private static final String FAILED_REPLY = "Failed !!!";
+
     private RecyclerView mRecyclerView;
     private Button mSendBtn;
     private EditText mSendText;
@@ -64,11 +85,39 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
     private ViewPager mViewPager;
     private TabLayout mTabLayout;
 
+    private AccountTypeTextView mAccountTypeTextView;
+
+    private Button mRemarkBtn;
+
+    private TextView mDateText;
+
     private BookKeepingContract.Present mPresent;
 
     private List<Fragment> mFragmentList;
 
     private AccountCategory mSendCategory;
+
+    private String mRemarkMsg = "";
+
+    private Handler mHandler = new Handler(Looper.getMainLooper()){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case SHOW_INPUT_MSG: {
+                    InputMethodManager inputMethodManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                            inputMethodManager.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
+
+                    /*InputMethodManager inputManager = (InputMethodManager) remarkEdit.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputManager.showSoftInput(remarkEdit, 0);*/
+                    break;
+                }
+                default:
+                    break;
+            }
+
+        }
+    };
 
     public static BookKeepingFragment newInstance(String param1, String param2) {
         BookKeepingFragment fragment = new BookKeepingFragment();
@@ -101,20 +150,96 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.setAdapter(mChatAdapter);
 
+        mAccountTypeTextView = sendLayout.findViewById(R.id.account_type_view);
+        mRemarkBtn = sendLayout.findViewById(R.id.remark_msg);
+
+        mRemarkBtn.setOnClickListener(v -> {
+            LinearLayout linearLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.account_remark_dialog, null);
+            EditText remarkEdit = linearLayout.findViewById(R.id.remark_edit_text);
+            MaterialDialog.Builder builder = new MaterialDialog.Builder(getContext())
+                    .setView(linearLayout)
+                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                        mRemarkMsg = remarkEdit.getText().toString();
+                        dialog.dismiss();
+                    })
+                    .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
+                        dialog.dismiss();
+                    });
+            MaterialDialog dialog = builder.create();
+            dialog.show();
+            Resources resources = getContext().getResources();
+            dialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(resources.getColor(R.color.material_blue_700));
+            dialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(resources.getColor(R.color.material_blue_700));
+
+            remarkEdit.setFocusable(true);
+            remarkEdit.setFocusableInTouchMode(true);
+            remarkEdit.requestFocus();
+
+            Message msg = new Message();
+            msg.what = SHOW_INPUT_MSG;
+            mHandler.sendMessageDelayed(msg, SHOW_INPUT_DELAY_TIMES);
+        });
         mSendBtn.setOnClickListener(v -> {
-            ChatMsgEntity chatMsgEntity = new ChatMsgEntity();
-            String msg = mSendText.getText().toString();
-            if ("".equals(msg)) {
+            String money = mSendText.getText().toString();
+            if ("".equals(money)) {
                 return;
             }
             long timeMillis = System.currentTimeMillis();
             mSendText.setText("");
+
+            Account account = new Account();
+            account.setType(mAccountTypeTextView.getAccountType());
+            account.setDate(Utils.stringConvertSqlDate(mDateText.getText().toString()));
+            account.setTime(new Time(timeMillis));
+            if (mSendCategory == null) {
+                LogUtils.w("no category");
+                return;
+            }
+            account.setCategory(mSendCategory);
+            BigDecimal moneyDecimal = new BigDecimal(money)
+                    .setScale(2);
+            account.setAmount(moneyDecimal);
+            String msg = account.getDate().toString() + ", " + mSendCategory.getCategory() + ":" + moneyDecimal;
+            if (!"".equals(mRemarkMsg)) {
+                account.setRemark(mRemarkMsg);
+                msg += ", " + getContext().getResources().getString(R.string.remark_msg_btn) + ":"  + mRemarkMsg;
+                mRemarkMsg = "";
+            }
+
+            ChatMsgEntity chatMsgEntity = new ChatMsgEntity();
             chatMsgEntity.setMsg(msg);
             chatMsgEntity.setChatType(ChatType.SEND_MSG);
             chatMsgEntity.setDate(new Date(timeMillis));
             chatMsgEntity.setTime(new Time(timeMillis));
 
             addNewMsg(chatMsgEntity);
+            mPresent.addAccount(account);
+        });
+        mDateText = rootView.findViewById(R.id.date_text);
+        mDateText.setText(new Date(System.currentTimeMillis()).toString());
+        mDateText.setOnClickListener(v -> {
+            LinearLayout linearLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.datepick_dialog, null);
+            MaterialDialog.Builder builder = new MaterialDialog.Builder(getContext())
+                    .setView(linearLayout)
+                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                        dialog.dismiss();
+                    });
+            DatePicker datePicker = linearLayout.findViewById(R.id.date_picker);
+            Calendar c = Calendar.getInstance();
+            datePicker.init(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH),
+                    new DatePicker.OnDateChangedListener() {
+                        @Override
+                        public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                            StringBuilder sb = new StringBuilder();
+                            sb.append(year).append("-").append(monthOfYear + 1).append("-").append(dayOfMonth);
+                            mDateText.setText(Utils.stringConvertSqlDate(sb.toString()).toString());
+                        }
+                    });
+
+            MaterialDialog dialog = builder.create();
+            dialog.show();
+            Resources resources = getContext().getResources();
+            dialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(resources.getColor(R.color.material_blue_700));
         });
         mViewPager = rootView.findViewById(R.id.view_list);
         mTabLayout = rootView.findViewById(R.id.tab_layout);
@@ -240,5 +365,10 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
     public void loadAccountCategoryData(List<AccountCategory> titles,
                                         Map<Long, List<AccountCategory>> map) {
         setAccountCategoryView(titles, map);
+    }
+
+    @Override
+    public void addAccountState(Boolean insert) {
+        reply(insert ? SUCCESS_REPLY : FAILED_REPLY);
     }
 }

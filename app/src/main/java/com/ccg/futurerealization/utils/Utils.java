@@ -1,5 +1,7 @@
 package com.ccg.futurerealization.utils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -38,5 +40,21 @@ public class Utils {
             sb.append(str.charAt(number));
         }
         return sb.toString();
+    }
+
+    public static java.util.Date stringConvertDate(String time) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        java.util.Date date = null;
+        try {
+            date = simpleDateFormat.parse(time);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date;
+    }
+
+    public static java.sql.Date stringConvertSqlDate(String time) {
+        java.util.Date date = stringConvertDate(time);
+        return new java.sql.Date(date.getTime());
     }
 }
