@@ -11,6 +11,8 @@ import java.sql.Time;
  */
 public class ChatMsgEntity {
 
+    private Long accountId;
+
     private String name;
 
     private String msg;
@@ -61,10 +63,19 @@ public class ChatMsgEntity {
         this.time = time;
     }
 
+    public Long getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(Long accountId) {
+        this.accountId = accountId;
+    }
+
     @Override
     public String toString() {
         return "ChatMsgEntity{" +
-                "name='" + name + '\'' +
+                "accountId=" + accountId +
+                ", name='" + name + '\'' +
                 ", msg='" + msg + '\'' +
                 ", chatType=" + chatType +
                 ", date=" + date +

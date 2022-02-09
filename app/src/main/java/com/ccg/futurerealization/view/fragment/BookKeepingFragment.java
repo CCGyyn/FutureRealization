@@ -32,6 +32,7 @@ import com.ccg.futurerealization.bean.Account;
 import com.ccg.futurerealization.bean.AccountCategory;
 import com.ccg.futurerealization.contract.BookKeepingContract;
 import com.ccg.futurerealization.event.BookKeepingEvent;
+import com.ccg.futurerealization.event.ChatMsgDeleteEvent;
 import com.ccg.futurerealization.pojo.ChatMsgEntity;
 import com.ccg.futurerealization.pojo.ChatType;
 import com.ccg.futurerealization.present.BookKeepingPresenter;
@@ -416,6 +417,11 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
         LogUtils.v("accountCategory = " + accountCategory.toString());
         setBookKeepTypeText(accountCategory);
     }
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void deleteAccountMsg(ChatMsgDeleteEvent chatMsgDeleteEvent) {
+        Long accountId = chatMsgDeleteEvent.getChatMsgEntity().getAccountId();
+        mPresent.deleteAccount(accountId);
+    }
 
     /**
      *
@@ -446,7 +452,12 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
     }
 
     @Override
-    public void addAccountState(Boolean insert) {
+    public void addAccountState(Boolean insert, Account account) {
+        LogUtils.v(account.toString());
+        Long accountId = account.getId();
+        if (null != accountId) {
+            mChatAdapter.setAccountIdForMsg(accountId);
+        }
         reply(insert ? SUCCESS_REPLY : FAILED_REPLY);
     }
 
@@ -472,5 +483,20 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
             }
         }
         setAccountText(totalIncome, totalOver);
+    }
+
+    /**
+     * 加载删除信息状态
+     *
+     * @param i
+     */
+    @Override
+    public void loadDeleteAccountState(Integer i) {
+        LogUtils.v("delete state = " + i);
+        if (i > 0) {
+            //重新计算当月账单
+            mPresent.queryCurrentMonthAccount();
+            mChatAdapter.deleteMsgByPosition();
+        }
     }
 }

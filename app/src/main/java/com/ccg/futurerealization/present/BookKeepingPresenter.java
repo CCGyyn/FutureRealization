@@ -188,7 +188,36 @@ public class BookKeepingPresenter extends BookKeepingContract.Present {
 
             @Override
             public void onNext(@NonNull Boolean b) {
-                mView.addAccountState(b);
+                mView.addAccountState(b, account);
+            }
+
+            @Override
+            public void onError(@NonNull Throwable e) {
+
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        });
+    }
+
+    @Override
+    public void deleteAccount(Long id) {
+        Task.execute(emmitter -> {
+            Integer delete = mAccountManager.deleteById(id);
+            emmitter.onNext(delete);
+            emmitter.onComplete();
+        }, new Observer<Integer>() {
+            @Override
+            public void onSubscribe(@NonNull Disposable d) {
+                addDisposable(d);
+            }
+
+            @Override
+            public void onNext(@NonNull Integer i) {
+                mView.loadDeleteAccountState(i);
             }
 
             @Override
