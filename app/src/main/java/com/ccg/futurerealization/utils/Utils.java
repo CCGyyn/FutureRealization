@@ -1,5 +1,6 @@
 package com.ccg.futurerealization.utils;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Random;
@@ -56,5 +57,23 @@ public class Utils {
     public static java.sql.Date stringConvertSqlDate(String time) {
         java.util.Date date = stringConvertDate(time);
         return new java.sql.Date(date.getTime());
+    }
+
+    /**
+     * 转换到数据库中存储
+     * @param money
+     * @return
+     */
+    public static Integer convertBigDecimalToInteger(BigDecimal money) {
+        return money.multiply(new BigDecimal(100)).intValue();
+    }
+
+    /**
+     * 从数据库中取出转换
+     * @param money
+     * @return
+     */
+    public static BigDecimal convertIntegerToBigDecimal(Integer money) {
+        return new BigDecimal(money).divide(new BigDecimal(100)).setScale(2);
     }
 }

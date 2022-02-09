@@ -2,15 +2,13 @@ package com.ccg.futurerealization.bean;
 
 import org.litepal.crud.LitePalSupport;
 
-import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.Time;
-
 /**
  * @Description:记账表
  * @Author: cgaopeng
  * @CreateDate: 21-12-17 上午10:35
  * @Version: 1.0
+ * @update 22-02-09 重新设计表,修复没有date,amount column, date更改为string类型, amount更改为Integer类型 保存单位为分
+ *      与表AccountCategory建立关联, 一对多
  */
 public class Account extends LitePalSupport {
 
@@ -18,19 +16,16 @@ public class Account extends LitePalSupport {
     /**
      * yyyy-MM-dd
      */
-    private Date date;
-    /**
-     * hh-mm-ss
-     */
-    private Time time;
+    private String date;
+
     /**
      * 1/0 支出/收入
      */
     private Integer type;
     /**
-     * 金额
+     * 金额 单位 分,保存时需要乘以100存储
      */
-    private BigDecimal amount;
+    private Integer amount;
     /**
      * 备注
      */
@@ -38,7 +33,7 @@ public class Account extends LitePalSupport {
     /**
      * 分类id，联表查询分类
      */
-    private AccountCategory category;
+    private AccountCategory accountCategory;
 
     public Long getId() {
         return id;
@@ -48,20 +43,12 @@ public class Account extends LitePalSupport {
         this.id = id;
     }
 
-    public Date getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(String date) {
         this.date = date;
-    }
-
-    public Time getTime() {
-        return time;
-    }
-
-    public void setTime(Time time) {
-        this.time = time;
     }
 
     public Integer getType() {
@@ -72,11 +59,11 @@ public class Account extends LitePalSupport {
         this.type = type;
     }
 
-    public BigDecimal getAmount() {
+    public Integer getAmount() {
         return amount;
     }
 
-    public void setAmount(BigDecimal amount) {
+    public void setAmount(Integer amount) {
         this.amount = amount;
     }
 
@@ -88,12 +75,12 @@ public class Account extends LitePalSupport {
         this.remark = remark;
     }
 
-    public AccountCategory getCategory() {
-        return category;
+    public AccountCategory getAccountCategory() {
+        return accountCategory;
     }
 
-    public void setCategory(AccountCategory category) {
-        this.category = category;
+    public void setAccountCategory(AccountCategory accountCategory) {
+        this.accountCategory = accountCategory;
     }
 
     @Override
@@ -101,11 +88,10 @@ public class Account extends LitePalSupport {
         return "Account{" +
                 "id=" + id +
                 ", date=" + date +
-                ", time=" + time +
                 ", type=" + type +
                 ", amount=" + amount +
                 ", remark='" + remark + '\'' +
-                ", category=" + category +
+                ", category=" + accountCategory +
                 '}';
     }
 }

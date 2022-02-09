@@ -5,11 +5,14 @@ import android.os.Parcelable;
 
 import org.litepal.crud.LitePalSupport;
 
+import java.util.List;
+
 /**
  * @Description: 记账分类表
  * @Author: cgaopeng
  * @CreateDate: 21-12-17 上午10:28
  * @Version: 1.0
+ * @update: 22-02-09 与表Account建立关联, 多对一关系
  */
 public class AccountCategory extends LitePalSupport implements Parcelable {
 
@@ -22,6 +25,8 @@ public class AccountCategory extends LitePalSupport implements Parcelable {
      * 父类id
      */
     private Long pid;
+
+    private List<Account> accountList;
 
     public AccountCategory() {}
 
@@ -95,4 +100,13 @@ public class AccountCategory extends LitePalSupport implements Parcelable {
         dest.writeString(category);
         dest.writeLong(pid);
     }
+
+    public List<Account> getAccountList() {
+        return accountList;
+    }
+
+    public void setAccountList(List<Account> accountList) {
+        this.accountList = accountList;
+    }
+
 }

@@ -90,6 +90,10 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
     private Button mRemarkBtn;
 
     private TextView mDateText;
+    /**
+     * 当月收入和支出的总额
+     */
+    private TextView mAccountText;
 
     private BookKeepingContract.Present mPresent;
 
@@ -152,7 +156,6 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
 
         mAccountTypeTextView = sendLayout.findViewById(R.id.account_type_view);
         mRemarkBtn = sendLayout.findViewById(R.id.remark_msg);
-
         mRemarkBtn.setOnClickListener(v -> {
             LinearLayout linearLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.account_remark_dialog, null);
             EditText remarkEdit = linearLayout.findViewById(R.id.remark_edit_text);
@@ -179,6 +182,7 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
             msg.what = SHOW_INPUT_MSG;
             mHandler.sendMessageDelayed(msg, SHOW_INPUT_DELAY_TIMES);
         });
+
         mSendBtn.setOnClickListener(v -> {
             String money = mSendText.getText().toString();
             if ("".equals(money)) {
@@ -189,21 +193,29 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
 
             Account account = new Account();
             account.setType(mAccountTypeTextView.getAccountType());
-            account.setDate(Utils.stringConvertSqlDate(mDateText.getText().toString()));
-            account.setTime(new Time(timeMillis));
+            account.setDate(mDateText.getText().toString());
             if (mSendCategory == null) {
                 LogUtils.w("no category");
                 return;
             }
-            account.setCategory(mSendCategory);
+            account.setAccountCategory(mSendCategory);
             BigDecimal moneyDecimal = new BigDecimal(money)
                     .setScale(2);
-            account.setAmount(moneyDecimal);
-            String msg = account.getDate().toString() + ", " + mSendCategory.getCategory() + ":" + moneyDecimal;
+
+            account.setAmount(Utils.convertBigDecimalToInteger(moneyDecimal));
+            String msg = account.getDate() + ", " + mSendCategory.getCategory() + ":" + moneyDecimal;
             if (!"".equals(mRemarkMsg)) {
                 account.setRemark(mRemarkMsg);
                 msg += ", " + getContext().getResources().getString(R.string.remark_msg_btn) + ":"  + mRemarkMsg;
                 mRemarkMsg = "";
+            } else {
+                account.setRemark("");
+            }
+
+            if (account.getType() == 0) {
+                addAccountText(moneyDecimal, new BigDecimal(0));
+            } else {
+                addAccountText(new BigDecimal(0), moneyDecimal);
             }
 
             ChatMsgEntity chatMsgEntity = new ChatMsgEntity();
@@ -215,6 +227,7 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
             addNewMsg(chatMsgEntity);
             mPresent.addAccount(account);
         });
+
         mDateText = rootView.findViewById(R.id.date_text);
         mDateText.setText(new Date(System.currentTimeMillis()).toString());
         mDateText.setOnClickListener(v -> {
@@ -241,10 +254,14 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
             Resources resources = getContext().getResources();
             dialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(resources.getColor(R.color.material_blue_700));
         });
+
+        mAccountText = rootView.findViewById(R.id.account_text);
+
         mViewPager = rootView.findViewById(R.id.view_list);
         mTabLayout = rootView.findViewById(R.id.tab_layout);
         mFragmentList = new ArrayList<>();
         mPresent.queryAccountCategory();
+        mPresent.queryCurrentMonthAccount();
     }
 
     @Override
@@ -332,6 +349,67 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
         }
     }
 
+    /**
+     * 设置当月收入和支出显示
+     * @param totalIncome   收入
+     * @param totalOver     支出
+     */
+    private void setAccountText(BigDecimal totalIncome, BigDecimal totalOver) {
+        if (null != mAccountText) {
+            mAccountText.setText(concatAccountText(totalIncome, totalOver));
+        }
+    }
+
+    /**
+     * 发送数据增加相关数值
+     * @param income
+     * @param over
+     */
+    private void addAccountText(BigDecimal income, BigDecimal over) {
+        if (null != mAccountText) {
+            String s = mAccountText.getText().toString();
+            if (null != s) {
+                String[] accounts = s.split("/");
+                if (accounts.length == 2) {
+                    BigDecimal totalIncome = new BigDecimal(accounts[0]).add(income);
+                    BigDecimal totalOver = new BigDecimal(accounts[1]).add(over);
+                    mAccountText.setText(concatAccountText(totalIncome, totalOver));
+                }
+            }
+        }
+    }
+
+    /**
+     * 减少相关数值
+     * @param income
+     * @param over
+     */
+    private void subAccountText(BigDecimal income, BigDecimal over) {
+        if (null != mAccountText) {
+            String s = mAccountText.getText().toString();
+            if (null != s) {
+                String[] accounts = s.split("/");
+                if (accounts.length == 2) {
+                    BigDecimal totalIncome = new BigDecimal(accounts[0]).add(income);
+                    BigDecimal totalOver = new BigDecimal(accounts[1]).add(over);
+                    mAccountText.setText(concatAccountText(totalIncome, totalOver));
+                }
+            }
+        }
+    }
+
+    /**
+     * 拼接收入/支出 文本显示
+     * @param totalIncome
+     * @param totalOver
+     * @return
+     */
+    private String concatAccountText(BigDecimal totalIncome, BigDecimal totalOver) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(totalIncome).append("/").append(totalOver);
+        return sb.toString();
+    }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void setAccountCategoryId(BookKeepingEvent bookKeepingEvent) {
         AccountCategory accountCategory = bookKeepingEvent.getAccountCategory();
@@ -370,5 +448,29 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
     @Override
     public void addAccountState(Boolean insert) {
         reply(insert ? SUCCESS_REPLY : FAILED_REPLY);
+    }
+
+    /**
+     * 加载当前月份账单数据
+     *
+     * @param accountList
+     */
+    @Override
+    public void loadCurrentMonthAccountData(List<Account> accountList) {
+        //收入
+        BigDecimal totalIncome = BigDecimal.valueOf(0).setScale(2);
+        //支出
+        BigDecimal totalOver = BigDecimal.valueOf(0).setScale(2);
+        for (Account account:accountList
+             ) {
+            BigDecimal money = Utils.convertIntegerToBigDecimal(account.getAmount());
+            if (account.getType() == 0) {
+                totalIncome = totalIncome.add(money);
+            } else {
+                // == 1
+                totalOver = totalOver.add(money);
+            }
+        }
+        setAccountText(totalIncome, totalOver);
     }
 }

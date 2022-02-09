@@ -29,6 +29,12 @@ public interface BookKeepingContract {
         void loadAccountCategoryData(List<AccountCategory> titles, Map<Long, List<AccountCategory>> map);
 
         void addAccountState(Boolean insert);
+
+        /**
+         * 加载当前月份账单数据
+         * @param accountList
+         */
+        void loadCurrentMonthAccountData(List<Account> accountList);
     }
 
     abstract class Present extends BaseApiSubscriber implements BasePresenter {
@@ -46,6 +52,11 @@ public interface BookKeepingContract {
         abstract public void initAccountCategory();
 
         abstract public void addAccount(Account account);
+
+        /**
+         * 查询当月账单
+         */
+        abstract public void queryCurrentMonthAccount();
 
         @Override
         public void destroy() {

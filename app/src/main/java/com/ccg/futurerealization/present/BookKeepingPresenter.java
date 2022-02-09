@@ -18,6 +18,7 @@ import org.xmlpull.v1.XmlPullParser;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -188,6 +189,39 @@ public class BookKeepingPresenter extends BookKeepingContract.Present {
             @Override
             public void onNext(@NonNull Boolean b) {
                 mView.addAccountState(b);
+            }
+
+            @Override
+            public void onError(@NonNull Throwable e) {
+
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        });
+    }
+
+    /**
+     * 查询当月账单
+     */
+    @Override
+    public void queryCurrentMonthAccount() {
+        Task.execute(emitter -> {
+            Date date = new Date(System.currentTimeMillis());
+            List<Account> accounts = mAccountManager.queryAccountByDate(date);
+            emitter.onNext(accounts);
+            emitter.onComplete();
+        }, new Observer<List<Account>>() {
+            @Override
+            public void onSubscribe(@NonNull Disposable d) {
+                addDisposable(d);
+            }
+
+            @Override
+            public void onNext(@NonNull List<Account> accounts) {
+                mView.loadCurrentMonthAccountData(accounts);
             }
 
             @Override

@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <litepal>
     <dbname value="db_sth" />
-    <version value="2" />
+    <version value="3" />
     <list>
         <mapping class="com.ccg.futurerealization.bean.DoSth" />
         <mapping class="com.ccg.futurerealization.bean.AccountCategory" />
         <mapping class="com.ccg.futurerealization.bean.Account" />
     </list>
     <storage value="internal" />
+
+    <!--
+        建立数据库时在对应的/data/data/com.ccg.futurerealization/databases下
+        sqlite3 db_sth.db
+        pragma table_info(account);
+        查看生成的表column,尤其是当有关外键时,需要注意有没有生成对应的外键,
+        有一些数据类型是无法生成column的,如Date和BigDecimal
+        -->
 
     <!--
        Define the database name of your application.
