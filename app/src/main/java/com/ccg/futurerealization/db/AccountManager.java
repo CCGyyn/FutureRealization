@@ -3,7 +3,6 @@ package com.ccg.futurerealization.db;
 import com.ccg.futurerealization.base.BaseManager;
 import com.ccg.futurerealization.bean.Account;
 
-import java.sql.Date;
 import java.util.List;
 
 /**
@@ -14,5 +13,5 @@ import java.util.List;
  */
 public interface AccountManager extends BaseManager<Account> {
 
-    List<Account> queryAccountByDate(Date date);
+    List<Account> queryAccountByDate(String date);
 }

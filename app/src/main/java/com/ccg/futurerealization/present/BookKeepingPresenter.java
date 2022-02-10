@@ -18,8 +18,9 @@ import org.xmlpull.v1.XmlPullParser;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -238,8 +239,10 @@ public class BookKeepingPresenter extends BookKeepingContract.Present {
     @Override
     public void queryCurrentMonthAccount() {
         Task.execute(emitter -> {
-            Date date = new Date(System.currentTimeMillis());
-            List<Account> accounts = mAccountManager.queryAccountByDate(date);
+            Date date = new Date();
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM");
+            String month = formatter.format(date);
+            List<Account> accounts = mAccountManager.queryAccountByDate(month);
             emitter.onNext(accounts);
             emitter.onComplete();
         }, new Observer<List<Account>>() {

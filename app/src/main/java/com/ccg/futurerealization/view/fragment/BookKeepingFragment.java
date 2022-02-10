@@ -47,6 +47,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -213,10 +214,12 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
                 account.setRemark("");
             }
 
-            if (account.getType() == 0) {
-                addAccountText(moneyDecimal, new BigDecimal(0));
-            } else {
-                addAccountText(new BigDecimal(0), moneyDecimal);
+            if (isThisMonth(account.getDate())) {
+                if (account.getType() == 0) {
+                    addAccountText(moneyDecimal, new BigDecimal(0));
+                } else {
+                    addAccountText(new BigDecimal(0), moneyDecimal);
+                }
             }
 
             ChatMsgEntity chatMsgEntity = new ChatMsgEntity();
@@ -409,6 +412,21 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
         StringBuilder sb = new StringBuilder();
         sb.append(totalIncome).append("/").append(totalOver);
         return sb.toString();
+    }
+
+    /**
+     * 日期是否在当前月份
+     * @param date
+     * @return
+     */
+    private boolean isThisMonth(String date) {
+        java.util.Date month = new java.util.Date();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM");
+        String str = formatter.format(month);
+        if (str.equals(date.substring(0, 7))) {
+            return true;
+        }
+        return false;
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
