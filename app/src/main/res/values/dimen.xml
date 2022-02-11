@@ -7,4 +7,6 @@
     <dimen name="item_msg_text_height">40px</dimen>
     <dimen name="account_category_viewpager_height">155dp</dimen>
     <dimen name="account_category_item_text_size">40px</dimen>
+    <dimen name="fragment_book_keeping_title_height">25dp</dimen>
+    <dimen name="book_keeping_title_text_size">35px</dimen>
 </resources>

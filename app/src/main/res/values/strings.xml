@@ -26,4 +26,7 @@
     <string name="account_type_view_code">1#0</string>
     <string name="remark_msg_btn">Remark</string>
     <string name="chat_msg_delete_pop">Delete</string>
+    <string name="income_text">income</string>
+    <string name="over_text">over</string>
+    <string name="item_account_remark_text">Remark:</string>
 </resources>

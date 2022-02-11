@@ -6,13 +6,14 @@
     android:orientation="vertical">
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/fragment_book_keeping_title_height"
         android:orientation="horizontal">
 
         <TextView
             android:id="@+id/date_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="@dimen/book_keeping_title_text_size"
             android:clickable="true"
             android:focusable="true"
             android:textColor="@drawable/item_msg_click_selector" />
@@ -21,7 +22,17 @@
             android:id="@+id/account_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="@dimen/book_keeping_title_text_size"
             android:layout_centerHorizontal="true"/>
+
+        <ImageButton
+            android:id="@+id/calendar_img_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/fragment_book_keeping_title_height"
+            android:background="@mipmap/icon_calender"
+            android:layout_alignParentEnd="true"
+            android:clickable="true"
+            android:focusable="true" />
     </RelativeLayout>
     <androidx.recyclerview.widget.RecyclerView
         android:background="@color/book_keep_list"

@@ -55,6 +55,7 @@ dependencies {
     implementation 'org.dom4j:dom4j:2.0.3'
     //解决new XSSFWorkbook时 FactoryConfigurationError: Provider com.bea.xml.stream.EventFactory not found
     implementation 'org.clojars.kjw:wstx-asl:3.2.7'
+    implementation 'com.haibin:calendarview:3.7.1'
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'

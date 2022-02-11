@@ -2,6 +2,7 @@ package com.ccg.futurerealization.view.fragment;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,6 +15,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -38,6 +40,7 @@ import com.ccg.futurerealization.pojo.ChatType;
 import com.ccg.futurerealization.present.BookKeepingPresenter;
 import com.ccg.futurerealization.utils.LogUtils;
 import com.ccg.futurerealization.utils.Utils;
+import com.ccg.futurerealization.view.activity.CalendarActivity;
 import com.ccg.futurerealization.view.widget.AccountTypeTextView;
 import com.google.android.material.tabs.TabLayout;
 
@@ -96,6 +99,8 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
      * 当月收入和支出的总额
      */
     private TextView mAccountText;
+
+    private ImageButton mCalendarButton;
 
     private BookKeepingContract.Present mPresent;
 
@@ -260,6 +265,12 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
         });
 
         mAccountText = rootView.findViewById(R.id.account_text);
+
+        mCalendarButton = rootView.findViewById(R.id.calendar_img_btn);
+        mCalendarButton.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), CalendarActivity.class);
+            startActivity(intent);
+        });
 
         mViewPager = rootView.findViewById(R.id.view_list);
         mTabLayout = rootView.findViewById(R.id.tab_layout);
