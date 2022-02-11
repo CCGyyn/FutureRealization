@@ -125,18 +125,6 @@ public class CalendarActivity extends BaseActivity implements CalendarContract.V
     }
 
     /**
-     * 获取yyyy-MM格式日期字符串
-     * @param date
-     * @return
-     */
-    @Deprecated
-    private String getYearMonthStrByDate(Date date) {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM");
-        String month = formatter.format(date);
-        return month;
-    }
-
-    /**
      * 获取yyyy-MM-dd格式日期字符串
      * @param date
      * @return

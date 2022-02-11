@@ -14,15 +14,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.FutureRealization">
+        <activity android:name=".view.activity.ReportActivity"></activity>
         <activity
             android:name=".view.activity.MsgShowDialogActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:excludeFromRecents="true"
-            android:noHistory="true"
             android:launchMode="singleInstance"
-            android:theme="@style/Theme.Dialog.Transparent"
-            android:process=":ui"/>
-        <activity android:name=".view.activity.MainActivity"
+            android:noHistory="true"
+            android:process=":ui"
+            android:theme="@style/Theme.Dialog.Transparent" />
+        <activity
+            android:name=".view.activity.MainActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
@@ -31,10 +33,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".view.activity.CalendarActivity"
-            android:screenOrientation="portrait"/>
-
+        <activity
+            android:name=".view.activity.CalendarActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

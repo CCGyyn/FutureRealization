@@ -10,4 +10,8 @@
         <attr name="nameText" format="string" />
         <attr name="codeText" format="string" />
     </declare-styleable>
+
+    <declare-styleable name="DateTextView">
+        <attr name="only_show_year_month" format="boolean" />
+    </declare-styleable>
 </resources>

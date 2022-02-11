@@ -9,7 +9,7 @@
         android:layout_height="@dimen/fragment_book_keeping_title_height"
         android:orientation="horizontal">
 
-        <TextView
+        <com.ccg.futurerealization.view.widget.DateTextView
             android:id="@+id/date_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -24,6 +24,16 @@
             android:layout_height="wrap_content"
             android:textSize="@dimen/book_keeping_title_text_size"
             android:layout_centerHorizontal="true"/>
+
+        <ImageButton
+            android:id="@+id/report_img_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/fragment_book_keeping_title_height"
+            android:background="@mipmap/icon_report"
+            android:layout_toStartOf="@+id/calendar_img_btn"
+            android:layout_marginEnd="@dimen/report_img_btn_margin_right"
+            android:clickable="true"
+            android:focusable="true" />
 
         <ImageButton
             android:id="@+id/calendar_img_btn"

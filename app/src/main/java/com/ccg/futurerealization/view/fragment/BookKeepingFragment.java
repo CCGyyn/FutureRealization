@@ -41,7 +41,9 @@ import com.ccg.futurerealization.present.BookKeepingPresenter;
 import com.ccg.futurerealization.utils.LogUtils;
 import com.ccg.futurerealization.utils.Utils;
 import com.ccg.futurerealization.view.activity.CalendarActivity;
+import com.ccg.futurerealization.view.activity.ReportActivity;
 import com.ccg.futurerealization.view.widget.AccountTypeTextView;
+import com.ccg.futurerealization.view.widget.DateTextView;
 import com.google.android.material.tabs.TabLayout;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -94,13 +96,15 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
 
     private Button mRemarkBtn;
 
-    private TextView mDateText;
+    private DateTextView mDateText;
     /**
      * 当月收入和支出的总额
      */
     private TextView mAccountText;
 
     private ImageButton mCalendarButton;
+
+    private ImageButton mReportButton;
 
     private BookKeepingContract.Present mPresent;
 
@@ -238,37 +242,18 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
         });
 
         mDateText = rootView.findViewById(R.id.date_text);
-        mDateText.setText(new Date(System.currentTimeMillis()).toString());
-        mDateText.setOnClickListener(v -> {
-            LinearLayout linearLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.datepick_dialog, null);
-            MaterialDialog.Builder builder = new MaterialDialog.Builder(getContext())
-                    .setView(linearLayout)
-                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                        dialog.dismiss();
-                    });
-            DatePicker datePicker = linearLayout.findViewById(R.id.date_picker);
-            Calendar c = Calendar.getInstance();
-            datePicker.init(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH),
-                    new DatePicker.OnDateChangedListener() {
-                        @Override
-                        public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                            StringBuilder sb = new StringBuilder();
-                            sb.append(year).append("-").append(monthOfYear + 1).append("-").append(dayOfMonth);
-                            mDateText.setText(Utils.stringConvertSqlDate(sb.toString()).toString());
-                        }
-                    });
-
-            MaterialDialog dialog = builder.create();
-            dialog.show();
-            Resources resources = getContext().getResources();
-            dialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(resources.getColor(R.color.material_blue_700));
-        });
 
         mAccountText = rootView.findViewById(R.id.account_text);
 
         mCalendarButton = rootView.findViewById(R.id.calendar_img_btn);
         mCalendarButton.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), CalendarActivity.class);
+            startActivity(intent);
+        });
+
+        mReportButton = rootView.findViewById(R.id.report_img_btn);
+        mReportButton.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), ReportActivity.class);
             startActivity(intent);
         });
 

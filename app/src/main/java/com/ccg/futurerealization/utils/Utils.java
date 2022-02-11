@@ -3,6 +3,7 @@ package com.ccg.futurerealization.utils;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -75,5 +76,30 @@ public class Utils {
      */
     public static BigDecimal convertIntegerToBigDecimal(Integer money) {
         return new BigDecimal(money).divide(new BigDecimal(100)).setScale(2);
+    }
+
+    /**
+     * 获取yyyy-MM格式日期字符串
+     * @param date
+     * @return
+     */
+    public static String getYearMonthStrByDate(Date date) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM");
+        String month = formatter.format(date);
+        return month;
+    }
+
+    public static String getYearMonthStrByDate(String str) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM");
+        Date date = null;
+        try {
+            date = formatter.parse(str);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        if (date == null) {
+            return "";
+        }
+        return getYearMonthStrByDate(date);
     }
 }

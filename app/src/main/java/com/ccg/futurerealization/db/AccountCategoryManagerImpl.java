@@ -54,4 +54,16 @@ public class AccountCategoryManagerImpl implements AccountCategoryManager {
         AccountCategory accountCategory = LitePal.find(AccountCategory.class, id);
         return accountCategory;
     }
+
+    /**
+     * 根据pid查找
+     *
+     * @param pid
+     * @return
+     */
+    @Override
+    public List<AccountCategory> queryByPid(Long pid) {
+        List<AccountCategory> accountCategories = LitePal.where("pid = ?", String.valueOf(pid)).find(AccountCategory.class);
+        return accountCategories;
+    }
 }
