@@ -10,6 +10,7 @@ import com.ccg.futurerealization.contract.ReportContract;
 import com.ccg.futurerealization.present.ReportPresent;
 import com.ccg.futurerealization.utils.Utils;
 import com.ccg.futurerealization.view.widget.DateTextView;
+import com.lwb.piechart.PieChartView;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -20,6 +21,8 @@ public class ReportActivity extends BaseActivity implements ReportContract.View 
 
     private DateTextView mDateText;
     private TextView mAccountText;
+
+    private PieChartView mPieChartView;
 
     private ReportContract.Present mPresent;
 
@@ -39,6 +42,7 @@ public class ReportActivity extends BaseActivity implements ReportContract.View 
     protected void initViews() {
         mDateText = findViewById(R.id.date_text);
         mAccountText = findViewById(R.id.account_text);
+        mPieChartView = findViewById(R.id.account_pie_chart);
     }
 
     @Override
@@ -61,6 +65,39 @@ public class ReportActivity extends BaseActivity implements ReportContract.View 
             mPresent = null;
         }
         super.onDestroy();
+    }
+
+    private void setPieChartView(String date) {
+        List<Account> accounts = mAccountMap.get(Utils.getYearMonthStrByDate(date));
+        if (accounts.size() > 0) {
+            //收入
+            Map<String, Integer> incomeMap = new HashMap<>();
+            //支出
+            Map<String, Integer> overMap = new HashMap<>();
+            Integer totalIncome = 0;
+            Integer totalOver = 0;
+            for (Account account:accounts
+                 ) {
+                AccountCategory ac = account.getAccountCategory();
+                AccountCategory accountCategory = mRootCategoryMap.get(ac.getPid());
+                String category = accountCategory.getCategory();
+                Integer money;
+                if (account.getType() == 0) {
+                    money = incomeMap.getOrDefault(category, 0);
+                    money += account.getAmount();
+                    incomeMap.put(category, money);
+                } else {
+                    money = overMap.getOrDefault(category, 0);
+                    money += account.getAmount();
+                    overMap.put(category, money);
+                }
+            }
+            for (String key:incomeMap.keySet()
+                 ) {
+                Integer money = incomeMap.get(key);
+                //mPieChartView.addItemType(new PieChartView.ItemType(key + ":" + , ));
+            }
+        }
     }
 
     /**
