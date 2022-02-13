@@ -21,6 +21,7 @@
     <type_1 name="收">
         <type_2 name="收入" />
         <type_2 name="工资" />
+        <type_2 name="其他" />
     </type_1>
 
     <type_1 name="购">

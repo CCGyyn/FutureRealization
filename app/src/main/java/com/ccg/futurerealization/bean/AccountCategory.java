@@ -13,6 +13,7 @@ import java.util.List;
  * @CreateDate: 21-12-17 上午10:28
  * @Version: 1.0
  * @update: 22-02-09 与表Account建立关联, 多对一关系
+ *          22-02-11 添加type
  */
 public class AccountCategory extends LitePalSupport implements Parcelable {
 
@@ -21,6 +22,11 @@ public class AccountCategory extends LitePalSupport implements Parcelable {
      * 一级 如食 其子类就是早中晚三餐
      */
     private String category;
+
+    /**
+     * 1/0 支出/收入
+     */
+    private Integer type;
     /**
      * 父类id
      */
@@ -30,6 +36,7 @@ public class AccountCategory extends LitePalSupport implements Parcelable {
 
     public AccountCategory() {}
 
+
     protected AccountCategory(Parcel in) {
         if (in.readByte() == 0) {
             id = null;
@@ -37,6 +44,11 @@ public class AccountCategory extends LitePalSupport implements Parcelable {
             id = in.readLong();
         }
         category = in.readString();
+        if (in.readByte() == 0) {
+            type = null;
+        } else {
+            type = in.readInt();
+        }
         if (in.readByte() == 0) {
             pid = null;
         } else {
@@ -80,12 +92,22 @@ public class AccountCategory extends LitePalSupport implements Parcelable {
         this.pid = pid;
     }
 
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
+
     @Override
     public String toString() {
         return "AccountCategory{" +
                 "id=" + id +
                 ", category='" + category + '\'' +
+                ", type=" + type +
                 ", pid=" + pid +
+                ", accountList=" + accountList +
                 '}';
     }
 
@@ -98,6 +120,7 @@ public class AccountCategory extends LitePalSupport implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(id);
         dest.writeString(category);
+        dest.writeInt(type);
         dest.writeLong(pid);
     }
 

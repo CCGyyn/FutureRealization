@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -42,7 +41,6 @@ import com.ccg.futurerealization.utils.LogUtils;
 import com.ccg.futurerealization.utils.Utils;
 import com.ccg.futurerealization.view.activity.CalendarActivity;
 import com.ccg.futurerealization.view.activity.ReportActivity;
-import com.ccg.futurerealization.view.widget.AccountTypeTextView;
 import com.ccg.futurerealization.view.widget.DateTextView;
 import com.google.android.material.tabs.TabLayout;
 
@@ -54,7 +52,6 @@ import java.sql.Date;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,8 +88,6 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
 
     private ViewPager mViewPager;
     private TabLayout mTabLayout;
-
-    private AccountTypeTextView mAccountTypeTextView;
 
     private Button mRemarkBtn;
 
@@ -165,7 +160,6 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.setAdapter(mChatAdapter);
 
-        mAccountTypeTextView = sendLayout.findViewById(R.id.account_type_view);
         mRemarkBtn = sendLayout.findViewById(R.id.remark_msg);
         mRemarkBtn.setOnClickListener(v -> {
             LinearLayout linearLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.account_remark_dialog, null);
@@ -203,7 +197,7 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
             mSendText.setText("");
 
             Account account = new Account();
-            account.setType(mAccountTypeTextView.getAccountType());
+            account.setType(mSendCategory.getType());
             account.setDate(mDateText.getText().toString());
             if (mSendCategory == null) {
                 LogUtils.w("no category");

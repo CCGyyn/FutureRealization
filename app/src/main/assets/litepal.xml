@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <litepal>
     <dbname value="db_sth" />
-    <version value="3" />
+    <version value="4" />
     <list>
         <mapping class="com.ccg.futurerealization.bean.DoSth" />
         <mapping class="com.ccg.futurerealization.bean.AccountCategory" />

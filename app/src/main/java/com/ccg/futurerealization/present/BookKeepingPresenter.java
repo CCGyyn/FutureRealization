@@ -99,6 +99,7 @@ public class BookKeepingPresenter extends BookKeepingContract.Present {
 
                 int mEventType = xmlPullParser.getEventType();
                 Long pid = 0L;
+                Long incomePid = -1L;
                 while (mEventType != XmlPullParser.END_DOCUMENT) {
                     if (mEventType == XmlPullParser.START_TAG) {
                         String startTag = xmlPullParser.getName();
@@ -114,6 +115,12 @@ public class BookKeepingPresenter extends BookKeepingContract.Present {
                                     pid = accountCategory.getId();
                                     titles.add(accountCategory);
                                 }
+                                if ("收".equals(name)) {
+                                    incomePid = pid;
+                                    accountCategory.setType(0);
+                                } else {
+                                    accountCategory.setType(1);
+                                }
                                 LogUtils.v(accountCategory.toString());
                             }
                         } else if ("type_2".equals(startTag)) {
@@ -121,6 +128,11 @@ public class BookKeepingPresenter extends BookKeepingContract.Present {
                                 AccountCategory accountCategory = new AccountCategory();
                                 accountCategory.setCategory(name);
                                 accountCategory.setPid(pid);
+                                if (pid == incomePid) {
+                                    accountCategory.setType(0);
+                                } else {
+                                    accountCategory.setType(1);
+                                }
                                 Boolean success = mAccountCategoryManager.insert(accountCategory);
                                 if (success) {
                                     List<AccountCategory> list = map.getOrDefault(pid, new ArrayList<>());
