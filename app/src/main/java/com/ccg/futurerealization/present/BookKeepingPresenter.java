@@ -110,16 +110,19 @@ public class BookKeepingPresenter extends BookKeepingContract.Present {
                                 AccountCategory accountCategory = new AccountCategory();
                                 accountCategory.setCategory(name);
                                 accountCategory.setPid(pid);
+                                if ("收".equals(name)) {
+                                    accountCategory.setType(0);
+                                } else {
+                                    accountCategory.setType(1);
+                                }
                                 Boolean success = mAccountCategoryManager.insert(accountCategory);
                                 if (success) {
                                     pid = accountCategory.getId();
                                     titles.add(accountCategory);
-                                }
-                                if ("收".equals(name)) {
-                                    incomePid = pid;
-                                    accountCategory.setType(0);
-                                } else {
-                                    accountCategory.setType(1);
+                                    LogUtils.i(accountCategory.toString());
+                                    if ("收".equals(name)) {
+                                        incomePid = accountCategory.getId();
+                                    }
                                 }
                                 LogUtils.v(accountCategory.toString());
                             }
@@ -128,7 +131,7 @@ public class BookKeepingPresenter extends BookKeepingContract.Present {
                                 AccountCategory accountCategory = new AccountCategory();
                                 accountCategory.setCategory(name);
                                 accountCategory.setPid(pid);
-                                if (pid == incomePid) {
+                                if (pid.equals(incomePid)) {
                                     accountCategory.setType(0);
                                 } else {
                                     accountCategory.setType(1);
@@ -138,6 +141,7 @@ public class BookKeepingPresenter extends BookKeepingContract.Present {
                                     List<AccountCategory> list = map.getOrDefault(pid, new ArrayList<>());
                                     list.add(accountCategory);
                                     map.put(pid, list);
+                                    LogUtils.i(accountCategory.toString());
                                 }
                                 LogUtils.v(accountCategory.toString());
                             }

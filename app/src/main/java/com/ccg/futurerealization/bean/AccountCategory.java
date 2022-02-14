@@ -14,6 +14,7 @@ import java.util.List;
  * @Version: 1.0
  * @update: 22-02-09 与表Account建立关联, 多对一关系
  *          22-02-11 添加type
+ *          22-02-14 toString导致stackoverflow,在insert时
  */
 public class AccountCategory extends LitePalSupport implements Parcelable {
 
@@ -107,7 +108,6 @@ public class AccountCategory extends LitePalSupport implements Parcelable {
                 ", category='" + category + '\'' +
                 ", type=" + type +
                 ", pid=" + pid +
-                ", accountList=" + accountList +
                 '}';
     }
 
