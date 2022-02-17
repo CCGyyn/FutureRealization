@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class AccountManagerImpl implements AccountManager{
 
-    private static AccountManager mAccountManager;
+    private static volatile AccountManager mAccountManager;
 
     private AccountManagerImpl() {}
 

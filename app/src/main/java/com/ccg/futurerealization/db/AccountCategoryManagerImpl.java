@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class AccountCategoryManagerImpl implements AccountCategoryManager {
 
-    private static AccountCategoryManager mAccountCategoryManager;
+    private static volatile AccountCategoryManager mAccountCategoryManager;
 
     private AccountCategoryManagerImpl() {
 

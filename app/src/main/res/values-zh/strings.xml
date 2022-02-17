@@ -9,6 +9,7 @@
     </string-array>
     <string name="menu_add_sth">添加</string>
     <string name="menu_delete_all_sth">删除全部</string>
+    <string name="menu_update">更新</string>
     <string name="hint_content">在这里添加内容</string>
     <string name="radio_group_type_text">实现类型</string>
     <string name="radio_btn_type_name">无#长期#短期</string>

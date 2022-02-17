@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class DoSthManagerImpl implements DoSthManager {
 
-    private static DoSthManager mDoSthManagerImpl;
+    private static volatile DoSthManager mDoSthManagerImpl;
 
     private DoSthManagerImpl() {
     }

@@ -1,6 +1,7 @@
 package com.ccg.futurerealization.view.fragment;
 
 import android.content.DialogInterface;
+import android.content.pm.PackageInfo;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -26,8 +27,11 @@ import com.ccg.futurerealization.adapter.MsgAdapter;
 import com.ccg.futurerealization.base.BaseFragment;
 import com.ccg.futurerealization.bean.DoSth;
 import com.ccg.futurerealization.contract.MainFragmentContract;
+import com.ccg.futurerealization.model.VersionModel;
 import com.ccg.futurerealization.present.MainFragmentPresenter;
+import com.ccg.futurerealization.service.VersionService;
 import com.ccg.futurerealization.utils.LogUtils;
+import com.ccg.futurerealization.utils.RetrofitUtils;
 import com.ccg.futurerealization.utils.ToastUtils;
 import com.ccg.futurerealization.utils.Utils;
 import com.ccg.futurerealization.view.widget.RadioGroupButton;
@@ -37,6 +41,9 @@ import java.util.List;
 import java.util.Random;
 
 import de.mrapp.android.dialog.MaterialDialog;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * @Description:主界面功能
@@ -159,6 +166,28 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
                     doSth.setState(random.nextBoolean());
                     mPresenter.addDoSth(doSth);
                 }
+                break;
+            }
+            case R.id.update_app : {
+                PackageInfo packageInfo = Utils.getPackageInfo(getActivity().getApplicationContext());
+                int versionCode = packageInfo.versionCode;
+                String versionName = packageInfo.versionName;
+                LogUtils.i("versionName = " + versionName + ", versionCode=" + versionCode);
+                VersionService versionService = RetrofitUtils.getInstance().getCCGRetrofit(getActivity().getApplicationContext()).create(VersionService.class);
+                Call<VersionModel> call = versionService.getServerVersion();
+                call.enqueue(new Callback<VersionModel>() {
+                    @Override
+                    public void onResponse(Call<VersionModel> call, Response<VersionModel> response) {
+                        VersionModel body = response.body();
+                        String version_id = body.getVersion_id();
+                        LogUtils.i("version_id = " + version_id);
+                    }
+
+                    @Override
+                    public void onFailure(Call<VersionModel> call, Throwable t) {
+                        LogUtils.e(t.getMessage());
+                    }
+                });
                 break;
             }
             default:

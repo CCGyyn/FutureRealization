@@ -9,6 +9,7 @@
     </string-array>
     <string name="menu_add_sth">add</string>
     <string name="menu_delete_all_sth">delete all</string>
+    <string name="menu_update">update</string>
     <string name="hint_content">Add content here</string>
     <string name="radio_group_type_text">Type:</string>
     <string name="radio_btn_type_name">No#Long-term#Short-term</string>

@@ -10,7 +10,7 @@ import android.app.Activity;
  */
 public class AOPContextHelper {
 
-    private static AOPContextHelper mInstance;
+    private static volatile AOPContextHelper mInstance;
 
     private Activity mActivity;
 
