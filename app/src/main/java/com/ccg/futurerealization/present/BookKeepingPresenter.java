@@ -119,7 +119,6 @@ public class BookKeepingPresenter extends BookKeepingContract.Present {
                                 if (success) {
                                     pid = accountCategory.getId();
                                     titles.add(accountCategory);
-                                    LogUtils.i(accountCategory.toString());
                                     if ("收".equals(name)) {
                                         incomePid = accountCategory.getId();
                                     }
@@ -141,7 +140,6 @@ public class BookKeepingPresenter extends BookKeepingContract.Present {
                                     List<AccountCategory> list = map.getOrDefault(pid, new ArrayList<>());
                                     list.add(accountCategory);
                                     map.put(pid, list);
-                                    LogUtils.i(accountCategory.toString());
                                 }
                                 LogUtils.v(accountCategory.toString());
                             }

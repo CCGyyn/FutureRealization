@@ -1,5 +1,9 @@
 package com.ccg.futurerealization.view.activity;
 
+import android.graphics.Color;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.widget.TextView;
 
 import com.ccg.futurerealization.R;
@@ -8,6 +12,7 @@ import com.ccg.futurerealization.bean.Account;
 import com.ccg.futurerealization.bean.AccountCategory;
 import com.ccg.futurerealization.contract.ReportContract;
 import com.ccg.futurerealization.present.ReportPresent;
+import com.ccg.futurerealization.utils.LogUtils;
 import com.ccg.futurerealization.utils.Utils;
 import com.ccg.futurerealization.view.widget.DateTextView;
 import com.lwb.piechart.PieChartView;
@@ -16,8 +21,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.Random;
 
 public class ReportActivity extends BaseActivity implements ReportContract.View {
+
+    private static final int MSG_LOAD_DATA = 100;
+
+    private Boolean IS_FINISH_CATEGORY_LOAD = false;
 
     private DateTextView mDateText;
     private TextView mAccountText;
@@ -28,10 +40,24 @@ public class ReportActivity extends BaseActivity implements ReportContract.View 
 
     private Map<Long, AccountCategory> mRootCategoryMap;
 
+    private LoadDataObservable mLoadDataObservable;
+
     /**
      * key="yyyy-MM"
      */
     private Map<String, List<Account>> mAccountMap;
+
+    private Handler mHandler = new Handler(Looper.getMainLooper()){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                default:
+                    break;
+            }
+
+        }
+    };
 
     @Override
     public int getLayoutId() {
@@ -50,6 +76,8 @@ public class ReportActivity extends BaseActivity implements ReportContract.View 
         mPresent = new ReportPresent(this);
         mRootCategoryMap = new HashMap<>();
         mAccountMap = new HashMap<>();
+        mPieChartView.setCell(5);            //设置环形图的间距
+        mPieChartView.setInnerRadius(0.4f);  //设置环形图内环半径比例 0 - 1.0f
         mPresent.queryCategoryByPid(0L);
         mPresent.queryAccountByMonth(Utils.getYearMonthStrByDate(new Date()));
     }
@@ -64,6 +92,9 @@ public class ReportActivity extends BaseActivity implements ReportContract.View 
             mPresent.destroy();
             mPresent = null;
         }
+        if (null != mLoadDataObservable) {
+            mLoadDataObservable = null;
+        }
         super.onDestroy();
     }
 
@@ -74,8 +105,6 @@ public class ReportActivity extends BaseActivity implements ReportContract.View 
             Map<String, Integer> incomeMap = new HashMap<>();
             //支出
             Map<String, Integer> overMap = new HashMap<>();
-            Integer totalIncome = 0;
-            Integer totalOver = 0;
             for (Account account:accounts
                  ) {
                 AccountCategory ac = account.getAccountCategory();
@@ -92,12 +121,23 @@ public class ReportActivity extends BaseActivity implements ReportContract.View 
                     overMap.put(category, money);
                 }
             }
-            for (String key:incomeMap.keySet()
+            for (String key:overMap.keySet()
                  ) {
-                Integer money = incomeMap.get(key);
-                //mPieChartView.addItemType(new PieChartView.ItemType(key + ":" + , ));
+                Integer money = overMap.get(key);
+                int color = getRandomColor();
+                mPieChartView.addItemType(new PieChartView.ItemType(key, money / 100, color));
             }
         }
+    }
+
+    /**
+     * 随机颜色
+     * @return
+     */
+    private int getRandomColor() {
+        Random random = new Random();
+        int color = Color.argb(255, random.nextInt(256), random.nextInt(256), random.nextInt(256));
+        return color;
     }
 
     /**
@@ -111,6 +151,15 @@ public class ReportActivity extends BaseActivity implements ReportContract.View 
         }
         String date = accountList.get(0).getDate();
         mAccountMap.put(Utils.getYearMonthStrByDate(date), accountList);
+        if (IS_FINISH_CATEGORY_LOAD) {
+            setPieChartView(date);
+            return;
+        }
+        if (null == mLoadDataObservable) {
+            mLoadDataObservable = new LoadDataObservable();
+        }
+        LoadDataObserver observer = new LoadDataObserver(date);
+        mLoadDataObservable.addObserver(observer);
     }
 
     /**
@@ -123,6 +172,35 @@ public class ReportActivity extends BaseActivity implements ReportContract.View 
         for (AccountCategory ac:accountCategories
              ) {
             mRootCategoryMap.put(ac.getId(), ac);
+        }
+        IS_FINISH_CATEGORY_LOAD = true;
+        if (null != mLoadDataObservable) {
+            mLoadDataObservable.notifySetData();
+        }
+    }
+
+    private class LoadDataObserver implements Observer {
+
+        private String date;
+
+        public LoadDataObserver(String date) {
+            this.date = date;
+        }
+
+        @Override
+        public void update(Observable o, Object arg) {
+            LogUtils.v("update");
+            setPieChartView(date);
+        }
+    }
+
+    private class LoadDataObservable extends Observable {
+
+        public void notifySetData() {
+            LogUtils.v("notifyObservers");
+            setChanged();
+            notifyObservers();
+            deleteObservers();
         }
     }
 }

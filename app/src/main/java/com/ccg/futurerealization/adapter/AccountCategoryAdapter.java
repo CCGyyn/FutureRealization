@@ -42,7 +42,7 @@ public class AccountCategoryAdapter extends RecyclerView.Adapter<AccountCategory
         holder.setTextClickListen(v -> {
             EventBus.getDefault().post(BookKeepingEvent.getInstance(accountCategory));
         });
-        LogUtils.d("AccountCategoryAdapter " + position + ", " + accountCategory.getCategory());
+        LogUtils.v("AccountCategoryAdapter " + position + ", " + accountCategory.getCategory());
     }
 
     @Override
