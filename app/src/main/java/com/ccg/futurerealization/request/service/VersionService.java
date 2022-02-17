@@ -1,6 +1,6 @@
-package com.ccg.futurerealization.service;
+package com.ccg.futurerealization.request.service;
 
-import com.ccg.futurerealization.model.VersionModel;
+import com.ccg.futurerealization.request.model.VersionModel;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

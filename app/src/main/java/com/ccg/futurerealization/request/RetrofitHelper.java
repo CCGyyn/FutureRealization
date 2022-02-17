@@ -1,8 +1,9 @@
-package com.ccg.futurerealization.utils;
+package com.ccg.futurerealization.request;
 
 import android.content.Context;
 
 import com.ccg.futurerealization.Config;
+import com.ccg.futurerealization.utils.LogUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,24 +28,24 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * @CreateDate: 22-2-17 下午4:48
  * @Version: 1.0
  */
-public class RetrofitUtils {
+public class RetrofitHelper {
 
-    private static volatile RetrofitUtils mRetrofitUtils;
+    private static volatile RetrofitHelper mRetrofitHelper;
 
     private static final String GITHUB_CER = "github.cer";
 
 
-    private RetrofitUtils() {}
+    private RetrofitHelper() {}
 
-    public static RetrofitUtils getInstance() {
-        if (mRetrofitUtils == null) {
-            synchronized (RetrofitUtils.class) {
-                if (mRetrofitUtils == null) {
-                    mRetrofitUtils = new RetrofitUtils();
+    public static RetrofitHelper getInstance() {
+        if (mRetrofitHelper == null) {
+            synchronized (RetrofitHelper.class) {
+                if (mRetrofitHelper == null) {
+                    mRetrofitHelper = new RetrofitHelper();
                 }
             }
         }
-        return mRetrofitUtils;
+        return mRetrofitHelper;
     }
 
     /*public Retrofit getRetrofit() {

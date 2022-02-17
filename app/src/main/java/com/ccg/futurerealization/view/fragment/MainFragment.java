@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,11 +26,11 @@ import com.ccg.futurerealization.adapter.MsgAdapter;
 import com.ccg.futurerealization.base.BaseFragment;
 import com.ccg.futurerealization.bean.DoSth;
 import com.ccg.futurerealization.contract.MainFragmentContract;
-import com.ccg.futurerealization.model.VersionModel;
+import com.ccg.futurerealization.request.model.VersionModel;
 import com.ccg.futurerealization.present.MainFragmentPresenter;
-import com.ccg.futurerealization.service.VersionService;
+import com.ccg.futurerealization.request.service.VersionService;
 import com.ccg.futurerealization.utils.LogUtils;
-import com.ccg.futurerealization.utils.RetrofitUtils;
+import com.ccg.futurerealization.request.RetrofitHelper;
 import com.ccg.futurerealization.utils.ToastUtils;
 import com.ccg.futurerealization.utils.Utils;
 import com.ccg.futurerealization.view.widget.RadioGroupButton;
@@ -173,7 +172,7 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
                 int versionCode = packageInfo.versionCode;
                 String versionName = packageInfo.versionName;
                 LogUtils.i("versionName = " + versionName + ", versionCode=" + versionCode);
-                VersionService versionService = RetrofitUtils.getInstance().getCCGRetrofit(getActivity().getApplicationContext()).create(VersionService.class);
+                VersionService versionService = RetrofitHelper.getInstance().getCCGRetrofit(getActivity().getApplicationContext()).create(VersionService.class);
                 Call<VersionModel> call = versionService.getServerVersion();
                 call.enqueue(new Callback<VersionModel>() {
                     @Override

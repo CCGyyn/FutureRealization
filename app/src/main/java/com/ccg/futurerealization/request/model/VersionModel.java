@@ -1,4 +1,4 @@
-package com.ccg.futurerealization.model;
+package com.ccg.futurerealization.request.model;
 
 /**
  * @Description:
