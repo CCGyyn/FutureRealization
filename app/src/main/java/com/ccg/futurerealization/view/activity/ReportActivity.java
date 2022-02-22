@@ -2,9 +2,10 @@ package com.ccg.futurerealization.view.activity;
 
 import android.graphics.Color;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import com.ccg.futurerealization.R;
 import com.ccg.futurerealization.base.BaseActivity;
@@ -17,6 +18,7 @@ import com.ccg.futurerealization.utils.Utils;
 import com.ccg.futurerealization.view.widget.DateTextView;
 import com.lwb.piechart.PieChartView;
 
+import java.lang.ref.WeakReference;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -47,17 +49,7 @@ public class ReportActivity extends BaseActivity implements ReportContract.View 
      */
     private Map<String, List<Account>> mAccountMap;
 
-    private Handler mHandler = new Handler(Looper.getMainLooper()){
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-                default:
-                    break;
-            }
-
-        }
-    };
+    private Handler mHandler = new MyHandler(this);
 
     @Override
     public int getLayoutId() {
@@ -94,6 +86,10 @@ public class ReportActivity extends BaseActivity implements ReportContract.View 
         }
         if (null != mLoadDataObservable) {
             mLoadDataObservable = null;
+        }
+        if (null != mHandler) {
+            mHandler.removeCallbacksAndMessages(null);
+            mHandler = null;
         }
         super.onDestroy();
     }
@@ -201,6 +197,27 @@ public class ReportActivity extends BaseActivity implements ReportContract.View 
             setChanged();
             notifyObservers();
             deleteObservers();
+        }
+    }
+
+    private static class MyHandler extends Handler {
+        private WeakReference<ReportActivity> mWeakReference;
+
+        public MyHandler(ReportActivity activity) {
+            mWeakReference = new WeakReference<>(activity);
+        }
+
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            ReportActivity activity = mWeakReference.get();
+            if (activity == null) {
+                return;
+            }
+            switch (msg.what) {
+                default:
+                    break;
+            }
         }
     }
 }

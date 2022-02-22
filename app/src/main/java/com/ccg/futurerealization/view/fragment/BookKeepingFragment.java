@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,6 +46,7 @@ import com.google.android.material.tabs.TabLayout;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
@@ -109,25 +109,7 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
 
     private String mRemarkMsg = "";
 
-    private Handler mHandler = new Handler(Looper.getMainLooper()){
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-                case SHOW_INPUT_MSG: {
-                    InputMethodManager inputMethodManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                            inputMethodManager.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
-
-                    /*InputMethodManager inputManager = (InputMethodManager) remarkEdit.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    inputManager.showSoftInput(remarkEdit, 0);*/
-                    break;
-                }
-                default:
-                    break;
-            }
-
-        }
-    };
+    private Handler mHandler = new MyHandler(this);
 
     public static BookKeepingFragment newInstance(String param1, String param2) {
         BookKeepingFragment fragment = new BookKeepingFragment();
@@ -268,6 +250,10 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
         if (null != mPresent) {
             mPresent.destroy();
             mPresent = null;
+        }
+        if (null != mHandler) {
+            mHandler.removeCallbacksAndMessages(null);
+            mHandler = null;
         }
         super.onDestroy();
     }
@@ -505,6 +491,35 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
             //重新计算当月账单
             mPresent.queryCurrentMonthAccount();
             mChatAdapter.deleteMsgByPosition();
+        }
+    }
+
+    private static class MyHandler extends Handler {
+        private WeakReference<BookKeepingFragment> mWeakReference;
+
+        public MyHandler(BookKeepingFragment fragment) {
+            mWeakReference = new WeakReference<>(fragment);
+        }
+
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            BookKeepingFragment fragment = mWeakReference.get();
+            if (fragment == null) {
+                return;
+            }
+            switch (msg.what) {
+                case SHOW_INPUT_MSG: {
+                    InputMethodManager inputMethodManager = (InputMethodManager) fragment.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputMethodManager.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
+
+                    /*InputMethodManager inputManager = (InputMethodManager) remarkEdit.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputManager.showSoftInput(remarkEdit, 0);*/
+                    break;
+                }
+                default:
+                    break;
+            }
         }
     }
 }
