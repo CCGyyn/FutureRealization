@@ -22,4 +22,10 @@ public class Task {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(observer);
     }
+
+    public static <T> void execute(Class <T> tClass, ObservableOnSubscribe<T> observableOnSubscribe,
+                                   Observer<T> observer) {
+        execute(observableOnSubscribe, observer);
+    }
+
 }
