@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.SecureRandom;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.Arrays;
 
@@ -56,6 +57,26 @@ public class RetrofitHelper {
 
         return retrofit;
     }*/
+
+    /**
+     * https忽略证书请求
+     * @param context
+     * @return
+     */
+    public Retrofit getRetrofitIgCer(Context context) {
+        OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
+        try {
+            clientBuilder.sslSocketFactory(getSSLSocketFactory()).hostnameVerifier(org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(Config.CCG_GITHUB_BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(clientBuilder.build())
+                .build();
+        return retrofit;
+    }
 
     /**
      * https 需要证书
@@ -115,5 +136,35 @@ public class RetrofitHelper {
         } catch (Exception e) {
             LogUtils.e(e.getMessage());
         }
+    }
+
+    private SSLSocketFactory getSSLSocketFactory() throws Exception {
+        //创建一个不验证证书链的证书信任管理器。
+        final TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
+            @Override
+            public void checkClientTrusted(
+                    java.security.cert.X509Certificate[] chain,
+                    String authType) throws CertificateException {
+            }
+
+            @Override
+            public void checkServerTrusted(
+                    java.security.cert.X509Certificate[] chain,
+                    String authType) throws CertificateException {
+            }
+
+            @Override
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return new java.security.cert.X509Certificate[0];
+            }
+        }};
+
+        // Install the all-trusting trust manager
+        final SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, trustAllCerts,
+                new java.security.SecureRandom());
+        // Create an ssl socket factory with our all-trusting manager
+        return sslContext
+                .getSocketFactory();
     }
 }

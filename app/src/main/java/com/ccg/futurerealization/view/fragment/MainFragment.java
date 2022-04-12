@@ -172,7 +172,7 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
                 int versionCode = packageInfo.versionCode;
                 String versionName = packageInfo.versionName;
                 LogUtils.i("versionName = " + versionName + ", versionCode=" + versionCode);
-                VersionService versionService = RetrofitHelper.getInstance().getCCGRetrofit(getActivity().getApplicationContext()).create(VersionService.class);
+                VersionService versionService = RetrofitHelper.getInstance().getRetrofitIgCer(getActivity().getApplicationContext()).create(VersionService.class);
                 Call<VersionModel> call = versionService.getServerVersion();
                 call.enqueue(new Callback<VersionModel>() {
                     @Override
