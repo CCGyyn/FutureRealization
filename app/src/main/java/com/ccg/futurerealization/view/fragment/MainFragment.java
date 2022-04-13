@@ -1,9 +1,14 @@
 package com.ccg.futurerealization.view.fragment;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -29,6 +34,7 @@ import com.ccg.futurerealization.contract.MainFragmentContract;
 import com.ccg.futurerealization.request.model.VersionModel;
 import com.ccg.futurerealization.present.MainFragmentPresenter;
 import com.ccg.futurerealization.request.service.VersionService;
+import com.ccg.futurerealization.service.DownloadService;
 import com.ccg.futurerealization.utils.LogUtils;
 import com.ccg.futurerealization.request.RetrofitHelper;
 import com.ccg.futurerealization.utils.ToastUtils;
@@ -65,6 +71,22 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
     private MsgAdapter mMsgAdapter;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
+
+    private DownloadService.DownloadBinder mDownloadBinder;
+
+    ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            LogUtils.i("onServiceConnected");
+            mDownloadBinder = (DownloadService.DownloadBinder) service;
+            mDownloadBinder.startDownload("test/Flashtest.apk");
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            LogUtils.i("onServiceDisconnected");
+        }
+    };
 
     /**
      * 这种方式主要是防止类似竖屏切成横屏时 传过来数据丢失
@@ -170,9 +192,10 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
             case R.id.update_app : {
                 PackageInfo packageInfo = Utils.getPackageInfo(getActivity().getApplicationContext());
                 int versionCode = packageInfo.versionCode;
-                String versionName = packageInfo.versionName;
+                final String versionName = packageInfo.versionName;
                 LogUtils.i("versionName = " + versionName + ", versionCode=" + versionCode);
-                VersionService versionService = RetrofitHelper.getInstance().getRetrofitIgCer(getActivity().getApplicationContext()).create(VersionService.class);
+                VersionService versionService = RetrofitHelper.getInstance().getRetrofitIgCer()
+                        .create(VersionService.class);
                 Call<VersionModel> call = versionService.getServerVersion();
                 call.enqueue(new Callback<VersionModel>() {
                     @Override
@@ -180,6 +203,21 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
                         VersionModel body = response.body();
                         String version_id = body.getVersion_id();
                         LogUtils.i("version_id = " + version_id);
+                        if (!versionName.equals(version_id)) {
+                            float resId = Float.parseFloat(version_id);
+                            float currentId = Float.parseFloat(versionName);
+                            if (resId > currentId) {
+                                LogUtils.i("update app");
+                                if (mDownloadBinder != null) {
+                                    mDownloadBinder.startDownload("test/Flashtest.apk");
+                                    return;
+                                }
+                                Intent intent = new Intent("com.ccg.futurerealization.DownloadService");
+                                intent.setPackage(getContext().getPackageName());
+                                getContext().startService(intent);
+                                getContext().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+                            }
+                        }
                     }
 
                     @Override

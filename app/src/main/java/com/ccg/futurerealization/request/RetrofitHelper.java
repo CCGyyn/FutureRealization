@@ -21,6 +21,7 @@ import javax.net.ssl.X509TrustManager;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
@@ -60,19 +61,24 @@ public class RetrofitHelper {
 
     /**
      * https忽略证书请求
-     * @param context
      * @return
      */
-    public Retrofit getRetrofitIgCer(Context context) {
-        OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
-        try {
-            clientBuilder.sslSocketFactory(getSSLSocketFactory()).hostnameVerifier(org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public Retrofit getRetrofitIgCer() {
+        OkHttpClient.Builder clientBuilder = ignoreCertificates();
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(Config.CCG_GITHUB_BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
+                .client(clientBuilder.build())
+                .build();
+        return retrofit;
+    }
+
+    public Retrofit getRetrofitIgCerWithRx() {
+        OkHttpClient.Builder clientBuilder = ignoreCertificates();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(Config.CCG_GITHUB_BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
                 .client(clientBuilder.build())
                 .build();
         return retrofit;
@@ -96,6 +102,20 @@ public class RetrofitHelper {
                 .client(clientBuilder.build())
                 .build();
         return retrofit;
+    }
+
+    /**
+     * 忽略证书 不安全访问,用于测试
+     * @return
+     */
+    private OkHttpClient.Builder ignoreCertificates() {
+        OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
+        try {
+            clientBuilder.sslSocketFactory(getSSLSocketFactory()).hostnameVerifier(org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return clientBuilder;
     }
 
     /**

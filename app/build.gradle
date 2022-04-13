@@ -57,9 +57,10 @@ dependencies {
     implementation 'org.clojars.kjw:wstx-asl:3.2.7'
     implementation 'com.haibin:calendarview:3.7.1'
     implementation 'com.github.luweibin3118:PieChartView:v1.1.2'
-    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'//ConverterFactory的Gson依赖包
-    implementation 'com.squareup.retrofit2:converter-scalars:2.3.0'//ConverterFactory的String依赖包
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'//ConverterFactory的Gson依赖包
+    implementation 'com.squareup.retrofit2:converter-scalars:2.9.0'//ConverterFactory的String依赖包
+    implementation 'com.squareup.retrofit2:adapter-rxjava3:2.9.0'//转换为rxjava3
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
