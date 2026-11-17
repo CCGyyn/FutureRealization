@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.ccg.futurerealization.R;
 import com.ccg.futurerealization.backup.LedgerBackup;
+import com.ccg.futurerealization.backup.EmailBackup;
 import com.ccg.futurerealization.backup.LedgerBackupStore;
 
 import java.io.ByteArrayOutputStream;
@@ -28,7 +29,7 @@ import java.util.concurrent.Executors;
 public class BackupActivity extends AppCompatActivity {
     private static final int EXPORT = 101, IMPORT = 102;
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
-    private Button exportButton, importButton;
+    private Button exportButton, importButton, emailButton;
     private TextView status;
     private boolean busy;
 
@@ -39,6 +40,8 @@ public class BackupActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         exportButton = findViewById(R.id.export_backup);
         importButton = findViewById(R.id.import_backup);
+        emailButton = findViewById(R.id.email_backup);
+        emailButton.setOnClickListener(v -> prepareEmail());
         status = findViewById(R.id.backup_status);
         findViewById(R.id.open_xls_import).setOnClickListener(v -> { if (!busy) startActivity(new Intent(this, XlsImportActivity.class)); });
         String last = getPreferences(MODE_PRIVATE).getString("last_export", "");
@@ -87,6 +90,42 @@ public class BackupActivity extends AppCompatActivity {
                 finishWork("导出失败：" + error(e) + "\n请重新导出，失败产生的文件不能用于恢复。");
             }
         });
+    }
+
+    private void prepareEmail() {
+        if (busy) return;
+        java.util.List<EmailBackup.Target> targets = EmailBackup.targets(this);
+        if (targets.isEmpty()) {
+            status.setText("未检测到可接收备份附件的邮件应用。请先安装并登录邮箱，或导出备份后手动添加附件发送。");
+            return;
+        }
+        setBusy(true, "正在生成邮件备份附件，请稍候…");
+        worker.execute(() -> {
+            try {
+                EmailBackup.Prepared attachment = EmailBackup.prepare(getApplicationContext());
+                runOnUiThread(() -> {
+                    if (isFinishing() || isDestroyed()) return;
+                    setBusy(false, "备份附件已生成，包含 " + attachment.backup.data.accounts.size() + " 笔账单和 " + goalCount(attachment.backup) + " 个目标。请选择邮件应用。");
+                    if (targets.size() == 1) openEmail(attachment, targets.get(0));
+                    else {
+                        String[] labels = new String[targets.size()];
+                        for (int i = 0; i < labels.length; i++) labels[i] = targets.get(i).label;
+                        new AlertDialog.Builder(this).setTitle("选择发送备份的邮箱")
+                                .setItems(labels, (dialog, which) -> openEmail(attachment, targets.get(which)))
+                                .setNegativeButton("取消", null).show();
+                    }
+                });
+            } catch (Exception e) { finishWork("邮件备份准备失败：" + error(e)); }
+        });
+    }
+
+    private void openEmail(EmailBackup.Prepared attachment, EmailBackup.Target target) {
+        try {
+            startActivity(EmailBackup.compose(this, attachment, target.packageName));
+            status.setText("备份附件已交给“" + target.label + "”。\n请确认附件、填写收件人并点击发送。是否发送成功，请在邮件应用的“已发送”中确认。");
+        } catch (android.content.ActivityNotFoundException | SecurityException e) {
+            status.setText("无法打开该邮件应用，请确认已安装并登录邮箱，或导出备份后手动添加附件发送。");
+        }
     }
 
     private void inspect(Uri uri) {
@@ -146,6 +185,7 @@ public class BackupActivity extends AppCompatActivity {
         busy = value;
         exportButton.setEnabled(!value);
         importButton.setEnabled(!value);
+        emailButton.setEnabled(!value);
         status.setText(text);
     }
 

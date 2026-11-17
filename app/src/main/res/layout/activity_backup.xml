@@ -10,10 +10,15 @@
             android:textSize="14sp" android:lineSpacingExtra="6dp" android:textColor="@color/ledger_muted" />
         <Button android:id="@+id/export_backup" android:layout_width="match_parent" android:layout_height="56dp"
             android:layout_marginTop="24dp" android:text="导出全部数据" android:textColor="@color/white" app:backgroundTint="@color/ledger_accent" />
+        <Button android:id="@+id/email_backup" android:layout_width="match_parent" android:layout_height="56dp"
+            android:layout_marginTop="8dp" android:text="发送备份到邮箱" android:textColor="@color/ledger_accent" app:backgroundTint="@color/ledger_soft" />
         <Button android:id="@+id/import_backup" android:layout_width="match_parent" android:layout_height="56dp"
             android:layout_marginTop="8dp" android:text="从文件恢复到新手机" android:textColor="@color/ledger_accent" app:backgroundTint="@color/ledger_soft" />
         <Button android:id="@+id/open_xls_import" android:layout_width="match_parent" android:layout_height="56dp"
             android:layout_marginTop="8dp" android:text="导入其他 App 账单（XLS）" android:textColor="@color/ledger_accent" app:backgroundTint="@color/ledger_soft" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp"
+            android:text="邮件备份会自动附上完整 JSON 文件。请先安装并登录邮件应用，再填写收件人、确认附件并发送。"
+            android:textSize="12sp" android:lineSpacingExtra="4dp" android:textColor="@color/ledger_muted" />
         <TextView android:id="@+id/backup_status" android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="16dp" android:padding="16dp" android:background="@drawable/ledger_card"
             android:textSize="14sp" android:lineSpacingExtra="5dp" android:textColor="@color/ledger_text" android:textIsSelectable="true" />

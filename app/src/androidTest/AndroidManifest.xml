@@ -1,0 +1,18 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.ccg.futurerealization.test">
+    <application android:label="测试邮箱（不发送）">
+        <activity android:name="com.ccg.futurerealization.test.FakeEmailActivity" android:exported="true" android:enabled="false"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.SENDTO" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="mailto" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/json" />
+            </intent-filter>
+        </activity>
+        <receiver android:name="com.ccg.futurerealization.test.FakeEmailControlReceiver" android:exported="true" />
+    </application>
+</manifest>
