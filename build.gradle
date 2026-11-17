@@ -1,6 +1,11 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     repositories {
+        // AspectJX 2.0.10 原发布于 JCenter，使用仍保留该版本的镜像。
+        maven {
+            url 'https://maven.aliyun.com/repository/public'
+            content { includeGroup 'com.hujiang.aspectjx' }
+        }
         google()
         jcenter()
     }
@@ -15,6 +20,15 @@ buildscript {
 
 allprojects {
     repositories {
+        // 为仍使用旧版 JCenter 发布物的依赖提供镜像。
+        maven {
+            url 'https://maven.aliyun.com/repository/public'
+            content {
+                includeGroup 'org.litepal.android'
+                includeGroup 'org.clojars.kjw'
+                includeGroup 'com.haibin'
+            }
+        }
         google()
         jcenter()
     }
