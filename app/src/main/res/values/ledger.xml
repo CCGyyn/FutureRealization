@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ledger_background">#F7F5F2</color>
+    <color name="ledger_surface">#FFFFFF</color>
+    <color name="ledger_text">#302F35</color>
+    <color name="ledger_muted">#77747C</color>
+    <color name="ledger_accent">#A34C62</color>
+    <color name="ledger_soft">#F7E7EB</color>
+    <color name="ledger_income">#38786A</color>
+    <style name="LedgerAmount">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingTop">6dp</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:text">¥0.00</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:autoSizeTextType">uniform</item>
+        <item name="android:autoSizeMinTextSize">10sp</item>
+        <item name="android:autoSizeMaxTextSize">17sp</item>
+        <item name="android:autoSizeStepGranularity">1sp</item>
+    </style>
+</resources>

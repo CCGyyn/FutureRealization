@@ -118,10 +118,13 @@ public class AccountCategory extends LitePalSupport implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(id);
+        dest.writeByte((byte) (id == null ? 0 : 1));
+        if (id != null) dest.writeLong(id);
         dest.writeString(category);
-        dest.writeInt(type);
-        dest.writeLong(pid);
+        dest.writeByte((byte) (type == null ? 0 : 1));
+        if (type != null) dest.writeInt(type);
+        dest.writeByte((byte) (pid == null ? 0 : 1));
+        if (pid != null) dest.writeLong(pid);
     }
 
     public List<Account> getAccountList() {

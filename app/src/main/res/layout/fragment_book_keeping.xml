@@ -1,112 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical">
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/fragment_book_keeping_title_height"
-        android:orientation="horizontal">
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/ledger_background" android:orientation="vertical">
 
-        <com.ccg.futurerealization.view.widget.DateTextView
-            android:id="@+id/date_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="@dimen/book_keeping_title_text_size"
-            android:clickable="true"
-            android:focusable="true"
-            android:textColor="@drawable/item_msg_click_selector" />
-
-        <TextView
-            android:id="@+id/account_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="@dimen/book_keeping_title_text_size"
-            android:layout_centerHorizontal="true"/>
-
-        <ImageButton
-            android:id="@+id/report_img_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/fragment_book_keeping_title_height"
-            android:background="@mipmap/icon_report"
-            android:layout_toStartOf="@+id/calendar_img_btn"
-            android:layout_marginEnd="@dimen/report_img_btn_margin_right"
-            android:clickable="true"
-            android:focusable="true" />
-
-        <ImageButton
-            android:id="@+id/calendar_img_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/fragment_book_keeping_title_height"
-            android:background="@mipmap/icon_calender"
-            android:layout_alignParentEnd="true"
-            android:clickable="true"
-            android:focusable="true" />
-    </RelativeLayout>
-    <androidx.recyclerview.widget.RecyclerView
-        android:background="@color/book_keep_list"
-        android:id="@+id/chat_msg_list"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:fadingEdge="none"
-        android:overScrollMode="never"/>
-
-    <LinearLayout
-        android:background="@color/book_keep_send_layout"
-        android:id="@+id/send_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <TextView
-            android:id="@+id/book_keep_type"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <!--<com.ccg.futurerealization.view.widget.AccountTypeTextView
-            android:id="@+id/account_type_view"
-            android:textColor="@drawable/item_msg_click_selector"
-            android:layout_marginStart="5dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>-->
-        <EditText
-            android:background="@color/book_keep_send_text"
-            android:id="@+id/send_msg"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:phoneNumber="true"
-            />
-        <Button
-            android:id="@+id/remark_msg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/remark_msg_btn"/>
-        <Button
-            android:id="@+id/send_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/chat_send_btn"/>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <androidx.viewpager.widget.ViewPager
-            android:id="@+id/view_list"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/account_category_viewpager_height"
-            android:overScrollMode="never"
-            />
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tab_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:tabIndicatorColor="@color/tab_indicator_color"
-            app:tabMode="fixed"
-            />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="56dp"
+        android:paddingStart="16dp" android:paddingEnd="12dp" android:gravity="center_vertical">
+        <TextView android:layout_width="40dp" android:layout_height="40dp"
+            android:background="@drawable/ledger_accent_surface" android:gravity="center"
+            android:text="伴" android:textStyle="bold" android:textSize="20sp" android:textColor="@color/ledger_accent" />
+        <TextView android:id="@+id/buddy_title" android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="48dp" android:gravity="center_vertical" android:paddingStart="12dp"
+            android:textColor="@color/ledger_text" android:textSize="16sp" android:textStyle="bold"
+            android:background="?attr/selectableItemBackground" />
+        <TextView android:id="@+id/backup_btn" android:layout_width="48dp" android:layout_height="48dp"
+            android:text="备份" android:gravity="center" android:textSize="14sp" android:textColor="@color/ledger_accent"
+            android:background="?attr/selectableItemBackground" android:contentDescription="备份与换机迁移" />
     </LinearLayout>
 
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginStart="16dp" android:layout_marginEnd="16dp" android:padding="14dp"
+        android:background="@drawable/ledger_card" android:orientation="vertical">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical">
+            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                android:text="本月收支" android:textColor="@color/ledger_text" android:textStyle="bold" android:textSize="14sp" />
+            <TextView android:id="@+id/report_img_btn" android:layout_width="48dp" android:layout_height="32dp"
+                android:gravity="center" android:text="报表 ›" android:textSize="12sp" android:textColor="@color/ledger_muted"
+                android:background="?attr/selectableItemBackground" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="4dp">
+            <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="支出" android:textSize="12sp" android:textColor="@color/ledger_muted" />
+                <TextView android:id="@+id/month_expense" style="@style/LedgerAmount" android:textColor="@color/ledger_accent" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="收入" android:textSize="12sp" android:textColor="@color/ledger_muted" />
+                <TextView android:id="@+id/month_income" style="@style/LedgerAmount" android:textColor="@color/ledger_income" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="结余" android:textSize="12sp" android:textColor="@color/ledger_muted" />
+                <TextView android:id="@+id/month_balance" style="@style/LedgerAmount" android:textColor="@color/ledger_text" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="40dp" android:gravity="center_vertical"
+        android:paddingStart="16dp" android:paddingEnd="16dp">
+        <com.ccg.futurerealization.view.widget.DateTextView android:id="@+id/date_text"
+            android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent"
+            android:gravity="center_vertical" android:textSize="13sp" android:textColor="@color/ledger_muted"
+            android:background="?attr/selectableItemBackground" android:contentDescription="选择记账日期" />
+        <TextView android:id="@+id/calendar_img_btn" android:layout_width="64dp" android:layout_height="match_parent"
+            android:gravity="center" android:text="账单日历" android:textSize="12sp" android:textColor="@color/ledger_accent"
+            android:background="?attr/selectableItemBackground" />
+    </LinearLayout>
+    <androidx.recyclerview.widget.RecyclerView android:id="@+id/chat_msg_list"
+        android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+        android:paddingStart="16dp" android:paddingEnd="16dp" android:paddingBottom="8dp"
+        android:clipToPadding="false" android:overScrollMode="never" />
+    <TextView android:id="@+id/day_summary" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:paddingStart="16dp" android:paddingEnd="16dp" android:paddingTop="6dp" android:paddingBottom="6dp"
+        android:textSize="11sp" android:textColor="@color/ledger_muted" />
+
+    <LinearLayout android:id="@+id/send_layout" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="10dp" android:background="@color/ledger_surface">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="40dp" android:gravity="center_vertical">
+            <TextView android:id="@+id/book_keep_type" android:layout_width="wrap_content" android:layout_height="40dp"
+                android:gravity="center" android:paddingStart="12dp" android:paddingEnd="12dp" android:text="选择分类 ▾"
+                android:textSize="13sp" android:textColor="@color/ledger_accent" android:background="@drawable/ledger_accent_surface" />
+            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                android:text="  一笔一笔，记住生活" android:textSize="11sp" android:textColor="@color/ledger_muted" />
+            <TextView android:id="@+id/remark_msg" android:layout_width="64dp" android:layout_height="40dp"
+                android:gravity="center" android:text="备注" android:textSize="13sp" android:textColor="@color/ledger_muted"
+                android:background="?attr/selectableItemBackground" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:paddingTop="6dp">
+            <EditText android:id="@+id/send_msg" android:layout_width="0dp" android:layout_weight="1"
+                android:layout_height="48dp" android:background="@drawable/ledger_input" android:paddingStart="12dp" android:paddingEnd="12dp"
+                android:hint="金额，或午餐25元" android:textColorHint="@color/ledger_muted" android:textColor="@color/ledger_text"
+                android:textSize="15sp" android:inputType="text" android:imeOptions="actionSend" android:singleLine="true" android:maxLength="200" />
+            <Button android:id="@+id/send_btn" android:layout_width="84dp" android:layout_height="48dp"
+                android:layout_marginStart="8dp" android:text="记一笔" android:textSize="14sp" android:textColor="@color/white"
+                app:backgroundTint="@color/ledger_accent" android:insetTop="0dp" android:insetBottom="0dp" />
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout android:id="@+id/category_panel" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:visibility="gone" android:background="@color/ledger_surface" android:orientation="vertical">
+        <com.google.android.material.tabs.TabLayout android:id="@+id/tab_layout" android:layout_width="match_parent"
+            android:layout_height="40dp" app:tabIndicatorColor="@color/ledger_accent" app:tabSelectedTextColor="@color/ledger_accent"
+            app:tabTextColor="@color/ledger_muted" app:tabMode="scrollable" />
+        <androidx.viewpager.widget.ViewPager android:id="@+id/view_list" android:layout_width="match_parent"
+            android:layout_height="144dp" android:overScrollMode="never" />
+    </LinearLayout>
 </LinearLayout>

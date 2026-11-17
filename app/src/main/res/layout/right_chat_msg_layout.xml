@@ -1,16 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:gravity="right"
-    android:orientation="horizontal">
-    <TextView
-        android:id="@+id/msg_text"
-        android:background="@drawable/chat_msg_right_selector"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:clickable="true"
-        android:focusable="true" />
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:paddingTop="6dp" android:paddingBottom="6dp"
+    android:gravity="end" android:orientation="vertical">
+    <TextView android:id="@+id/msg_text" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:maxWidth="288dp" android:padding="14dp" android:lineSpacingExtra="4dp"
+        android:background="@drawable/ledger_bubble_right" android:textSize="15sp" android:textColor="@color/ledger_text"
+        android:longClickable="true" />
 </LinearLayout>

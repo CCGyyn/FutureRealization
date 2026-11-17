@@ -69,7 +69,7 @@ public class AccountCategoryFragment extends BaseFragment {
         accountCategoryAdapter.setAccountCategoryList(list);
         mRecyclerView.setAdapter(accountCategoryAdapter);
         //mRecyclerView.addItemDecoration(new RecyclerItemDecoration(10, 10, GRID_NUM));
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.HORIZONTAL));
+
         //mRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
     }
 

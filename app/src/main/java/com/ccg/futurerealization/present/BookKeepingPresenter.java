@@ -1,6 +1,7 @@
 package com.ccg.futurerealization.present;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Xml;
 
 import com.ccg.futurerealization.R;
@@ -11,275 +12,106 @@ import com.ccg.futurerealization.db.AccountCategoryManager;
 import com.ccg.futurerealization.db.AccountCategoryManagerImpl;
 import com.ccg.futurerealization.db.AccountManager;
 import com.ccg.futurerealization.db.AccountManagerImpl;
-import com.ccg.futurerealization.utils.LogUtils;
-import com.ccg.futurerealization.utils.Task;
 
+import org.litepal.LitePal;
+import org.litepal.crud.LitePalSupport;
 import org.xmlpull.v1.XmlPullParser;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Locale;
+import java.util.concurrent.Callable;
 
-import io.reactivex.rxjava3.annotations.NonNull;
-import io.reactivex.rxjava3.core.Observer;
-import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
-/**
- * @Description:
- * @Author: cgaopeng
- * @CreateDate: 22-1-5 上午11:37
- * @Version: 1.0
- */
 public class BookKeepingPresenter extends BookKeepingContract.Present {
+    private final AccountCategoryManager categoryManager = AccountCategoryManagerImpl.getInstance();
+    private final AccountManager accountManager = AccountManagerImpl.getInstance();
+    private int dayRequest, monthRequest;
 
-    private AccountCategoryManager mAccountCategoryManager;
+    public BookKeepingPresenter(BookKeepingContract.View view, Context context) { super(view, context); }
 
-    private AccountManager mAccountManager;
-
-    public BookKeepingPresenter(BookKeepingContract.View view, Context context) {
-        super(view, context);
-        mAccountCategoryManager = AccountCategoryManagerImpl.getInstance();
-        mAccountManager = AccountManagerImpl.getInstance();
+    private <T> void execute(Callable<T> work, Consumer<T> success, Consumer<Throwable> failure) {
+        addDisposable(Single.fromCallable(work).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread()).subscribe(success, failure));
     }
 
-    @Override
-    public void queryAccountCategory() {
-        Task.execute(emitter -> {
-                    List<AccountCategory> accountCategories = mAccountCategoryManager.queryAll();
-                    emitter.onNext(accountCategories);
-                    emitter.onComplete();
-                },
-                new Observer<List<AccountCategory>>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-                        addDisposable(d);
-                    }
-
-                    @Override
-                    public void onNext(@NonNull List<AccountCategory> accountCategories) {
-                        int size = accountCategories.size();
-                        LogUtils.v("accountCategories size = " + size);
-                        if (size == 0) {
-                            initAccountCategory();
-                            return;
-                        }
-                        mView.loadAccountCategoryData(accountCategories);
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
+    @Override public void queryAccountCategory() {
+        // Capture application context so a detached fragment cannot invalidate a running task.
+        Context context = mContext.getApplicationContext();
+        execute(() -> {
+            ensureCategories(context);
+            return categoryManager.queryAll();
+        }, categories -> mView.loadAccountCategoryData(categories),
+                e -> mView.showBookkeepingError("分类加载失败，请重新进入记账页"));
     }
 
-    @Override
-    public void initAccountCategory() {
-        List<AccountCategory> titles = new ArrayList<>();
-        Map<Long, List<AccountCategory>> map = new HashMap<>();
-        Task.execute(emitter -> {
-            InputStream fis = null;
+    @Override public void initAccountCategory() { queryAccountCategory(); }
+
+    private void ensureCategories(Context context) throws Exception {
+        if (!categoryManager.queryAll().isEmpty()) return;
+        // Match LitePal's lock order for multi-operation transactions.
+        synchronized (LitePalSupport.class) {
+            SQLiteDatabase db = LitePal.getDatabase();
+            db.beginTransaction();
             try {
-                /**
-                 * 一开始用FileInputStream一直为null
-                 */
-                fis = mContext.getResources().openRawResource(R.raw.account_category);
-                XmlPullParser xmlPullParser = Xml.newPullParser();
-                xmlPullParser.setInput(fis, "UTF-8");
-
-                int mEventType = xmlPullParser.getEventType();
-                Long pid = 0L;
-                Long incomePid = -1L;
-                while (mEventType != XmlPullParser.END_DOCUMENT) {
-                    if (mEventType == XmlPullParser.START_TAG) {
-                        String startTag = xmlPullParser.getName();
-                        String name = xmlPullParser.getAttributeValue(null, "name");
-                        if ("type_1".equals(startTag)) {
-                            if (null != name) {
-                                pid = 0L;
-                                AccountCategory accountCategory = new AccountCategory();
-                                accountCategory.setCategory(name);
-                                accountCategory.setPid(pid);
-                                if ("收".equals(name)) {
-                                    accountCategory.setType(0);
-                                } else {
-                                    accountCategory.setType(1);
-                                }
-                                Boolean success = mAccountCategoryManager.insert(accountCategory);
-                                if (success) {
-                                    pid = accountCategory.getId();
-                                    titles.add(accountCategory);
-                                    if ("收".equals(name)) {
-                                        incomePid = accountCategory.getId();
-                                    }
-                                }
-                                LogUtils.v(accountCategory.toString());
-                            }
-                        } else if ("type_2".equals(startTag)) {
-                            if (null != name) {
-                                AccountCategory accountCategory = new AccountCategory();
-                                accountCategory.setCategory(name);
-                                accountCategory.setPid(pid);
-                                if (pid.equals(incomePid)) {
-                                    accountCategory.setType(0);
-                                } else {
-                                    accountCategory.setType(1);
-                                }
-                                Boolean success = mAccountCategoryManager.insert(accountCategory);
-                                if (success) {
-                                    List<AccountCategory> list = map.getOrDefault(pid, new ArrayList<>());
-                                    list.add(accountCategory);
-                                    map.put(pid, list);
-                                }
-                                LogUtils.v(accountCategory.toString());
-                            }
+                // Recheck under the write transaction: import and first-run initialization may overlap.
+                if (categoryManager.queryAll().isEmpty()) {
+                    try (InputStream input = context.getResources().openRawResource(R.raw.account_category)) {
+                        XmlPullParser parser = Xml.newPullParser();
+                        parser.setInput(input, "UTF-8");
+                        long parentId = 0;
+                        int type = 1;
+                        for (int event = parser.getEventType(); event != XmlPullParser.END_DOCUMENT; event = parser.next()) {
+                            if (event != XmlPullParser.START_TAG) continue;
+                            String tag = parser.getName();
+                            if (!"type_1".equals(tag) && !"type_2".equals(tag)) continue;
+                            String name = parser.getAttributeValue(null, "name");
+                            if (name == null) continue;
+                            if ("type_1".equals(tag)) type = "收".equals(name) ? 0 : 1;
+                            AccountCategory category = new AccountCategory();
+                            category.setCategory(name);
+                            category.setType(type);
+                            category.setPid("type_1".equals(tag) ? 0L : parentId);
+                            if (!categoryManager.insert(category)) throw new IllegalStateException("分类初始化失败");
+                            if ("type_1".equals(tag)) parentId = category.getId();
                         }
-                    } /*else if (mEventType == XmlPullParser.END_TAG) {
-                        String endTag = xmlPullParser.getName();
-                    }*/
-                    mEventType = xmlPullParser.next();
-                }
-            } catch (IOException e) {
-                LogUtils.e("readResultFile:" + e);
-            } finally {
-                if (null != fis) {
-                    try {
-                        LogUtils.v("finally close fis");
-                        fis.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
                     }
                 }
-            }
-            emitter.onNext(titles);
-            emitter.onComplete();
-            },
-                new Observer<List<AccountCategory>>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-                        addDisposable(d);
-                    }
-
-                    @Override
-                    public void onNext(@NonNull List<AccountCategory> list) {
-                        LogUtils.v("loadAccountCategoryData");
-                        //mView.loadAccountCategoryData(list);
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        LogUtils.v("onComplete loadAccountCategoryData");
-                        mView.loadAccountCategoryData(titles, map);
-                    }
-                });
+                db.setTransactionSuccessful();
+            } finally { db.endTransaction(); }
+        }
     }
 
-    @Override
-    public void addAccount(Account account) {
-        Task.execute(emmitter -> {
-            Boolean insert = mAccountManager.insert(account);
-            emmitter.onNext(insert);
-            emmitter.onComplete();
-        }, new Observer<Boolean>() {
-            @Override
-            public void onSubscribe(@NonNull Disposable d) {
-                addDisposable(d);
-            }
-
-            @Override
-            public void onNext(@NonNull Boolean b) {
-                mView.addAccountState(b, account);
-            }
-
-            @Override
-            public void onError(@NonNull Throwable e) {
-
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-        });
+    @Override public void addAccount(Account account) {
+        execute(() -> accountManager.insert(account), inserted -> mView.addAccountState(inserted, account),
+                e -> mView.addAccountState(false, account));
     }
 
-    @Override
-    public void deleteAccount(Long id) {
-        Task.execute(emmitter -> {
-            Integer delete = mAccountManager.deleteById(id);
-            emmitter.onNext(delete);
-            emmitter.onComplete();
-        }, new Observer<Integer>() {
-            @Override
-            public void onSubscribe(@NonNull Disposable d) {
-                addDisposable(d);
-            }
-
-            @Override
-            public void onNext(@NonNull Integer i) {
-                mView.loadDeleteAccountState(i);
-            }
-
-            @Override
-            public void onError(@NonNull Throwable e) {
-
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-        });
+    @Override public void deleteAccount(Long id) {
+        execute(() -> accountManager.deleteById(id), count -> mView.loadDeleteAccountState(count),
+                e -> mView.loadDeleteAccountState(0));
     }
 
-    /**
-     * 查询当月账单
-     */
-    @Override
-    public void queryCurrentMonthAccount() {
-        Task.execute(emitter -> {
-            Date date = new Date();
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM");
-            String month = formatter.format(date);
-            List<Account> accounts = mAccountManager.queryAccountByDate(month);
-            emitter.onNext(accounts);
-            emitter.onComplete();
-        }, new Observer<List<Account>>() {
-            @Override
-            public void onSubscribe(@NonNull Disposable d) {
-                addDisposable(d);
-            }
-
-            @Override
-            public void onNext(@NonNull List<Account> accounts) {
-                mView.loadCurrentMonthAccountData(accounts);
-            }
-
-            @Override
-            public void onError(@NonNull Throwable e) {
-
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-        });
+    @Override public void queryCurrentMonthAccount() {
+        final int request = ++monthRequest;
+        execute(() -> accountManager.queryAccountByDate(new SimpleDateFormat("yyyy-MM", Locale.ROOT).format(new Date())),
+                accounts -> { if (request == monthRequest) mView.loadCurrentMonthAccountData(accounts); },
+                e -> { if (request == monthRequest) mView.showBookkeepingError("本月账单加载失败，请稍后重试"); });
     }
 
+    @Override public void queryDayAccounts(String date) {
+        final int request = ++dayRequest;
+        execute(() -> {
+            List<Account> accounts = accountManager.queryAccountByDate(date);
+            accounts.sort((a, b) -> Long.compare(a.getId(), b.getId()));
+            return accounts;
+        }, accounts -> { if (request == dayRequest) mView.loadDayAccounts(date, accounts); },
+                e -> { if (request == dayRequest) mView.showBookkeepingError("当天账单加载失败，请稍后重试"); });
+    }
 }

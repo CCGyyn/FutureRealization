@@ -41,6 +41,10 @@ public interface BookKeepingContract {
          * @param i
          */
         void loadDeleteAccountState(Integer i);
+
+        void loadDayAccounts(String date, List<Account> accounts);
+
+        void showBookkeepingError(String message);
     }
 
     abstract class Present extends BaseApiSubscriber implements BasePresenter {
@@ -65,6 +69,8 @@ public interface BookKeepingContract {
          * 查询当月账单
          */
         abstract public void queryCurrentMonthAccount();
+
+        abstract public void queryDayAccounts(String date);
 
         @Override
         public void destroy() {

@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.fragment.app.FragmentStatePagerAdapter;
 
 import com.ccg.futurerealization.bean.AccountCategory;
 
@@ -16,7 +16,7 @@ import java.util.List;
  * @CreateDate: 22-1-6 下午4:42
  * @Version: 1.0
  */
-public class AccountCategoryPageAdapter extends FragmentPagerAdapter {
+public class AccountCategoryPageAdapter extends FragmentStatePagerAdapter {
 
     private List<AccountCategory> mAccountCategoryTitles;
     private List<Fragment> mFragmentList;
