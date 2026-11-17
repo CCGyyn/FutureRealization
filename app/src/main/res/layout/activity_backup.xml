@@ -6,7 +6,7 @@
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="备份账单与目标"
             android:textSize="25sp" android:textStyle="bold" android:textColor="@color/ledger_text" />
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp"
-            android:text="数据保存在本机。备份包含全部账单、自定义分类和目标（含完成状态）。卸载应用会删除本地数据，请先导出备份。"
+            android:text="数据保存在本机。备份包含全部账单、自定义分类和目标（含完成／放弃状态）。卸载应用会删除本地数据，请先导出备份。"
             android:textSize="14sp" android:lineSpacingExtra="6dp" android:textColor="@color/ledger_muted" />
         <Button android:id="@+id/export_backup" android:layout_width="match_parent" android:layout_height="56dp"
             android:layout_marginTop="24dp" android:text="导出全部数据" android:textColor="@color/white" app:backgroundTint="@color/ledger_accent" />
@@ -25,7 +25,7 @@
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="28dp"
             android:text="换手机，三步迁移数据" android:textSize="18sp" android:textStyle="bold" android:textColor="@color/ledger_text" />
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp"
-            android:text="1. 在旧手机导出备份，保存到本地“下载”目录。\n\n2. 用数据线、U盘、蓝牙或手机互传，把 JSON 文件传到新手机。\n\n3. 新手机安装本应用，先不要添加账单或目标。打开此页，选择备份文件并确认恢复。核对账单、目标与完成状态后，再处理旧手机。"
+            android:text="1. 在旧手机导出备份，保存到本地“下载”目录。\n\n2. 用数据线、U盘、蓝牙或手机互传，把 JSON 文件传到新手机。\n\n3. 新手机安装本应用，先不要添加账单或目标。打开此页，选择备份文件并确认恢复。核对账单、目标与完成／放弃状态后，再处理旧手机。"
             android:textSize="14sp" android:lineSpacingExtra="6dp" android:textColor="@color/ledger_text" />
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="20dp"
             android:text="备份是未加密的文件，请妥善保管。选择系统文件位置时可保存到本地，本应用不会主动上传。建议另外在电脑保留一份。"

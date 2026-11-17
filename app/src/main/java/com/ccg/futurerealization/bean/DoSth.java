@@ -26,6 +26,8 @@ public class DoSth extends LitePalSupport implements Parcelable, Cloneable {
      * 是否已实现
      */
     private Boolean state;
+
+    private boolean abandoned;
     /**
      * 0:默认，无特别注意
      * 1：长期实现
@@ -50,6 +52,7 @@ public class DoSth extends LitePalSupport implements Parcelable, Cloneable {
         } else {
             type = in.readInt();
         }
+        abandoned = in.readByte() != 0;
     }
 
     public static final Creator<DoSth> CREATOR = new Creator<DoSth>() {
@@ -86,6 +89,14 @@ public class DoSth extends LitePalSupport implements Parcelable, Cloneable {
 
     public void setState(Boolean state) {
         this.state = state;
+        if (Boolean.TRUE.equals(state)) abandoned = false;
+    }
+
+    public boolean isAbandoned() { return abandoned; }
+
+    public void setAbandoned(boolean abandoned) {
+        this.abandoned = abandoned;
+        if (abandoned) state = false;
     }
 
     public Integer getType() {
@@ -103,10 +114,13 @@ public class DoSth extends LitePalSupport implements Parcelable, Cloneable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(id);
+        dest.writeByte((byte) (id == null ? 0 : 1));
+        if (id != null) dest.writeLong(id);
         dest.writeString(future_content);
-        dest.writeByte((byte)(state ? 1 : 0));
-        dest.writeInt(type);
+        dest.writeByte((byte) (state == null ? 0 : state ? 1 : 2));
+        dest.writeByte((byte) (type == null ? 0 : 1));
+        if (type != null) dest.writeInt(type);
+        dest.writeByte((byte) (abandoned ? 1 : 0));
     }
 
     @Override

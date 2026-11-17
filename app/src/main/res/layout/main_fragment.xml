@@ -19,6 +19,7 @@
         <TextView android:id="@+id/goals_all" style="@style/LedgerFilter" android:text="全部" />
         <TextView android:id="@+id/goals_pending" style="@style/LedgerFilter" android:text="进行中" />
         <TextView android:id="@+id/goals_done" style="@style/LedgerFilter" android:text="已完成" />
+        <TextView android:id="@+id/goals_abandoned" style="@style/LedgerFilter" android:text="已放弃" />
     </LinearLayout>
     <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout android:id="@+id/swip_refresh_layout" android:layout_width="match_parent" android:layout_height="match_parent">

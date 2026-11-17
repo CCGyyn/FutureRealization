@@ -48,7 +48,8 @@ public class DoSthManagerImpl implements DoSthManager {
     public Integer updateInfo(DoSth info) {
         android.content.ContentValues values = new android.content.ContentValues();
         values.put("future_content", info.getFuture_content());
-        values.put("state", Boolean.TRUE.equals(info.getState()) ? 1 : 0);
+        values.put("state", !info.isAbandoned() && Boolean.TRUE.equals(info.getState()) ? 1 : 0);
+        values.put("abandoned", info.isAbandoned() ? 1 : 0);
         values.put("type", info.getType() == null ? 0 : info.getType());
         return LitePal.update(DoSth.class, values, info.getId());
     }

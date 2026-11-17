@@ -30,17 +30,20 @@ public class AccountSchemaMigrationTest {
         old.execSQL("INSERT INTO accountcategory(category,pid,type) VALUES ('食',0,1),('早餐',1,1)");
         old.execSQL("INSERT INTO account(amount,date,remark,type,accountcategory_id) VALUES (1234,'2026-11-17','旧版账单',1,2)");
         old.setVersion(4); old.close();
-        LitePalDB database = new LitePalDB(name, 5);
+        LitePalDB database = new LitePalDB(name, 6);
         database.addClassName(DoSth.class.getName()); database.addClassName(AccountCategory.class.getName()); database.addClassName(Account.class.getName());
         LitePal.use(database);
         try {
-            assertEquals(5, LitePal.getDatabase().getVersion());
+            assertEquals(6, LitePal.getDatabase().getVersion());
             Account account = LitePal.find(Account.class, 1, true);
             assertEquals(Integer.valueOf(1234), account.getAmount()); assertEquals("早餐", account.getAccountCategory().getCategory());
             assertNull(account.getTime()); assertTrue(AccountDetails.dateTime(account).contains("时间未记录"));
             account.setTime("09:10:11"); assertTrue(account.save());
             assertEquals("09:10:11", LitePal.find(Account.class, 1).getTime());
-            DoSth goal = LitePal.find(DoSth.class, 1); assertEquals("保留旧目标", goal.getFuture_content()); assertTrue(goal.getState());
+            DoSth goal = LitePal.find(DoSth.class, 1); assertEquals("保留旧目标", goal.getFuture_content()); assertTrue(goal.getState()); assertFalse(goal.isAbandoned());
+            goal.setAbandoned(true); assertTrue(goal.save());
+            assertTrue(LitePal.find(DoSth.class, 1).isAbandoned());
+            assertFalse(LitePal.find(DoSth.class, 1).getState());
             assertEquals(1, LitePal.count(Account.class));
         } finally { LitePal.deleteDatabase(name); LitePal.useDefault(); }
     }

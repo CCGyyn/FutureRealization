@@ -124,6 +124,25 @@ public class FeatureUpgradeTest {
         assertEquals("进行中 1", text(R.id.goals_pending));
     }
 
+    @Test public void goalCanBeAbandonedFilteredAndRestored() throws Exception {
+        DoSth goal = new DoSth(); goal.setFuture_content("旧计划"); goal.setType(1); goal.setState(false); assertTrue(goal.save());
+        start(MainActivity.class);
+        waitUntil(() -> activity.findViewById(R.id.add_goal) != null);
+        instrumentation.runOnMainSync(() -> ((ViewPager) activity.findViewById(R.id.view_list)).setCurrentItem(0, false));
+        waitUntil(() -> text(R.id.goals_pending).equals("进行中 1"));
+        instrumentation.runOnMainSync(() -> ((RecyclerView) activity.findViewById(R.id.msg_list)).getChildAt(0).performLongClick());
+        clickLabel("标记放弃");
+        waitUntil(() -> LitePal.find(DoSth.class, goal.getId()).isAbandoned() && text(R.id.goals_abandoned).equals("已放弃 1"));
+        assertEquals("进行中 0", text(R.id.goals_pending));
+        assertTrue(text(R.id.goal_progress_text).contains("0 / 0"));
+        click(R.id.goals_abandoned);
+        instrumentation.runOnMainSync(() -> ((RecyclerView) activity.findViewById(R.id.msg_list)).getChildAt(0).performLongClick());
+        clickLabel("恢复进行中");
+        waitUntil(() -> !LitePal.find(DoSth.class, goal.getId()).isAbandoned() && text(R.id.goals_pending).equals("进行中 1"));
+        assertFalse(LitePal.find(DoSth.class, goal.getId()).getState());
+        assertEquals("暂无已放弃的目标", text(R.id.goal_empty));
+    }
+
     private void click(int id) { instrumentation.runOnMainSync(() -> activity.findViewById(id).performClick()); }
     private String text(int id) {
         String[] result = {""};

@@ -51,7 +51,8 @@ public final class LedgerBackupStore {
                 for (DoSth goal : LitePal.findAll(DoSth.class)) {
                     LedgerBackup.Goal row = new LedgerBackup.Goal();
                     row.content = goal.getFuture_content() == null ? "" : goal.getFuture_content();
-                    row.completed = Boolean.TRUE.equals(goal.getState());
+                    row.completed = !goal.isAbandoned() && Boolean.TRUE.equals(goal.getState());
+                    row.abandoned = goal.isAbandoned();
                     row.type = goal.getType() == null ? 0 : goal.getType();
                     data.goals.add(row);
                 }
@@ -113,6 +114,7 @@ public final class LedgerBackupStore {
                     DoSth goal = new DoSth();
                     goal.setFuture_content(row.content);
                     goal.setState(row.completed);
+                    goal.setAbandoned(Boolean.TRUE.equals(row.abandoned));
                     goal.setType(row.type);
                     if (!goal.save()) throw new IllegalStateException("目标恢复失败，已回滚");
                 }

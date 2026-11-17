@@ -118,7 +118,7 @@ public class LedgerBackupStoreTest {
         assertTrue(saved.getState());
         assertEquals("读完一本书", saved.getFuture_content());
         LedgerBackup exported = LedgerBackup.decode(LedgerBackupStore.exportLedger(context));
-        assertEquals(3, exported.version);
+        assertEquals(4, exported.version);
         assertEquals(1, exported.data.goals.size());
         assertTrue(exported.data.goals.get(0).completed);
     }

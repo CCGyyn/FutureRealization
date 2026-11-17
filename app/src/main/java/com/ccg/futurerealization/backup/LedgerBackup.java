@@ -39,6 +39,7 @@ public final class LedgerBackup {
     public static class Goal {
         public String content;
         public Boolean completed;
+        public Boolean abandoned;
         public Integer type;
     }
 
@@ -62,7 +63,7 @@ public final class LedgerBackup {
         validate(data);
         LedgerBackup backup = new LedgerBackup();
         backup.format = "FutureRealization-Ledger";
-        backup.version = data.goals == null ? 1 : 3;
+        backup.version = data.goals == null ? 1 : 4;
         backup.data = data;
         backup.exportedAt = exportedAt;
         backup.sha256 = digest(GSON.toJson(data));
@@ -79,7 +80,7 @@ public final class LedgerBackup {
         } catch (RuntimeException e) {
             throw new IllegalArgumentException("文件内容损坏，无法读取备份");
         }
-        require(backup != null && "FutureRealization-Ledger".equals(backup.format) && (backup.version >= 1 && backup.version <= 3),
+        require(backup != null && "FutureRealization-Ledger".equals(backup.format) && (backup.version >= 1 && backup.version <= 4),
                 "不是受支持的备份，请使用本应用导出的备份文件");
         require(backup.data != null && backup.sha256 != null && backup.sha256.equals(digest(GSON.toJson(backup.data))),
                 "备份完整性校验失败，文件可能已被修改或损坏");
@@ -95,7 +96,7 @@ public final class LedgerBackup {
         if (data.goals != null) {
             require(data.goals.size() <= 100000, "目标记录数量超出支持范围");
             for (Goal goal : data.goals) require(goal != null && goal.content != null && goal.content.length() <= 10000 &&
-                    goal.completed != null && goal.type != null && goal.type >= 0 && goal.type <= 2, "目标信息无效");
+                    goal.completed != null && !(Boolean.TRUE.equals(goal.abandoned) && Boolean.TRUE.equals(goal.completed)) && goal.type != null && goal.type >= 0 && goal.type <= 2, "目标信息无效");
         }
         Map<Long, Category> categories = new HashMap<>();
         for (Category c : data.categories) {

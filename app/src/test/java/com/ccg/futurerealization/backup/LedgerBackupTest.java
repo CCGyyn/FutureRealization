@@ -67,7 +67,7 @@ public class LedgerBackupTest {
         LedgerBackup.Goal goal = new LedgerBackup.Goal();
         goal.content = "每天读书"; goal.completed = false; goal.type = 1; data.goals.add(goal);
         LedgerBackup read = LedgerBackup.decode(LedgerBackup.encode(data, "2026-11-17"));
-        assertEquals(3, read.version);
+        assertEquals(4, read.version);
         assertEquals("每天读书", read.data.goals.get(0).content);
         assertFalse(read.data.goals.get(0).completed);
         goal.completed = null; reject(data);
@@ -78,7 +78,7 @@ public class LedgerBackupTest {
         data.accounts.get(0).time = "07:42:30";
         LedgerBackup restored = LedgerBackup.decode(LedgerBackup.encode(data, "2026-11-17"));
         assertEquals("07:42:30", restored.data.accounts.get(0).time);
-        assertEquals(3, restored.version);
+        assertEquals(4, restored.version);
         data.accounts.get(0).time = "24:01:00"; reject(data);
     }
 
@@ -89,6 +89,26 @@ public class LedgerBackupTest {
         for (byte value : hash) checksum.append(String.format(java.util.Locale.ROOT, "%02x", value & 255));
         String json = "{\"format\":\"FutureRealization-Ledger\",\"version\":2,\"exportedAt\":\"2026-11-17\",\"data\":" + payload + ",\"sha256\":\"" + checksum + "\"}";
         assertEquals(2, LedgerBackup.decode(json.getBytes(StandardCharsets.UTF_8)).version);
+    }
+
+    @Test public void abandonedGoalsRoundTripAndCannotAlsoBeCompleted() {
+        LedgerBackup.Data data = fixture(); data.goals = new java.util.ArrayList<>();
+        LedgerBackup.Goal goal = new LedgerBackup.Goal();
+        goal.content = "暂停的计划"; goal.completed = false; goal.type = 2; goal.abandoned = true;
+        data.goals.add(goal);
+        assertTrue(LedgerBackup.decode(LedgerBackup.encode(data, "2026-11-17")).data.goals.get(0).abandoned);
+        goal.completed = true; reject(data);
+    }
+
+    @Test public void versionThreeGoalsWithoutAbandonedRemainReadable() throws Exception {
+        LedgerBackup.Data data = fixture(); data.goals = new java.util.ArrayList<>();
+        LedgerBackup.Goal goal = new LedgerBackup.Goal(); goal.content = "旧版目标"; goal.completed = true; goal.type = 1;
+        data.goals.add(goal);
+        String json = new String(LedgerBackup.encode(data, "2026-11-17"), StandardCharsets.UTF_8);
+        assertFalse(json.contains("abandoned"));
+        LedgerBackup legacy = LedgerBackup.decode(json.replace("\"version\":4", "\"version\":3").getBytes(StandardCharsets.UTF_8));
+        assertEquals(3, legacy.version); assertNull(legacy.data.goals.get(0).abandoned);
+        assertTrue(legacy.data.goals.get(0).completed);
     }
 
     private void reject(LedgerBackup.Data data) {

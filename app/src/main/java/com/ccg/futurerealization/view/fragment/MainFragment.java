@@ -10,7 +10,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -36,7 +35,7 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
     private TextView summary, progressText, empty;
     private ProgressBar progress;
     private View addButton;
-    private final TextView[] filters = new TextView[3];
+    private final TextView[] filters = new TextView[4];
     private int filter;
     private boolean busy;
     private AlertDialog editor;
@@ -62,15 +61,23 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
         adapter.setListen(new MsgAdapter.Listen() {
             @Override public void edit(DoSth goal) { showEditor(goal); }
             @Override public void toggle(DoSth goal) {
+                if (goal.isAbandoned()) return;
                 DoSth changed = goal.clone();
                 changed.setState(!Boolean.TRUE.equals(goal.getState()));
+                setBusy(true);
+                presenter.updateDoSth(changed);
+            }
+            @Override public void abandon(DoSth goal) {
+                DoSth changed = goal.clone();
+                changed.setState(false);
+                changed.setAbandoned(!goal.isAbandoned());
                 setBusy(true);
                 presenter.updateDoSth(changed);
             }
         });
         list.setLayoutManager(new LinearLayoutManager(requireContext()));
         list.setAdapter(adapter);
-        int[] ids = {R.id.goals_all, R.id.goals_pending, R.id.goals_done};
+        int[] ids = {R.id.goals_all, R.id.goals_pending, R.id.goals_done, R.id.goals_abandoned};
         for (int i = 0; i < filters.length; i++) {
             final int value = i;
             filters[i] = root.findViewById(ids[i]);
@@ -82,28 +89,34 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
 
     private void render() {
         if (adapter == null) return;
-        int done = 0;
-        for (DoSth goal : goals) if (Boolean.TRUE.equals(goal.getState())) done++;
-        int percent = goals.isEmpty() ? 0 : (int) ((long) done * 100 / goals.size());
-        summary.setText("进行中 " + (goals.size() - done) + "  ·  已完成 " + done);
-        progressText.setText("已完成 " + done + " / " + goals.size() + "  ·  " + percent + "%");
+        int done = 0, abandoned = 0;
+        for (DoSth goal : goals) {
+            if (goal.isAbandoned()) abandoned++;
+            else if (Boolean.TRUE.equals(goal.getState())) done++;
+        }
+        int active = goals.size() - abandoned;
+        int pending = active - done;
+        int percent = active == 0 ? 0 : (int) ((long) done * 100 / active);
+        summary.setText("进行中 " + pending + "  ·  已完成 " + done + "  ·  已放弃 " + abandoned);
+        progressText.setText("已完成 " + done + " / " + active + "  ·  " + percent + "%" + (abandoned > 0 ? "（已放弃不计入进度）" : ""));
         progress.setProgress(percent);
         List<DoSth> visible = new ArrayList<>();
         for (DoSth goal : goals) {
-            boolean completed = Boolean.TRUE.equals(goal.getState());
-            if (filter == 0 || filter == 1 && !completed || filter == 2 && completed) visible.add(goal);
+            boolean completed = !goal.isAbandoned() && Boolean.TRUE.equals(goal.getState());
+            if (filter == 0 || filter == 1 && !completed && !goal.isAbandoned() || filter == 2 && completed || filter == 3 && goal.isAbandoned()) visible.add(goal);
         }
         visible.sort((a, b) -> {
-            int order = Boolean.compare(Boolean.TRUE.equals(a.getState()), Boolean.TRUE.equals(b.getState()));
+            int order = Integer.compare(a.isAbandoned() ? 2 : Boolean.TRUE.equals(a.getState()) ? 1 : 0, b.isAbandoned() ? 2 : Boolean.TRUE.equals(b.getState()) ? 1 : 0);
             return order != 0 ? order : Long.compare(b.getId(), a.getId());
         });
         adapter.setDoSthList(visible);
         filters[0].setText("全部 " + goals.size());
-        filters[1].setText("进行中 " + (goals.size() - done));
+        filters[1].setText("进行中 " + pending);
         filters[2].setText("已完成 " + done);
+        filters[3].setText("已放弃 " + abandoned);
         for (int i = 0; i < filters.length; i++) filters[i].setSelected(filter == i);
         empty.setVisibility(visible.isEmpty() ? View.VISIBLE : View.GONE);
-        empty.setText(filter == 2 ? "还没有已完成的目标" : filter == 1 ? "暂无进行中的目标" : "还没有目标\n点击“添加目标”开始记录");
+        empty.setText(filter == 3 ? "暂无已放弃的目标" : filter == 2 ? "还没有已完成的目标" : filter == 1 ? "暂无进行中的目标" : "还没有目标\n点击“添加目标”开始记录");
     }
 
     private void showEditor(@Nullable DoSth original) {
@@ -124,11 +137,14 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
         type.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, new String[]{"普通目标", "长期目标", "短期目标"}));
         type.setSelection(original == null || original.getType() == null ? 0 : original.getType());
         content.addView(type, new LinearLayout.LayoutParams(-1, (int) (56 * getResources().getDisplayMetrics().density)));
-        Switch completed = new Switch(requireContext());
-        completed.setText("已完成");
-        completed.setPadding(0, pad / 2, 0, pad / 2);
-        completed.setChecked(original != null && Boolean.TRUE.equals(original.getState()));
-        content.addView(completed);
+        TextView statusLabel = new TextView(requireContext());
+        statusLabel.setText("目标状态");
+        content.addView(statusLabel);
+        Spinner status = new Spinner(requireContext());
+        status.setId(R.id.goal_editor_status);
+        status.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, new String[]{"进行中", "已完成", "已放弃"}));
+        status.setSelection(original != null && original.isAbandoned() ? 2 : original != null && Boolean.TRUE.equals(original.getState()) ? 1 : 0);
+        content.addView(status, new LinearLayout.LayoutParams(-1, (int) (56 * getResources().getDisplayMetrics().density)));
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext()).setTitle(original == null ? "添加目标" : "编辑目标")
                 .setView(content).setNegativeButton("取消", null).setPositiveButton("保存", null);
         if (original != null) builder.setNeutralButton("删除", (d, w) -> new AlertDialog.Builder(requireContext())
@@ -139,7 +155,7 @@ public class MainFragment extends BaseFragment implements MainFragmentContract.V
             String value = text.getText().toString().trim();
             if (value.isEmpty()) { text.setError("请输入目标内容"); return; }
             DoSth goal = original == null ? new DoSth() : original.clone();
-            goal.setFuture_content(value); goal.setType(type.getSelectedItemPosition()); goal.setState(completed.isChecked());
+            goal.setFuture_content(value); goal.setType(type.getSelectedItemPosition()); goal.setState(status.getSelectedItemPosition() == 1); goal.setAbandoned(status.getSelectedItemPosition() == 2);
             setBusy(true);
             if (original == null) presenter.addDoSth(goal); else presenter.updateDoSth(goal);
         }));

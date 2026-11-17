@@ -6,6 +6,8 @@
     <View android:id="@+id/goal_type_marker" android:layout_width="3dp" android:layout_height="40dp"
         android:layout_marginEnd="8dp" android:background="@color/goal_normal_marker" android:importantForAccessibility="no" />
     <CheckBox android:id="@+id/goal_check" android:layout_width="48dp" android:layout_height="48dp" android:buttonTint="@color/ledger_accent" />
+    <ImageView android:id="@+id/goal_abandoned_icon" android:layout_width="48dp" android:layout_height="48dp"
+        android:padding="11dp" android:src="@drawable/ic_goal_abandoned" android:contentDescription="已放弃" android:visibility="gone" />
     <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical" android:paddingStart="6dp" android:paddingEnd="8dp">
         <TextView android:id="@+id/msg_text" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="16sp"
             android:textColor="@color/ledger_text" android:lineSpacingExtra="4dp" />
