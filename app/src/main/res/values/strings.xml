@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FutureRealization</string>
+    <string name="app_name">ccg</string>
 
     <string name="permission_deny_toast">Denying permission will prevent normal use of the program</string>
     <string-array name="page_tab_items">

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">未来想做</string>
+    <string name="app_name">ccg</string>
 
     <string name="permission_deny_toast">"拒绝权限将无法使用正常程序"</string>
     <string-array name="page_tab_items">
