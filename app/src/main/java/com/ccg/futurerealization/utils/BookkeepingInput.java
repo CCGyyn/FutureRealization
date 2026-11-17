@@ -14,7 +14,7 @@ public final class BookkeepingInput {
         String text = input == null ? "" : input.trim();
         Matcher matcher = AMOUNT.matcher(text);
         if (!matcher.find()) {
-            throw new IllegalArgumentException("请输入金额，例如 25.50 或 午餐25元");
+            throw new IllegalArgumentException("请输入金额，例如 25.50");
         }
         String number = matcher.group();
         int start = matcher.start();

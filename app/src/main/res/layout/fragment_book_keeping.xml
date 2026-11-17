@@ -80,8 +80,9 @@
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:paddingTop="6dp">
             <EditText android:id="@+id/send_msg" android:layout_width="0dp" android:layout_weight="1"
                 android:layout_height="48dp" android:background="@drawable/ledger_input" android:paddingStart="12dp" android:paddingEnd="12dp"
-                android:hint="金额，或午餐25元" android:textColorHint="@color/ledger_muted" android:textColor="@color/ledger_text"
-                android:textSize="15sp" android:inputType="text" android:imeOptions="actionSend" android:singleLine="true" android:maxLength="200" />
+                android:hint="输入金额（元），如 25.50" android:textColorHint="@color/ledger_muted" android:textColor="@color/ledger_text"
+                android:textSize="15sp" android:inputType="numberDecimal" android:digits="0123456789."
+                android:imeOptions="actionSend" android:singleLine="true" android:maxLength="20" />
             <Button android:id="@+id/send_btn" android:layout_width="84dp" android:layout_height="48dp"
                 android:layout_marginStart="8dp" android:text="记一笔" android:textSize="14sp" android:textColor="@color/white"
                 app:backgroundTint="@color/ledger_accent" android:insetTop="0dp" android:insetBottom="0dp" />

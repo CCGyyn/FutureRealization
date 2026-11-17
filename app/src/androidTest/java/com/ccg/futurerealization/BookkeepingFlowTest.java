@@ -65,22 +65,25 @@ public class BookkeepingFlowTest {
         context.getSharedPreferences("bookkeeping_buddy", 0).edit().putString("name", name).putInt("style", style).commit();
     }
 
-    @Test public void naturalLanguageEntryConfirmsAndSavesCorrectCategoryAndCents() throws Exception {
+    @Test public void numericKeyboardEntrySavesSelectedCategoryAndCents() throws Exception {
         // Existing legacy startup permission prompt is unrelated to the offline ledger.
         instrumentation.getUiAutomation().grantRuntimePermission(context.getPackageName(), "android.permission.READ_EXTERNAL_STORAGE");
         instrumentation.getUiAutomation().grantRuntimePermission(context.getPackageName(), "android.permission.WRITE_EXTERNAL_STORAGE");
         activity = instrumentation.startActivitySync(new Intent(context, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
         waitUntil(() -> LitePal.count(AccountCategory.class) > 0 && uiText(R.id.book_keep_type).contains("早餐"));
         instrumentation.runOnMainSync(() -> {
-            ((EditText) activity.findViewById(R.id.send_msg)).setText("午餐25.50元");
+            EditText amount = activity.findViewById(R.id.send_msg);
+            assertEquals(android.text.InputType.TYPE_CLASS_NUMBER,
+                    amount.getInputType() & android.text.InputType.TYPE_MASK_CLASS);
+            assertTrue((amount.getInputType() & android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL) != 0);
+            amount.setText("25.50");
             activity.findViewById(R.id.send_btn).performClick();
         });
-        clickDialog("确认记账");
         waitUntil(() -> LitePal.count(Account.class) == 1 && uiText(R.id.month_expense).equals("¥25.50"));
         Account account = LitePal.findAll(Account.class, true).get(0);
         assertEquals(Integer.valueOf(2550), account.getAmount());
-        assertEquals("中餐", account.getAccountCategory().getCategory());
-        assertEquals("午餐", account.getRemark());
+        assertEquals("早餐", account.getAccountCategory().getCategory());
+        assertEquals("", account.getRemark());
     }
 
     @Test public void selectedBackupFileIsValidatedConfirmedAndRestored() throws Exception {
