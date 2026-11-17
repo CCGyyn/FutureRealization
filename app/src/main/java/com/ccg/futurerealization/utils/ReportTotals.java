@@ -8,14 +8,18 @@ import java.util.List;
 import java.util.Map;
 
 public final class ReportTotals {
-    public long income, expense;
+    public long income, expense, foodExpense;
     private final List<Account> accounts;
     private final Map<Long, AccountCategory> roots;
     public ReportTotals(List<Account> accounts, Map<Long, AccountCategory> roots) {
         this.accounts = accounts; this.roots = roots;
         for (Account account : accounts) {
             long cents = account.getAmount() == null ? 0 : account.getAmount();
-            if (Integer.valueOf(0).equals(account.getType())) income += cents; else expense += cents;
+            if (Integer.valueOf(0).equals(account.getType())) income += cents; else {
+                expense += cents;
+                String group = AccountDetails.group(account, roots);
+                if (group.equals("食") || group.equals("餐饮") || group.equals("食品") || group.equals("餐饮美食")) foodExpense += cents;
+            }
         }
     }
     public List<Part> breakdown(boolean income) { return breakdown(income, null); }

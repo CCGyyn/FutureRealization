@@ -106,7 +106,7 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
         date = root.findViewById(R.id.date_text);
         categoryPanel = root.findViewById(R.id.category_panel);
         categoryPager = root.findViewById(R.id.view_list);
-        categoryTabs = root.findViewById(R.id.tab_layout);
+        categoryTabs = root.findViewById(R.id.bookkeeping_category_tabs);
         categories.clear();
         selected = null;
         busy = false;

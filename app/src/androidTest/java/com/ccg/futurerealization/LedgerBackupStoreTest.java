@@ -37,6 +37,7 @@ public class LedgerBackupStoreTest {
         database.addClassName(Account.class.getName());
         database.addClassName(com.ccg.futurerealization.bean.DoSth.class.getName());
         database.addClassName(AccountCategory.class.getName());
+        database.addClassName(com.ccg.futurerealization.bean.Note.class.getName());
         LitePal.use(database);
         LitePal.getDatabase();
     }
@@ -118,9 +119,22 @@ public class LedgerBackupStoreTest {
         assertTrue(saved.getState());
         assertEquals("读完一本书", saved.getFuture_content());
         LedgerBackup exported = LedgerBackup.decode(LedgerBackupStore.exportLedger(context));
-        assertEquals(4, exported.version);
+        assertEquals(5, exported.version);
         assertEquals(1, exported.data.goals.size());
         assertTrue(exported.data.goals.get(0).completed);
+    }
+
+    @Test public void notesSurviveFullBackupAndRefuseOverwritingExistingNotes() {
+        LedgerBackup backup = fixture(); backup.data.goals = new java.util.ArrayList<>(); backup.data.notes = new java.util.ArrayList<>();
+        LedgerBackup.Memo note = new LedgerBackup.Memo(); note.title = "数据"; note.content = "123.45\n678"; note.updatedAt = 123456789L; backup.data.notes.add(note);
+        LedgerBackupStore.restoreLedger(context, backup);
+        com.ccg.futurerealization.bean.Note saved = LitePal.findAll(com.ccg.futurerealization.bean.Note.class).get(0);
+        assertEquals(note.content, saved.getContent()); assertEquals(123456789L, saved.getUpdatedAt());
+        LedgerBackup copy = LedgerBackup.decode(LedgerBackupStore.exportLedger(context));
+        assertEquals(5, copy.version); assertEquals(note.content, copy.data.notes.get(0).content);
+        LitePal.deleteAll(Account.class);
+        try { LedgerBackupStore.restoreLedger(context, copy); fail("must reject overwriting notes"); } catch (IllegalArgumentException expected) { }
+        assertEquals(1, LitePal.count(com.ccg.futurerealization.bean.Note.class)); assertEquals(0, LitePal.count(Account.class));
     }
 
     @Test public void goalWriteFailureRollsBackTheWholeRestore() {

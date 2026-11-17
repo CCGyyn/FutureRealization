@@ -53,6 +53,7 @@ public class BookkeepingFlowTest {
         database.addClassName(Account.class.getName());
         database.addClassName(AccountCategory.class.getName());
         database.addClassName(DoSth.class.getName());
+        database.addClassName(com.ccg.futurerealization.bean.Note.class.getName());
         LitePal.use(database);
         LitePal.getDatabase();
     }

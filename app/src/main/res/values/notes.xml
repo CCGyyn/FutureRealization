@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="notes_background">#F5F5F5</color>
+    <color name="notes_ink">#252525</color>
+    <color name="notes_secondary">#858585</color>
+    <color name="notes_yellow">#FFCA28</color>
+</resources>

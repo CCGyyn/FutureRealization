@@ -3,7 +3,7 @@
 
     <string name="permission_deny_toast">Denying permission will prevent normal use of the program</string>
     <string-array name="page_tab_items">
-        <item>目标</item><item>记账</item><item>备份</item>
+        <item>目标</item><item>记账</item><item>笔记</item><item>备份</item>
     </string-array>
     <string name="menu_add_sth">add</string>
     <string name="menu_delete_all_sth">delete all</string>

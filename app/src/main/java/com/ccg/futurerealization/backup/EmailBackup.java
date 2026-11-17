@@ -60,11 +60,12 @@ public final class EmailBackup {
 
     public static Intent compose(Context context, Prepared attachment, String packageName) {
         int goals = attachment.backup.data.goals == null ? 0 : attachment.backup.data.goals.size();
+        int notes = attachment.backup.data.notes == null ? 0 : attachment.backup.data.notes.size();
         Intent intent = new Intent(Intent.ACTION_SEND).setType("application/json").setPackage(packageName);
         intent.putExtra(Intent.EXTRA_SUBJECT, "未来想做 · 数据备份 " + attachment.backup.exportedAt);
         intent.putExtra(Intent.EXTRA_TEXT, "备份时间：" + attachment.backup.exportedAt + "\n账单：" + attachment.backup.data.accounts.size() +
                 " 笔\n分类：" + attachment.backup.data.categories.size() + " 个\n目标：" + goals +
-                " 个（包含完成／放弃状态）\n\n附件为完整 JSON 备份。换机后，可在本应用“备份 → 从文件恢复到新手机”中选择附件恢复。\n\n请在邮件应用中填写收件人并确认发送。");
+                " 个（包含完成／放弃状态）\n笔记：" + notes + " 篇\n\n附件为完整 JSON 备份。换机后，可在本应用“备份 → 从文件恢复到新手机”中选择附件恢复。\n\n请在邮件应用中填写收件人并确认发送。");
         intent.putExtra(Intent.EXTRA_STREAM, attachment.uri);
         intent.setClipData(ClipData.newUri(context.getContentResolver(), attachment.filename, attachment.uri));
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);

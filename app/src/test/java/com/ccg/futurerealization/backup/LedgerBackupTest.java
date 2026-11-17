@@ -111,6 +111,15 @@ public class LedgerBackupTest {
         assertTrue(legacy.data.goals.get(0).completed);
     }
 
+    @Test public void versionFiveNotesRoundTripAndRejectMalformedNotes() {
+        LedgerBackup.Data data = fixture(); data.goals = new java.util.ArrayList<>(); data.notes = new java.util.ArrayList<>();
+        LedgerBackup.Memo note = new LedgerBackup.Memo(); note.title = "数字"; note.content = "12.3\n45.6"; note.updatedAt = 123L; data.notes.add(note);
+        LedgerBackup decoded = LedgerBackup.decode(LedgerBackup.encode(data, "2026-11-17"));
+        assertEquals(5, decoded.version); assertEquals(note.content, decoded.data.notes.get(0).content);
+        note.content = "  "; reject(data);
+        note.content = "ok"; note.updatedAt = -1L; reject(data);
+    }
+
     private void reject(LedgerBackup.Data data) {
         try { LedgerBackup.encode(data, "2026-11-17"); fail("Accepted invalid backup"); }
         catch (IllegalArgumentException expected) { }

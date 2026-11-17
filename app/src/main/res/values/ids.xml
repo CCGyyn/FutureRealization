@@ -6,4 +6,6 @@
     <item type="id" name="category_editor_text" />
     <item type="id" name="category_editor_group" />
     <item type="id" name="goal_editor_status" />
+    <item name="note_title" type="id" />
+    <item name="note_content" type="id" />
 </resources>

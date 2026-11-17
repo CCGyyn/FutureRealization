@@ -110,7 +110,7 @@ public class ReportActivity extends AppCompatActivity implements ReportContract.
     @Override public void reportError(String message) {
         loading = false;
         loadError = message;
-        status.setText(message);
+        render();
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
@@ -120,6 +120,7 @@ public class ReportActivity extends AppCompatActivity implements ReportContract.
         ((TextView) findViewById(R.id.report_expense)).setText("¥" + BookkeepingInput.format(totals.expense));
         ((TextView) findViewById(R.id.report_balance)).setText("¥" + BookkeepingInput.format(totals.income - totals.expense));
         status.setText(loadError != null ? loadError : loading ? "正在加载…" : accounts.isEmpty() ? "这个月暂无账单" : "本月共 " + accounts.size() + " 笔账单");
+        ((TextView) findViewById(R.id.report_engel)).setText(loading ? "正在加载…" : loadError != null ? "暂无数据" : com.ccg.futurerealization.utils.EngelLevel.label(totals.foodExpense, totals.expense));
         incomeButton.setSelected(income);
         expenseButton.setSelected(!income);
         List<ReportTotals.Part> parts = totals.breakdown(income, selectedGroup);

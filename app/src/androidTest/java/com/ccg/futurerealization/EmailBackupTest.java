@@ -39,6 +39,7 @@ public class EmailBackupTest {
         LitePal.deleteDatabase(DB);
         LitePalDB database = new LitePalDB(DB, 1);
         database.addClassName(Account.class.getName()); database.addClassName(AccountCategory.class.getName()); database.addClassName(DoSth.class.getName());
+        database.addClassName(com.ccg.futurerealization.bean.Note.class.getName());
         LitePal.use(database); LitePal.getDatabase();
         AccountCategory root = new AccountCategory(); root.setCategory("食"); root.setPid(0L); root.setType(1); assertTrue(root.save());
         AccountCategory leaf = new AccountCategory(); leaf.setCategory("早餐"); leaf.setPid(root.getId()); leaf.setType(1); assertTrue(leaf.save());

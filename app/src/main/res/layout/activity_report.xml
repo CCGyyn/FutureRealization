@@ -26,6 +26,9 @@
                 <TextView android:id="@+id/report_balance" style="@style/LedgerAmount" android:textColor="@color/ledger_text" />
             </LinearLayout>
         </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginTop="12dp" android:padding="16dp" android:background="@drawable/ledger_card">
+            <TextView android:id="@+id/report_engel" style="@style/LedgerAmount" android:textColor="@color/ledger_accent" android:text="—" />
+        </LinearLayout>
         <TextView android:id="@+id/report_status" style="@style/LedgerCaption" android:paddingTop="16dp" android:paddingBottom="16dp" />
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp" android:background="@drawable/ledger_card">
             <LinearLayout android:layout_width="match_parent" android:layout_height="48dp">

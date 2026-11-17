@@ -85,7 +85,7 @@ public class BackupActivity extends AppCompatActivity {
                 }
                 getPreferences(MODE_PRIVATE).edit().putString("last_export", backup.exportedAt).commit();
                 finishWork("备份导出成功：" + backup.data.accounts.size() + " 笔账单、" +
-                        backup.data.categories.size() + " 个分类、" + goalCount(backup) + " 个目标。\n请将文件另存到电脑、U盘或新手机，确认恢复成功前保留旧手机数据。");
+                        backup.data.categories.size() + " 个分类、" + goalCount(backup) + " 个目标、" + noteCount(backup) + " 篇笔记。\n请将文件另存到电脑、U盘或新手机，确认恢复成功前保留旧手机数据。");
             } catch (Exception e) {
                 finishWork("导出失败：" + error(e) + "\n请重新导出，失败产生的文件不能用于恢复。");
             }
@@ -105,7 +105,7 @@ public class BackupActivity extends AppCompatActivity {
                 EmailBackup.Prepared attachment = EmailBackup.prepare(getApplicationContext());
                 runOnUiThread(() -> {
                     if (isFinishing() || isDestroyed()) return;
-                    setBusy(false, "备份附件已生成，包含 " + attachment.backup.data.accounts.size() + " 笔账单和 " + goalCount(attachment.backup) + " 个目标。请选择邮件应用。");
+                    setBusy(false, "备份附件已生成，包含 " + attachment.backup.data.accounts.size() + " 笔账单和 " + goalCount(attachment.backup) + " 个目标、" + noteCount(attachment.backup) + " 篇笔记。请选择邮件应用。");
                     if (targets.size() == 1) openEmail(attachment, targets.get(0));
                     else {
                         String[] labels = new String[targets.size()];
@@ -152,7 +152,8 @@ public class BackupActivity extends AppCompatActivity {
                             .setMessage("备份时间：" + backup.exportedAt + "\n账单：" + backup.data.accounts.size() +
                                     " 笔\n分类：" + backup.data.categories.size() + " 个\n目标：" + goalCount(backup) + " 个" +
                                     (backup.data.goals == null ? "（旧版备份不含目标）" : "") +
-                                    "\n\n账单列表必须为空；备份含目标时，目标列表也需为空。不会覆盖已有数据。")
+                                    "\n笔记：" + noteCount(backup) + " 篇" + (backup.data.notes == null ? "（旧版备份不含笔记）" : "") +
+                                    "\n\n账单列表必须为空；备份含目标或笔记时，对应列表也需为空。不会覆盖已有数据。")
                             .setNegativeButton("取消", (d, w) -> status.setText("已取消恢复，本地数据未改变。"))
                             .setPositiveButton("确认恢复", (d, w) -> restore(backup)).show();
                 });
@@ -165,10 +166,12 @@ public class BackupActivity extends AppCompatActivity {
         worker.execute(() -> {
             try {
                 int count = LedgerBackupStore.restoreLedger(getApplicationContext(), backup);
-                finishWork("恢复成功：" + count + " 笔账单、" + goalCount(backup) + " 个目标。\n返回相应页面即可查看；旧手机中的备份文件建议继续保留。");
+                finishWork("恢复成功：" + count + " 笔账单、" + goalCount(backup) + " 个目标、" + noteCount(backup) + " 篇笔记。\n返回相应页面即可查看；旧手机中的备份文件建议继续保留。");
             } catch (Exception e) { finishWork("恢复未完成：" + error(e)); }
         });
     }
+
+    private static int noteCount(LedgerBackup backup) { return backup.data.notes == null ? 0 : backup.data.notes.size(); }
 
     private static int goalCount(LedgerBackup backup) { return backup.data.goals == null ? 0 : backup.data.goals.size(); }
 

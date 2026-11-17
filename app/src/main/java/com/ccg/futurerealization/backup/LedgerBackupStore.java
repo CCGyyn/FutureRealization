@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.ccg.futurerealization.bean.Account;
 import com.ccg.futurerealization.bean.AccountCategory;
 import com.ccg.futurerealization.bean.DoSth;
+import com.ccg.futurerealization.bean.Note;
 
 import org.litepal.LitePal;
 import org.litepal.crud.LitePalSupport;
@@ -24,6 +25,7 @@ public final class LedgerBackupStore {
     public static byte[] exportLedger(Context context) {
         LedgerBackup.Data data = new LedgerBackup.Data();
         data.goals = new java.util.ArrayList<>();
+        data.notes = new java.util.ArrayList<>();
         // Match LitePal's lock order for multi-operation transactions.
         synchronized (LitePalSupport.class) {
             SQLiteDatabase db = LitePal.getDatabase();
@@ -56,6 +58,9 @@ public final class LedgerBackupStore {
                     row.type = goal.getType() == null ? 0 : goal.getType();
                     data.goals.add(row);
                 }
+                for (Note note : LitePal.findAll(Note.class)) {
+                    LedgerBackup.Memo row = new LedgerBackup.Memo(); row.title = note.getTitle(); row.content = note.getContent(); row.updatedAt = note.getUpdatedAt(); data.notes.add(row);
+                }
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
@@ -74,6 +79,8 @@ public final class LedgerBackupStore {
                 if (LitePal.count(Account.class) != 0) throw new IllegalArgumentException("当前已有账单。为防止覆盖或重复导入，请在新手机的空记账本恢复。");
                 if (backup.data.goals != null && !backup.data.goals.isEmpty() && LitePal.count(DoSth.class) != 0)
                     throw new IllegalArgumentException("备份包含目标，当前目标列表已有数据。请在新手机的空目标列表恢复，避免重复或覆盖。");
+                if (backup.data.notes != null && !backup.data.notes.isEmpty() && LitePal.count(Note.class) != 0)
+                    throw new IllegalArgumentException("备份包含笔记，当前笔记列表已有数据。请在空笔记列表恢复，避免重复或覆盖。");
                 com.ccg.futurerealization.utils.CategoryNames.mergeLunchAliases();
                 Map<Long, AccountCategory> restored = new HashMap<>();
                 List<AccountCategory> existing = LitePal.findAll(AccountCategory.class);
@@ -117,6 +124,10 @@ public final class LedgerBackupStore {
                     goal.setAbandoned(Boolean.TRUE.equals(row.abandoned));
                     goal.setType(row.type);
                     if (!goal.save()) throw new IllegalStateException("目标恢复失败，已回滚");
+                }
+                if (backup.data.notes != null) for (LedgerBackup.Memo row : backup.data.notes) {
+                    Note note = new Note(); note.setTitle(row.title); note.setContent(row.content); note.setUpdatedAt(row.updatedAt);
+                    if (!note.save()) throw new IllegalStateException("笔记恢复失败，已回滚");
                 }
                 db.setTransactionSuccessful();
             } finally {

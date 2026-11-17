@@ -45,6 +45,7 @@ public class FeatureUpgradeTest {
         LitePal.deleteDatabase(DB);
         LitePalDB database = new LitePalDB(DB, 1);
         database.addClassName(Account.class.getName()); database.addClassName(AccountCategory.class.getName()); database.addClassName(DoSth.class.getName());
+        database.addClassName(com.ccg.futurerealization.bean.Note.class.getName());
         LitePal.use(database); LitePal.getDatabase();
     }
     @After public void tearDown() {
@@ -141,6 +142,49 @@ public class FeatureUpgradeTest {
         waitUntil(() -> !LitePal.find(DoSth.class, goal.getId()).isAbandoned() && text(R.id.goals_pending).equals("进行中 1"));
         assertFalse(LitePal.find(DoSth.class, goal.getId()).getState());
         assertEquals("暂无已放弃的目标", text(R.id.goal_empty));
+    }
+
+    @Test public void engelCoefficientUsesFoodExpensesAndFollowsSelectedMonth() throws Exception {
+        Calendar current = Calendar.getInstance(), previous = (Calendar) current.clone(); previous.add(Calendar.MONTH, -1);
+        AccountCategory food = category("食", "早餐", 1), travel = category("行", "公交", 1), income = category("收", "工资", 0);
+        account(food, date(current), 5000); account(travel, date(current), 20000); account(income, date(current), 100000);
+        account(food, date(previous), 700); account(travel, date(previous), 700);
+        start(ReportActivity.class);
+        waitUntil(() -> text(R.id.report_engel).equals("最富裕"));
+        click(R.id.report_income_tab); assertEquals("最富裕", text(R.id.report_engel));
+        click(R.id.report_previous); waitUntil(() -> text(R.id.report_engel).equals("温饱"));
+        click(R.id.report_previous); waitUntil(() -> text(R.id.report_engel).equals("暂无支出"));
+    }
+
+    @Test public void notesTabCanCreateSearchEditWithBackSaveAndDelete() throws Exception {
+        start(MainActivity.class);
+        waitUntil(() -> activity.findViewById(R.id.notes_list) != null);
+        instrumentation.runOnMainSync(() -> {
+            com.google.android.material.tabs.TabLayout tabs = activity.findViewById(R.id.tab_layout);
+            assertEquals(4, tabs.getTabCount()); assertEquals("笔记", tabs.getTabAt(2).getText()); assertEquals("备份", tabs.getTabAt(3).getText());
+            ((ViewPager) activity.findViewById(R.id.view_list)).setCurrentItem(2, false);
+        });
+        Instrumentation.ActivityMonitor monitor = instrumentation.addMonitor(com.ccg.futurerealization.view.activity.NoteEditorActivity.class.getName(), null, false);
+        click(R.id.add_note);
+        Activity editor = instrumentation.waitForMonitorWithTimeout(monitor, 5000); instrumentation.removeMonitor(monitor); assertNotNull(editor);
+        setDialogText("note_title", "测量数据"); setDialogText("note_content", "体重 65.2\n步数 8000"); clickLabel("完成");
+        waitUntil(() -> LitePal.count(com.ccg.futurerealization.bean.Note.class) == 1 && text(R.id.notes_status).equals("1 篇笔记"));
+        setDialogText("notes_search", "不存在的内容"); waitUntil(() -> text(R.id.notes_status).equals("找到 0 篇笔记"));
+        assertEquals("没有找到相关笔记", text(R.id.notes_empty));
+        setDialogText("notes_search", "8000"); waitUntil(() -> text(R.id.notes_status).equals("找到 1 篇笔记"));
+        setDialogText("notes_search", "");
+        monitor = instrumentation.addMonitor(com.ccg.futurerealization.view.activity.NoteEditorActivity.class.getName(), null, false);
+        instrumentation.runOnMainSync(() -> ((RecyclerView) activity.findViewById(R.id.notes_list)).getChildAt(0).performClick());
+        Activity editing = instrumentation.waitForMonitorWithTimeout(monitor, 5000); instrumentation.removeMonitor(monitor); assertNotNull(editing);
+        setDialogText("note_content", "体重 64.8"); instrumentation.runOnMainSync(() -> editing.onBackPressed());
+        waitUntil(() -> editing.isFinishing() && LitePal.findAll(com.ccg.futurerealization.bean.Note.class).get(0).getContent().equals("体重 64.8"));
+        instrumentation.runOnMainSync(() -> activity.finish());
+        start(MainActivity.class);
+        waitUntil(() -> text(R.id.notes_status).equals("1 篇笔记"));
+        instrumentation.runOnMainSync(() -> ((ViewPager) activity.findViewById(R.id.view_list)).setCurrentItem(2, false));
+        instrumentation.runOnMainSync(() -> ((RecyclerView) activity.findViewById(R.id.notes_list)).getChildAt(0).performLongClick());
+        clickLabel("删除");
+        waitUntil(() -> LitePal.count(com.ccg.futurerealization.bean.Note.class) == 0 && text(R.id.notes_status).equals("0 篇笔记"));
     }
 
     private void click(int id) { instrumentation.runOnMainSync(() -> activity.findViewById(id).performClick()); }

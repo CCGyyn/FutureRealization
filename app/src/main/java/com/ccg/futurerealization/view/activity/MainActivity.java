@@ -97,6 +97,7 @@ public class MainActivity extends BaseActivity implements MainActivityContract.V
         BookKeepingFragment bookKeepingFragment = new BookKeepingFragment();
         mFragmentList.add(mainFragment);
         mFragmentList.add(bookKeepingFragment);
+        mFragmentList.add(new com.ccg.futurerealization.view.fragment.NotesFragment());
         mFragmentList.add(otherFragment);
         MsgPageAdapter msgPageAdapter = new MsgPageAdapter(getSupportFragmentManager(), mFragmentList,
                 mTitles);
@@ -105,7 +106,7 @@ public class MainActivity extends BaseActivity implements MainActivityContract.V
         //设置默认位置
         mViewPager.setCurrentItem(CURRENT_ITEM);
         //解决切换页面时数据丢失 还有一种就是将FragmentPagerAdapter换为FragmentStatePagerAdapter
-        mViewPager.setOffscreenPageLimit(2);
+        mViewPager.setOffscreenPageLimit(3);
         //解决页面1呼出键盘，滑动到页面2键盘不显示的问题
         mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override

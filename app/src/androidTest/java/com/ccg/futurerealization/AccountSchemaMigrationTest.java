@@ -30,11 +30,12 @@ public class AccountSchemaMigrationTest {
         old.execSQL("INSERT INTO accountcategory(category,pid,type) VALUES ('食',0,1),('早餐',1,1)");
         old.execSQL("INSERT INTO account(amount,date,remark,type,accountcategory_id) VALUES (1234,'2026-11-17','旧版账单',1,2)");
         old.setVersion(4); old.close();
-        LitePalDB database = new LitePalDB(name, 6);
+        LitePalDB database = new LitePalDB(name, 7);
         database.addClassName(DoSth.class.getName()); database.addClassName(AccountCategory.class.getName()); database.addClassName(Account.class.getName());
+        database.addClassName(com.ccg.futurerealization.bean.Note.class.getName());
         LitePal.use(database);
         try {
-            assertEquals(6, LitePal.getDatabase().getVersion());
+            assertEquals(7, LitePal.getDatabase().getVersion());
             Account account = LitePal.find(Account.class, 1, true);
             assertEquals(Integer.valueOf(1234), account.getAmount()); assertEquals("早餐", account.getAccountCategory().getCategory());
             assertNull(account.getTime()); assertTrue(AccountDetails.dateTime(account).contains("时间未记录"));
@@ -45,6 +46,8 @@ public class AccountSchemaMigrationTest {
             assertTrue(LitePal.find(DoSth.class, 1).isAbandoned());
             assertFalse(LitePal.find(DoSth.class, 1).getState());
             assertEquals(1, LitePal.count(Account.class));
+            com.ccg.futurerealization.bean.Note note = new com.ccg.futurerealization.bean.Note();
+            note.setTitle("迁移后笔记"); note.setContent("123"); note.setUpdatedAt(1); assertTrue(note.save());
         } finally { LitePal.deleteDatabase(name); LitePal.useDefault(); }
     }
 }
