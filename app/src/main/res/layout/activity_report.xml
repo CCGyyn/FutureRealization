@@ -32,6 +32,11 @@
                 <TextView android:id="@+id/report_expense_tab" style="@style/LedgerFilter" android:text="支出分类" />
                 <TextView android:id="@+id/report_income_tab" style="@style/LedgerFilter" android:text="收入分类" />
             </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="48dp" android:gravity="center_vertical">
+                <TextView android:id="@+id/report_path" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                    android:text="一级分类" android:textSize="15sp" android:textStyle="bold" android:textColor="@color/ledger_text" />
+                <TextView android:id="@+id/report_group_back" style="@style/LedgerTextButton" android:text="‹ 返回" android:visibility="gone" />
+            </LinearLayout>
             <com.ccg.futurerealization.view.widget.ReportChartView android:id="@+id/account_pie_chart"
                 android:layout_width="match_parent" android:layout_height="228dp" />
             <LinearLayout android:id="@+id/report_legend" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />

@@ -48,7 +48,7 @@ public final class XlsLedgerStore {
                     occurrences.put(signature, occurrence);
                     if (occurrence <= snapshot.existing.getOrDefault(signature, 0)) continue;
                     Account account = new Account(); account.setDate(row.date); account.setType(row.type); account.setAmount(row.cents);
-                    account.setAccountCategory(category); account.setRemark(row.remark);
+                    account.setAccountCategory(category); account.setRemark(row.remark); account.setTime(row.time);
                     if (!account.save()) throw new IllegalStateException("账单保存失败，导入已回滚");
                     imported++;
                 }
@@ -70,13 +70,13 @@ public final class XlsLedgerStore {
             }
             for (AccountCategory category : categories) {
                 AccountCategory parent = byId.get(category.getPid());
-                if (parent != null) children.putIfAbsent(XlsLedgerReader.key(category.getType(), parent.getCategory(), category.getCategory()), category);
+                if (parent != null) children.putIfAbsent(XlsLedgerReader.key(category.getType(), parent.getCategory(), com.ccg.futurerealization.utils.CategoryNames.canonical(category.getCategory())), category);
             }
             for (Account account : LitePal.findAll(Account.class, true)) {
                 AccountCategory category = account.getAccountCategory();
                 AccountCategory parent = category == null ? null : byId.get(category.getPid());
                 if (parent == null) continue;
-                String signature = XlsLedgerReader.key(account.getDate(), account.getType(), parent.getCategory(), category.getCategory(), account.getAmount(), account.getRemark());
+                String signature = XlsLedgerReader.key(account.getDate(), account.getType(), parent.getCategory(), com.ccg.futurerealization.utils.CategoryNames.canonical(category.getCategory()), account.getAmount(), account.getRemark());
                 existing.put(signature, existing.getOrDefault(signature, 0) + 1);
             }
         }

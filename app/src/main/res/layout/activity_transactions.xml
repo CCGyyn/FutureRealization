@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="@color/ledger_background" android:padding="16dp">
+    <TextView android:id="@+id/transaction_path" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:paddingTop="8dp" android:paddingBottom="12dp" android:textColor="@color/ledger_muted" android:textSize="14sp" />
+    <TextView android:id="@+id/transaction_summary" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp" android:padding="16dp" android:background="@drawable/ledger_card"
+        android:text="正在加载…" android:textSize="17sp" android:textStyle="bold" android:textColor="@color/ledger_text" />
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+        <androidx.recyclerview.widget.RecyclerView android:id="@+id/transaction_list" android:layout_width="match_parent" android:layout_height="match_parent" android:clipToPadding="false" />
+        <TextView android:id="@+id/transaction_empty" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+            android:text="该分类本月暂无账单" android:textSize="14sp" android:textColor="@color/ledger_muted" android:visibility="gone" />
+    </FrameLayout>
+</LinearLayout>

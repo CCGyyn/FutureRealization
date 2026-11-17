@@ -41,6 +41,7 @@ public final class LedgerBackupStore {
                     if (account.getAccountCategory() == null) throw new IllegalArgumentException("存在未关联分类的账单，请先修复后备份");
                     LedgerBackup.Entry row = new LedgerBackup.Entry();
                     row.date = account.getDate();
+                    row.time = com.ccg.futurerealization.utils.AccountDetails.timeOf(account);
                     row.type = account.getType();
                     row.amountCents = account.getAmount();
                     row.remark = account.getRemark();
@@ -72,22 +73,24 @@ public final class LedgerBackupStore {
                 if (LitePal.count(Account.class) != 0) throw new IllegalArgumentException("当前已有账单。为防止覆盖或重复导入，请在新手机的空记账本恢复。");
                 if (backup.data.goals != null && !backup.data.goals.isEmpty() && LitePal.count(DoSth.class) != 0)
                     throw new IllegalArgumentException("备份包含目标，当前目标列表已有数据。请在新手机的空目标列表恢复，避免重复或覆盖。");
+                com.ccg.futurerealization.utils.CategoryNames.mergeLunchAliases();
                 Map<Long, AccountCategory> restored = new HashMap<>();
                 List<AccountCategory> existing = LitePal.findAll(AccountCategory.class);
                 for (int level = 0; level < 2; level++) {
                     for (LedgerBackup.Category row : backup.data.categories) {
                         if ((row.parentId == 0) != (level == 0)) continue;
                         long parentId = row.parentId == 0 ? 0 : restored.get(row.parentId).getId();
+                        String name = row.parentId == 0 ? row.name : com.ccg.futurerealization.utils.CategoryNames.canonical(row.name);
                         AccountCategory category = null;
                         for (AccountCategory candidate : existing) {
-                            if (candidate.getPid() == parentId && candidate.getType() == row.type && row.name.equals(candidate.getCategory())) {
+                            if (candidate.getPid() == parentId && candidate.getType() == row.type && name.equals(candidate.getCategory())) {
                                 category = candidate;
                                 break;
                             }
                         }
                         if (category == null) {
                             category = new AccountCategory();
-                            category.setCategory(row.name);
+                            category.setCategory(name);
                             category.setPid(parentId);
                             category.setType(row.type);
                             if (!category.save()) throw new IllegalStateException("分类恢复失败，已回滚");
@@ -99,6 +102,7 @@ public final class LedgerBackupStore {
                 for (LedgerBackup.Entry row : backup.data.accounts) {
                     Account account = new Account();
                     account.setDate(row.date);
+                    account.setTime(row.time);
                     account.setType(row.type);
                     account.setAmount(row.amountCents);
                     account.setRemark(row.remark == null ? "" : row.remark);

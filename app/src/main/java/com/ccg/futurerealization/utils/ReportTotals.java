@@ -9,32 +9,36 @@ import java.util.Map;
 
 public final class ReportTotals {
     public long income, expense;
-    private final Map<String, Long> incomes = new HashMap<>(), expenses = new HashMap<>();
-
+    private final List<Account> accounts;
+    private final Map<Long, AccountCategory> roots;
     public ReportTotals(List<Account> accounts, Map<Long, AccountCategory> roots) {
+        this.accounts = accounts; this.roots = roots;
         for (Account account : accounts) {
             long cents = account.getAmount() == null ? 0 : account.getAmount();
-            boolean isIncome = Integer.valueOf(0).equals(account.getType());
-            if (isIncome) income += cents; else expense += cents;
-            AccountCategory leaf = account.getAccountCategory();
-            AccountCategory root = leaf == null ? null : roots.get(leaf.getPid());
-            String name = root != null ? root.getCategory() : leaf != null ? leaf.getCategory() : "未分类";
-            Map<String, Long> map = isIncome ? incomes : expenses;
-            Long previous = map.get(name);
-            map.put(name, (previous == null ? 0 : previous) + cents);
+            if (Integer.valueOf(0).equals(account.getType())) income += cents; else expense += cents;
         }
     }
-
-    public List<Part> breakdown(boolean income) {
+    public List<Part> breakdown(boolean income) { return breakdown(income, null); }
+    public List<Part> breakdown(boolean income, String selectedGroup) {
+        Map<String, Long> amounts = new HashMap<>(); Map<String, Integer> counts = new HashMap<>();
+        for (Account account : accounts) {
+            if (Integer.valueOf(0).equals(account.getType()) != income) continue;
+            String group = AccountDetails.group(account, roots);
+            if (selectedGroup != null && !selectedGroup.equals(group)) continue;
+            String name = selectedGroup == null ? group : AccountDetails.category(account);
+            amounts.put(name, amounts.getOrDefault(name, 0L) + (account.getAmount() == null ? 0 : account.getAmount()));
+            counts.put(name, counts.getOrDefault(name, 0) + 1);
+        }
         List<Part> parts = new ArrayList<>();
-        for (Map.Entry<String, Long> entry : (income ? incomes : expenses).entrySet()) parts.add(new Part(entry.getKey(), entry.getValue()));
+        for (Map.Entry<String, Long> entry : amounts.entrySet()) parts.add(new Part(entry.getKey(), entry.getValue(), counts.get(entry.getKey())));
         parts.sort((a, b) -> a.cents == b.cents ? a.name.compareTo(b.name) : Long.compare(b.cents, a.cents));
         return parts;
     }
-
     public static final class Part {
         public final String name;
         public final long cents;
-        public Part(String name, long cents) { this.name = name; this.cents = cents; }
+        public final int count;
+        public Part(String name, long cents) { this(name, cents, 0); }
+        public Part(String name, long cents, int count) { this.name = name; this.cents = cents; this.count = count; }
     }
 }

@@ -33,7 +33,7 @@ public class ReportActivity extends AppCompatActivity implements ReportContract.
     private final Map<Long, AccountCategory> roots = new HashMap<>();
     private List<Account> accounts = new ArrayList<>();
     private boolean income, loading;
-    private String loadError;
+    private String loadError, selectedGroup;
     private TextView monthText, status, incomeButton, expenseButton;
     private LinearLayout legend;
     private ReportChartView chart;
@@ -44,7 +44,7 @@ public class ReportActivity extends AppCompatActivity implements ReportContract.
         setTitle("收支报表");
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         month.set(Calendar.DAY_OF_MONTH, 1);
-        if (state != null) { month.setTimeInMillis(state.getLong("month", month.getTimeInMillis())); income = state.getBoolean("income"); }
+        if (state != null) { month.setTimeInMillis(state.getLong("month", month.getTimeInMillis())); income = state.getBoolean("income"); selectedGroup = state.getString("group"); }
         presenter = new ReportPresent(this);
         monthText = findViewById(R.id.report_month);
         status = findViewById(R.id.report_status);
@@ -58,8 +58,9 @@ public class ReportActivity extends AppCompatActivity implements ReportContract.
         findViewById(R.id.report_this_month).setOnClickListener(v -> {
             month.setTimeInMillis(System.currentTimeMillis()); month.set(Calendar.DAY_OF_MONTH, 1); loadMonth();
         });
-        incomeButton.setOnClickListener(v -> { income = true; render(); });
-        expenseButton.setOnClickListener(v -> { income = false; render(); });
+        incomeButton.setOnClickListener(v -> { income = true; selectedGroup = null; render(); });
+        expenseButton.setOnClickListener(v -> { income = false; selectedGroup = null; render(); });
+        findViewById(R.id.report_group_back).setOnClickListener(v -> { selectedGroup = null; render(); });
         presenter.queryCategoryByPid(0L);
         loadMonth();
     }
@@ -121,7 +122,9 @@ public class ReportActivity extends AppCompatActivity implements ReportContract.
         status.setText(loadError != null ? loadError : loading ? "正在加载…" : accounts.isEmpty() ? "这个月暂无账单" : "本月共 " + accounts.size() + " 笔账单");
         incomeButton.setSelected(income);
         expenseButton.setSelected(!income);
-        List<ReportTotals.Part> parts = totals.breakdown(income);
+        List<ReportTotals.Part> parts = totals.breakdown(income, selectedGroup);
+        ((TextView) findViewById(R.id.report_path)).setText(selectedGroup == null ? "一级分类 · 点击查看子分类" : selectedGroup + " · 点击分类查看账单");
+        findViewById(R.id.report_group_back).setVisibility(selectedGroup == null ? View.GONE : View.VISIBLE);
         chart.setParts(parts, income ? "收入" : "支出");
         legend.removeAllViews();
         long positiveTotal = 0;
@@ -140,14 +143,24 @@ public class ReportActivity extends AppCompatActivity implements ReportContract.
             amount.setText("¥" + BookkeepingInput.format(part.cents) + "  ·  " + String.format(Locale.CHINA, "%.1f%%", positiveTotal > 0 ? Math.max(0, part.cents) * 100d / positiveTotal : 0));
             amount.setTextSize(14); amount.setTextColor(getResources().getColor(R.color.ledger_muted));
             row.addView(amount);
+            TextView arrow = new TextView(this); arrow.setText("  ›"); arrow.setTextSize(20); arrow.setTextColor(getResources().getColor(R.color.ledger_muted)); row.addView(arrow);
+            row.setMinimumHeight(dp(52)); row.setClickable(true); row.setFocusable(true);
+            row.setContentDescription(part.name + "，" + part.count + "笔，" + BookkeepingInput.format(part.cents) + "元，点击查看");
+            row.setOnClickListener(v -> {
+                if (selectedGroup == null) { selectedGroup = part.name; render(); }
+                else startActivity(new android.content.Intent(this, TransactionListActivity.class)
+                        .putExtra("month", monthKey()).putExtra("type", income ? 0 : 1)
+                        .putExtra("group", selectedGroup).putExtra("category", part.name));
+            });
             legend.addView(row);
         }
     }
     private int dp(int value) { return (int) (getResources().getDisplayMetrics().density * value); }
-    @Override protected void onSaveInstanceState(Bundle out) { out.putLong("month", month.getTimeInMillis()); out.putBoolean("income", income); super.onSaveInstanceState(out); }
+    @Override protected void onSaveInstanceState(Bundle out) { out.putLong("month", month.getTimeInMillis()); out.putBoolean("income", income); out.putString("group", selectedGroup); super.onSaveInstanceState(out); }
+    @Override public void onBackPressed() { if (selectedGroup != null) { selectedGroup = null; render(); } else super.onBackPressed(); }
     @Override protected void onDestroy() { presenter.destroy(); super.onDestroy(); }
     @Override public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) { finish(); return true; }
+        if (item.getItemId() == android.R.id.home) { onBackPressed(); return true; }
         return super.onOptionsItemSelected(item);
     }
 }

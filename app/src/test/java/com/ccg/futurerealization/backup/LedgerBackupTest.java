@@ -67,10 +67,28 @@ public class LedgerBackupTest {
         LedgerBackup.Goal goal = new LedgerBackup.Goal();
         goal.content = "每天读书"; goal.completed = false; goal.type = 1; data.goals.add(goal);
         LedgerBackup read = LedgerBackup.decode(LedgerBackup.encode(data, "2026-11-17"));
-        assertEquals(2, read.version);
+        assertEquals(3, read.version);
         assertEquals("每天读书", read.data.goals.get(0).content);
         assertFalse(read.data.goals.get(0).completed);
         goal.completed = null; reject(data);
+    }
+
+    @Test public void backupRetainsRecordedTimeAndRejectsImpossibleTime() {
+        LedgerBackup.Data data = fixture(); data.goals = new java.util.ArrayList<>();
+        data.accounts.get(0).time = "07:42:30";
+        LedgerBackup restored = LedgerBackup.decode(LedgerBackup.encode(data, "2026-11-17"));
+        assertEquals("07:42:30", restored.data.accounts.get(0).time);
+        assertEquals(3, restored.version);
+        data.accounts.get(0).time = "24:01:00"; reject(data);
+    }
+
+    @Test public void versionTwoFilesWithoutTimeRemainReadable() throws Exception {
+        String payload = "{\"categories\":[],\"accounts\":[],\"goals\":[],\"buddyStyle\":0}";
+        byte[] hash = java.security.MessageDigest.getInstance("SHA-256").digest(payload.getBytes(StandardCharsets.UTF_8));
+        StringBuilder checksum = new StringBuilder();
+        for (byte value : hash) checksum.append(String.format(java.util.Locale.ROOT, "%02x", value & 255));
+        String json = "{\"format\":\"FutureRealization-Ledger\",\"version\":2,\"exportedAt\":\"2026-11-17\",\"data\":" + payload + ",\"sha256\":\"" + checksum + "\"}";
+        assertEquals(2, LedgerBackup.decode(json.getBytes(StandardCharsets.UTF_8)).version);
     }
 
     private void reject(LedgerBackup.Data data) {

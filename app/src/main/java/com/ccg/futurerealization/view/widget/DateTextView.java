@@ -35,6 +35,7 @@ public class DateTextView extends androidx.appcompat.widget.AppCompatTextView {
     private DateChangeListener mListener;
 
     private boolean isOnlyYM;
+    private androidx.appcompat.app.AlertDialog calendarDialog;
 
     public DateTextView(@NonNull Context context) {
         //super(context);
@@ -50,6 +51,7 @@ public class DateTextView extends androidx.appcompat.widget.AppCompatTextView {
         super(context, attrs, defStyleAttr);
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.DateTextView);
         isOnlyYM = ta.getBoolean(R.styleable.DateTextView_only_show_year_month, false);
+        ta.recycle();
         LogUtils.v(isOnlyYM);
         initData();
         initAction();
@@ -109,23 +111,15 @@ public class DateTextView extends androidx.appcompat.widget.AppCompatTextView {
      * 显示yyyy-MM-dd
      */
     private void showDatePickerDialog() {
-        final Calendar cd=Calendar.getInstance();
-            java.util.Date date= new java.util.Date();
-            cd.setTime(date);
-            DatePickerDialog dp= new DatePickerDialog(getContext(), new DatePickerDialog.OnDateSetListener(){
-                public void onDateSet(DatePicker view, int year,int monthOfYear, int dayOfMonth) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(year).append("-").append(monthOfYear + 1).append("-").append(dayOfMonth);
-                    setText(Utils.stringConvertSqlDate(sb.toString()).toString());
-                    if (null != mListener) {
-                        mListener.onDateChange(view, year, monthOfYear, dayOfMonth);
-                    }
-                }
-            },
-                    cd.get(Calendar.YEAR),
-                    cd.get(Calendar.MONTH),
-                    cd.get(Calendar.DAY_OF_MONTH));
-            dp.show();
+        calendarDialog = new CalendarDateDialog(getContext(), getText().toString(), (year, month, day) -> {
+            setText(String.format(java.util.Locale.ROOT, "%04d-%02d-%02d", year, month + 1, day));
+            if (mListener != null) mListener.onDateChange(null, year, month, day);
+        }).show();
+    }
+
+    @Override protected void onDetachedFromWindow() {
+        if (calendarDialog != null) calendarDialog.dismiss();
+        super.onDetachedFromWindow();
     }
 
     /**

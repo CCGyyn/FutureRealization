@@ -66,7 +66,7 @@ public final class XlsLedgerReader {
                             if (!validDate(time, "HH:mm:ss", "[0-9]{2}:[0-9]{2}:[0-9]{2}")) throw new IllegalArgumentException("记账时间格式无效");
                         }
                         String parent = category(value(row, columns, "一级分类", formatter));
-                        String child = category(value(row, columns, "二级分类", formatter));
+                        String child = com.ccg.futurerealization.utils.CategoryNames.canonical(category(value(row, columns, "二级分类", formatter)));
                         Cell amount = cell(row, columns, "记账金额");
                         if (amount == null || amount.getCellTypeEnum() == CellType.FORMULA) throw new IllegalArgumentException("金额缺失或使用了公式");
                         BigDecimal money;
@@ -88,7 +88,7 @@ public final class XlsLedgerReader {
                         if (!accountType.isEmpty()) remark.append("；账户类型：").append(accountType);
                         remark.append("；币种：人民币");
                         if (remark.length() > 10000) throw new IllegalArgumentException("备注内容过长");
-                        entries.add(new Entry(date, "收入".equals(kind) ? 0 : 1, parent, child, cents, remark.toString()));
+                        entries.add(new Entry(date, "收入".equals(kind) ? 0 : 1, parent, child, cents, remark.toString(), time.isEmpty() ? null : time));
                         if (entries.size() > 100000) throw new IllegalArgumentException("单次最多导入10万笔账目");
                     } catch (IllegalArgumentException e) {
                         throw new IllegalArgumentException("“" + sheet.getSheetName() + "”第" + (i + 1) + "行：" + e.getMessage());
@@ -139,10 +139,10 @@ public final class XlsLedgerReader {
         return result.toString();
     }
     public static final class Entry {
-        public final String date, parent, category, remark;
+        public final String date, parent, category, remark, time;
         public final int type, cents;
-        private Entry(String date, int type, String parent, String category, int cents, String remark) {
-            this.date = date; this.type = type; this.parent = parent; this.category = category; this.cents = cents; this.remark = remark;
+        private Entry(String date, int type, String parent, String category, int cents, String remark, String time) {
+            this.date = date; this.type = type; this.parent = parent; this.category = category; this.cents = cents; this.remark = remark; this.time = time;
         }
         public String signature() { return key(date, type, parent, category, cents, remark); }
         public String categoryKey() { return key(type, parent, category); }

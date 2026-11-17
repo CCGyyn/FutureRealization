@@ -18,6 +18,9 @@ public class Account extends LitePalSupport {
      */
     private String date;
 
+    /** HH:mm:ss. Null for historical entries whose time was never recorded. */
+    private String time;
+
     /**
      * 1/0 支出/收入
      */
@@ -50,6 +53,10 @@ public class Account extends LitePalSupport {
     public void setDate(String date) {
         this.date = date;
     }
+
+    public String getTime() { return time; }
+
+    public void setTime(String time) { this.time = time; }
 
     public Integer getType() {
         return type;

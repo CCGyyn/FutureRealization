@@ -8,7 +8,7 @@ public final class AccountCategoryStore {
     private AccountCategoryStore() { }
 
     public static AccountCategory add(long parentId, String value) {
-        String name = value == null ? "" : value.trim();
+        String name = CategoryNames.canonical(value == null ? "" : value.trim());
         if (name.isEmpty() || name.length() > 20) throw new IllegalArgumentException("分类名称请输入1～20个字");
         synchronized (LitePalSupport.class) {
             AccountCategory parent = LitePal.find(AccountCategory.class, parentId);

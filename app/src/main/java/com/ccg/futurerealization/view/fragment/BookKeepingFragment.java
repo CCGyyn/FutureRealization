@@ -160,6 +160,7 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
         AccountCategory chosen = inferred == null ? selected : inferred;
         Account account = new Account();
         account.setDate(date.getText().toString());
+        account.setTime(new java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.ROOT).format(new java.util.Date()));
         account.setType(chosen.getType());
         account.setAccountCategory(chosen);
         account.setAmount(entry.cents);
@@ -177,8 +178,8 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
 
     private AccountCategory inferCategory(String description) {
         if (description.isEmpty()) return null;
-        String normalized = description.replace("午餐", "中餐").replace("早饭", "早餐")
-                .replace("午饭", "中餐").replace("晚饭", "晚餐").replace("薪水", "工资");
+        String normalized = description.replace("中餐", "午餐").replace("早饭", "早餐")
+                .replace("午饭", "午餐").replace("晚饭", "晚餐").replace("薪水", "工资");
         AccountCategory match = null;
         for (AccountCategory category : categories) {
             if (normalized.contains(category.getCategory())) {
@@ -280,7 +281,7 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
         String category = account.getAccountCategory() == null ? "未分类" : account.getAccountCategory().getCategory();
         return (account.getType() == 0 ? "收入" : "支出") + " · " + category + "\n" +
                 (account.getType() == 0 ? "+" : "−") + " ¥" + BookkeepingInput.format(account.getAmount()) +
-                "\n" + account.getDate() +
+                "\n" + com.ccg.futurerealization.utils.AccountDetails.dateTime(account) +
                 (account.getRemark() == null || account.getRemark().isEmpty() ? "" : "\n" + account.getRemark());
     }
 

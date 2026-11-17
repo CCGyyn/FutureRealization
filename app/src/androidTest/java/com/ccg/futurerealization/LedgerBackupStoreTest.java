@@ -69,7 +69,7 @@ public class LedgerBackupStoreTest {
         assertEquals(2, LedgerBackupStore.restoreLedger(context, backup));
         List<Account> accounts = LitePal.findAll(Account.class, true);
         assertEquals(2, accounts.size());
-        assertEquals("中餐", accounts.get(0).getAccountCategory().getCategory());
+        assertEquals("午餐", accounts.get(0).getAccountCategory().getCategory());
         assertEquals(Integer.valueOf(1250), accounts.get(0).getAmount());
         assertNotEquals(Long.valueOf(900), accounts.get(0).getAccountCategory().getId());
         LedgerBackup exported = LedgerBackup.decode(LedgerBackupStore.exportLedger(context));
@@ -118,7 +118,7 @@ public class LedgerBackupStoreTest {
         assertTrue(saved.getState());
         assertEquals("读完一本书", saved.getFuture_content());
         LedgerBackup exported = LedgerBackup.decode(LedgerBackupStore.exportLedger(context));
-        assertEquals(2, exported.version);
+        assertEquals(3, exported.version);
         assertEquals(1, exported.data.goals.size());
         assertTrue(exported.data.goals.get(0).completed);
     }

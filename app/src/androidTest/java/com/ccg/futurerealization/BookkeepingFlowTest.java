@@ -111,7 +111,7 @@ public class BookkeepingFlowTest {
         clickDialog("确认恢复");
         waitUntil(() -> uiText(R.id.backup_status).contains("恢复成功"));
         assertEquals(1, LitePal.count(Account.class));
-        assertEquals("中餐", LitePal.findAll(Account.class, true).get(0).getAccountCategory().getCategory());
+        assertEquals("午餐", LitePal.findAll(Account.class, true).get(0).getAccountCategory().getCategory());
     }
 
     private String uiText(int id) {

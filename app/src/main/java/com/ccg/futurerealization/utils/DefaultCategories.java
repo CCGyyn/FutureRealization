@@ -15,7 +15,7 @@ import java.util.List;
 
 /** Adds missing bundled defaults on upgrades; existing categories and account links stay intact. */
 public final class DefaultCategories {
-    private static final int VERSION = 2;
+    private static final int VERSION = 3;
     private DefaultCategories() { }
 
     public static void ensure(Context context) throws Exception {
@@ -26,6 +26,8 @@ public final class DefaultCategories {
             SQLiteDatabase db = LitePal.getDatabase();
             db.beginTransaction();
             try (InputStream input = context.getResources().openRawResource(R.raw.account_category)) {
+                CategoryNames.mergeLunchAliases();
+                existing = new ArrayList<>(LitePal.findAll(AccountCategory.class));
                 XmlPullParser parser = Xml.newPullParser();
                 parser.setInput(input, "UTF-8");
                 long parentId = 0;

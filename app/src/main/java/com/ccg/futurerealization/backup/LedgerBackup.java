@@ -51,6 +51,7 @@ public final class LedgerBackup {
 
     public static class Entry {
         public String date;
+        public String time;
         public int type;
         public int amountCents;
         public long categoryId;
@@ -61,7 +62,7 @@ public final class LedgerBackup {
         validate(data);
         LedgerBackup backup = new LedgerBackup();
         backup.format = "FutureRealization-Ledger";
-        backup.version = data.goals == null ? 1 : 2;
+        backup.version = data.goals == null ? 1 : 3;
         backup.data = data;
         backup.exportedAt = exportedAt;
         backup.sha256 = digest(GSON.toJson(data));
@@ -78,7 +79,7 @@ public final class LedgerBackup {
         } catch (RuntimeException e) {
             throw new IllegalArgumentException("文件内容损坏，无法读取备份");
         }
-        require(backup != null && "FutureRealization-Ledger".equals(backup.format) && (backup.version == 1 || backup.version == 2),
+        require(backup != null && "FutureRealization-Ledger".equals(backup.format) && (backup.version >= 1 && backup.version <= 3),
                 "不是受支持的备份，请使用本应用导出的备份文件");
         require(backup.data != null && backup.sha256 != null && backup.sha256.equals(digest(GSON.toJson(backup.data))),
                 "备份完整性校验失败，文件可能已被修改或损坏");
@@ -113,6 +114,7 @@ public final class LedgerBackup {
         format.setLenient(false);
         for (Entry entry : data.accounts) {
             require(entry != null && entry.amountCents > 0 && (entry.type == 0 || entry.type == 1), "账单金额或收支类型无效");
+            require(entry.time == null || entry.time.matches("(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]"), "账单时间无效");
             require(entry.date != null && entry.date.matches("[0-9]{4}-[0-9]{2}-[0-9]{2}"), "账单日期格式无效");
             ParsePosition position = new ParsePosition(0);
             require(format.parse(entry.date, position) != null && position.getIndex() == 10, "账单日期无效");
