@@ -9,7 +9,6 @@ import android.widget.Toast;
 import com.ccg.futurerealization.Constant;
 import com.ccg.futurerealization.R;
 import com.ccg.futurerealization.adapter.MsgPageAdapter;
-import com.ccg.futurerealization.aop.PermissionTrace;
 import com.ccg.futurerealization.base.BaseActivity;
 import com.ccg.futurerealization.bean.DoSth;
 import com.ccg.futurerealization.contract.MainActivityContract;
@@ -51,6 +50,7 @@ public class MainActivity extends BaseActivity implements MainActivityContract.V
 
     @Override
     protected void initViews() {
+        if (getSupportActionBar() != null) getSupportActionBar().hide();
         mTabLayout = (TabLayout) findViewById(R.id.tab_layout);
         mViewPager = (ViewPager) findViewById(R.id.view_list);
     }
@@ -65,7 +65,6 @@ public class MainActivity extends BaseActivity implements MainActivityContract.V
         mPresenter.queryDoSthData();
     }
 
-    @PermissionTrace
     @Override
     protected void initAction() {
     }

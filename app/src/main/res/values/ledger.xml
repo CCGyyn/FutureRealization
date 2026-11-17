@@ -7,6 +7,16 @@
     <color name="ledger_accent">#A34C62</color>
     <color name="ledger_soft">#F7E7EB</color>
     <color name="ledger_income">#38786A</color>
+    <!-- Long-term: steady growth; short-term: warm, near-term action. -->
+    <color name="goal_long_text">#3E7162</color>
+    <color name="goal_long_surface">#EAF3EE</color>
+    <color name="goal_long_marker">#80A596</color>
+    <color name="goal_short_text">#966320</color>
+    <color name="goal_short_surface">#FBF1DD</color>
+    <color name="goal_short_marker">#D9B16C</color>
+    <color name="goal_normal_text">#606C7D</color>
+    <color name="goal_normal_surface">#F0F2F5</color>
+    <color name="goal_normal_marker">#D5DAE0</color>
     <style name="LedgerAmount">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
@@ -19,5 +29,19 @@
         <item name="android:autoSizeMinTextSize">10sp</item>
         <item name="android:autoSizeMaxTextSize">17sp</item>
         <item name="android:autoSizeStepGranularity">1sp</item>
+    </style>
+    <style name="LedgerCaption">
+        <item name="android:layout_width">wrap_content</item><item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/ledger_muted</item><item name="android:textSize">13sp</item>
+    </style>
+    <style name="LedgerTextButton">
+        <item name="android:layout_width">72dp</item><item name="android:layout_height">48dp</item>
+        <item name="android:gravity">center</item><item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/ledger_accent</item><item name="android:background">?attr/selectableItemBackground</item>
+    </style>
+    <style name="LedgerFilter">
+        <item name="android:layout_width">0dp</item><item name="android:layout_height">44dp</item><item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item><item name="android:layout_marginEnd">4dp</item><item name="android:textSize">14sp</item>
+        <item name="android:background">@drawable/ledger_filter</item><item name="android:textColor">@color/ledger_filter_text</item>
     </style>
 </resources>

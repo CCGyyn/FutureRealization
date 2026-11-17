@@ -6,13 +6,9 @@
 
     <LinearLayout android:layout_width="match_parent" android:layout_height="56dp"
         android:paddingStart="16dp" android:paddingEnd="12dp" android:gravity="center_vertical">
-        <TextView android:layout_width="40dp" android:layout_height="40dp"
-            android:background="@drawable/ledger_accent_surface" android:gravity="center"
-            android:text="伴" android:textStyle="bold" android:textSize="20sp" android:textColor="@color/ledger_accent" />
-        <TextView android:id="@+id/buddy_title" android:layout_width="0dp" android:layout_weight="1"
-            android:layout_height="48dp" android:gravity="center_vertical" android:paddingStart="12dp"
-            android:textColor="@color/ledger_text" android:textSize="16sp" android:textStyle="bold"
-            android:background="?attr/selectableItemBackground" />
+        <TextView android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="wrap_content" android:text="记账" android:textSize="25sp"
+            android:textStyle="bold" android:textColor="@color/ledger_text" />
         <TextView android:id="@+id/backup_btn" android:layout_width="48dp" android:layout_height="48dp"
             android:text="备份" android:gravity="center" android:textSize="14sp" android:textColor="@color/ledger_accent"
             android:background="?attr/selectableItemBackground" android:contentDescription="备份与换机迁移" />
@@ -54,10 +50,15 @@
             android:gravity="center" android:text="账单日历" android:textSize="12sp" android:textColor="@color/ledger_accent"
             android:background="?attr/selectableItemBackground" />
     </LinearLayout>
-    <androidx.recyclerview.widget.RecyclerView android:id="@+id/chat_msg_list"
-        android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
-        android:paddingStart="16dp" android:paddingEnd="16dp" android:paddingBottom="8dp"
-        android:clipToPadding="false" android:overScrollMode="never" />
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+        <androidx.recyclerview.widget.RecyclerView android:id="@+id/chat_msg_list"
+            android:layout_width="match_parent" android:layout_height="match_parent"
+            android:paddingStart="16dp" android:paddingEnd="16dp" android:paddingBottom="8dp"
+            android:clipToPadding="false" android:overScrollMode="never" />
+        <TextView android:id="@+id/ledger_empty" android:layout_width="match_parent" android:layout_height="match_parent"
+            android:gravity="center" android:text="暂无账单\n选择分类并输入金额即可记账" android:textSize="14sp"
+            android:lineSpacingExtra="8dp" android:textColor="@color/ledger_muted" />
+    </FrameLayout>
     <TextView android:id="@+id/day_summary" android:layout_width="match_parent" android:layout_height="wrap_content"
         android:paddingStart="16dp" android:paddingEnd="16dp" android:paddingTop="6dp" android:paddingBottom="6dp"
         android:textSize="11sp" android:textColor="@color/ledger_muted" />
@@ -68,8 +69,10 @@
             <TextView android:id="@+id/book_keep_type" android:layout_width="wrap_content" android:layout_height="40dp"
                 android:gravity="center" android:paddingStart="12dp" android:paddingEnd="12dp" android:text="选择分类 ▾"
                 android:textSize="13sp" android:textColor="@color/ledger_accent" android:background="@drawable/ledger_accent_surface" />
-            <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
-                android:text="  一笔一笔，记住生活" android:textSize="11sp" android:textColor="@color/ledger_muted" />
+            <TextView android:id="@+id/add_category_btn" android:layout_width="0dp" android:layout_weight="1"
+                android:layout_height="40dp" android:gravity="center_vertical" android:paddingStart="14dp"
+                android:text="＋ 添加分类" android:textSize="13sp" android:textColor="@color/ledger_accent"
+                android:background="?attr/selectableItemBackground" />
             <TextView android:id="@+id/remark_msg" android:layout_width="64dp" android:layout_height="40dp"
                 android:gravity="center" android:text="备注" android:textSize="13sp" android:textColor="@color/ledger_muted"
                 android:background="?attr/selectableItemBackground" />

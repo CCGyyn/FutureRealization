@@ -35,6 +35,7 @@ public class LedgerBackupStoreTest {
         LitePal.deleteDatabase(DB);
         LitePalDB database = new LitePalDB(DB, 1);
         database.addClassName(Account.class.getName());
+        database.addClassName(com.ccg.futurerealization.bean.DoSth.class.getName());
         database.addClassName(AccountCategory.class.getName());
         LitePal.use(database);
         LitePal.getDatabase();
@@ -104,6 +105,35 @@ public class LedgerBackupStoreTest {
                 assertEquals(category.getCategory(), copy.getCategory());
             } finally { parcel.recycle(); }
         }
+    }
+
+    @Test public void goalCompletionAndCustomCategorySurviveFullBackup() {
+        LedgerBackup backup = fixture();
+        backup.data.goals = new java.util.ArrayList<>();
+        LedgerBackup.Goal goal = new LedgerBackup.Goal();
+        goal.content = "读完一本书"; goal.completed = true; goal.type = 2;
+        backup.data.goals.add(goal);
+        assertEquals(2, LedgerBackupStore.restoreLedger(context, backup));
+        com.ccg.futurerealization.bean.DoSth saved = LitePal.findAll(com.ccg.futurerealization.bean.DoSth.class).get(0);
+        assertTrue(saved.getState());
+        assertEquals("读完一本书", saved.getFuture_content());
+        LedgerBackup exported = LedgerBackup.decode(LedgerBackupStore.exportLedger(context));
+        assertEquals(2, exported.version);
+        assertEquals(1, exported.data.goals.size());
+        assertTrue(exported.data.goals.get(0).completed);
+    }
+
+    @Test public void goalWriteFailureRollsBackTheWholeRestore() {
+        LedgerBackup backup = fixture();
+        backup.data.goals = new java.util.ArrayList<>();
+        LedgerBackup.Goal goal = new LedgerBackup.Goal();
+        goal.content = "abort"; goal.completed = false; goal.type = 0; backup.data.goals.add(goal);
+        LitePal.getDatabase().execSQL("CREATE TRIGGER abort_goal BEFORE INSERT ON dosth BEGIN SELECT RAISE(ABORT, 'test goal failure'); END");
+        try { LedgerBackupStore.restoreLedger(context, backup); fail("must fail"); }
+        catch (RuntimeException expected) { }
+        assertEquals(0, LitePal.count(Account.class));
+        assertEquals(0, LitePal.count(AccountCategory.class));
+        assertEquals(0, LitePal.count(com.ccg.futurerealization.bean.DoSth.class));
     }
 
     @Test public void rollsBackAccountsAndCategoriesWhenAnyWriteFails() {

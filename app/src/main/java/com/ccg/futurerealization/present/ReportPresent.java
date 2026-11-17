@@ -1,103 +1,28 @@
 package com.ccg.futurerealization.present;
 
-import com.ccg.futurerealization.bean.Account;
-import com.ccg.futurerealization.bean.AccountCategory;
 import com.ccg.futurerealization.contract.ReportContract;
-import com.ccg.futurerealization.db.AccountCategoryManager;
 import com.ccg.futurerealization.db.AccountCategoryManagerImpl;
-import com.ccg.futurerealization.db.AccountManager;
 import com.ccg.futurerealization.db.AccountManagerImpl;
-import com.ccg.futurerealization.utils.Task;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
-import java.util.List;
-
-import io.reactivex.rxjava3.annotations.NonNull;
-import io.reactivex.rxjava3.core.Observer;
-import io.reactivex.rxjava3.disposables.Disposable;
-
-/**
- * @Description:
- * @Author: cgaopeng
- * @CreateDate: 22-2-11 下午3:23
- * @Version: 1.0
- */
 public class ReportPresent extends ReportContract.Present {
+    private int request;
+    public ReportPresent(ReportContract.View view) { super(view); }
 
-    private AccountManager mAccountManager;
-
-    private AccountCategoryManager mAccountCategoryManager;
-
-    public ReportPresent(ReportContract.View view) {
-        super(view);
-        mAccountManager = AccountManagerImpl.getInstance();
-        mAccountCategoryManager = AccountCategoryManagerImpl.getInstance();
+    @Override public void queryAccountByMonth(String month) {
+        int current = ++request;
+        addDisposable(Single.fromCallable(() -> AccountManagerImpl.getInstance().queryAccountByDate(month))
+                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(accounts -> { if (request == current) mView.loadAccountDataByMonth(month, accounts); },
+                        e -> { if (request == current) mView.reportError("报表加载失败，请重新选择月份重试"); }));
     }
 
-    /**
-     * 根据yyyy-MM查找账单
-     *
-     * @param date
-     */
-    @Override
-    public void queryAccountByMonth(String date) {
-        Task.execute(emitter -> {
-            List<Account> accounts = mAccountManager.queryAccountByDate(date);
-            emitter.onNext(accounts);
-            emitter.onComplete();
-        }, new Observer<List<Account>>() {
-            @Override
-            public void onSubscribe(@NonNull Disposable d) {
-                addDisposable(d);
-            }
-
-            @Override
-            public void onNext(@NonNull List<Account> accountList) {
-                mView.loadAccountDataByMonth(accountList);
-            }
-
-            @Override
-            public void onError(@NonNull Throwable e) {
-
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-        });
-    }
-
-    /**
-     * 查找对应集合的类型
-     *
-     * @param pid
-     */
-    @Override
-    public void queryCategoryByPid(Long pid) {
-        Task.execute(emitter -> {
-            List<AccountCategory> accountCategories = mAccountCategoryManager.queryByPid(pid);
-            emitter.onNext(accountCategories);
-            emitter.onComplete();
-        }, new Observer<List<AccountCategory>>() {
-            @Override
-            public void onSubscribe(@NonNull Disposable d) {
-                addDisposable(d);
-            }
-
-            @Override
-            public void onNext(@NonNull List<AccountCategory> list) {
-                mView.loadRootCategory(list);
-            }
-
-            @Override
-            public void onError(@NonNull Throwable e) {
-
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-        });
+    @Override public void queryCategoryByPid(Long pid) {
+        addDisposable(Single.fromCallable(() -> AccountCategoryManagerImpl.getInstance().queryByPid(pid))
+                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(categories -> mView.loadRootCategory(categories),
+                        e -> mView.reportError("分组加载失败，暂按具体分类展示")));
     }
 }

@@ -22,7 +22,9 @@ public interface ReportContract {
          * 根据月份查询数据
          * @param accountList
          */
-        void loadAccountDataByMonth(List<Account> accountList);
+        void loadAccountDataByMonth(String month, List<Account> accountList);
+
+        void reportError(String message);
 
         /**
          * 加载根目录

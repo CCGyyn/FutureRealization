@@ -1,314 +1,175 @@
 package com.ccg.futurerealization.view.fragment;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.pm.PackageInfo;
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.Parcelable;
+import android.text.InputFilter;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-
+import android.widget.ProgressBar;
+import android.widget.Spinner;
+import android.widget.Switch;
+import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
-import com.ccg.futurerealization.Constant;
 import com.ccg.futurerealization.R;
 import com.ccg.futurerealization.adapter.MsgAdapter;
 import com.ccg.futurerealization.base.BaseFragment;
 import com.ccg.futurerealization.bean.DoSth;
 import com.ccg.futurerealization.contract.MainFragmentContract;
-import com.ccg.futurerealization.request.model.VersionModel;
 import com.ccg.futurerealization.present.MainFragmentPresenter;
-import com.ccg.futurerealization.request.service.VersionService;
-import com.ccg.futurerealization.service.DownloadService;
-import com.ccg.futurerealization.utils.LogUtils;
-import com.ccg.futurerealization.request.RetrofitHelper;
-import com.ccg.futurerealization.utils.ToastUtils;
-import com.ccg.futurerealization.utils.Utils;
-import com.ccg.futurerealization.view.widget.RadioGroupButton;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
-import de.mrapp.android.dialog.MaterialDialog;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-/**
- * @Description:主界面功能
- * @Author: cgaopeng
- * @CreateDate: 21-12-7 上午10:51
- * @Version: 1.0
- *
- * @update: cgaopeng 21-12-17 添加下拉刷新
- */
 public class MainFragment extends BaseFragment implements MainFragmentContract.View {
+    private final List<DoSth> goals = new ArrayList<>();
+    private MainFragmentPresenter presenter;
+    private MsgAdapter adapter;
+    private SwipeRefreshLayout refresh;
+    private TextView summary, progressText, empty;
+    private ProgressBar progress;
+    private View addButton;
+    private final TextView[] filters = new TextView[3];
+    private int filter;
+    private boolean busy;
+    private AlertDialog editor;
 
-    private static final String DATA_LIST = "data_list";
-
-    private RecyclerView mRecyclerView;
-
-    private MaterialDialog.Builder mBuilder;
-
-    private MainFragmentContract.Presenter mPresenter;
-
-    private MsgAdapter mMsgAdapter;
-
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-
-    private DownloadService.DownloadBinder mDownloadBinder;
-
-    ServiceConnection mServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            LogUtils.i("onServiceConnected");
-            mDownloadBinder = (DownloadService.DownloadBinder) service;
-            mDownloadBinder.startDownload("test/Flashtest.apk");
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            LogUtils.i("onServiceDisconnected");
-        }
-    };
-
-    /**
-     * 这种方式主要是防止类似竖屏切成横屏时 传过来数据丢失
-     * @param list
-     * @return
-     */
-    public static MainFragment newInstance(List<DoSth> list) {
-        MainFragment mainFragment = new MainFragment();
-        Bundle bundle = new Bundle();
-        bundle.putParcelableArrayList(DATA_LIST, (ArrayList <? extends Parcelable>)list);
-        mainFragment.setArguments(bundle);
-        return mainFragment;
+    public static MainFragment newInstance(List<DoSth> ignored) { return new MainFragment(); }
+    @Override protected int getContentViewId() { return R.layout.main_fragment; }
+    @Override protected void onCreateViewBefore(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle state) {
+        presenter = new MainFragmentPresenter(this);
+        if (state != null) filter = state.getInt("goal_filter", 0);
     }
-
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        if (Constant.TEST_MAIN_MSG_ADD) {
-            menu.add(0, R.id.test_menu_add, 1, R.string.msg_menu_add_test);
-        }
-    }
-
-    @Override
-    protected int getOptionsMenuId() {
-        return R.menu.main_fragment_menu;
-    }
-
-    @Override
-    protected void onCreateViewBefore(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mPresenter = new MainFragmentPresenter(this);
-    }
-
-    @Override
-    protected int getContentViewId() {
-        return R.layout.main_fragment;
-    }
-
-    @Override
-    protected void onCreateViewInit(View rootView) {
-        mSwipeRefreshLayout = rootView.findViewById(R.id.swip_refresh_layout);
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                LogUtils.v("onRefresh");
-                mPresenter.queryDoSthData();
+    @Override protected void onCreateViewInit(View root) {
+        summary = root.findViewById(R.id.goal_summary);
+        progressText = root.findViewById(R.id.goal_progress_text);
+        progress = root.findViewById(R.id.goal_progress);
+        empty = root.findViewById(R.id.goal_empty);
+        addButton = root.findViewById(R.id.add_goal);
+        addButton.setOnClickListener(v -> showEditor(null));
+        refresh = root.findViewById(R.id.swip_refresh_layout);
+        refresh.setColorSchemeResources(R.color.ledger_accent);
+        refresh.setOnRefreshListener(() -> presenter.queryDoSthData());
+        RecyclerView list = root.findViewById(R.id.msg_list);
+        adapter = new MsgAdapter();
+        adapter.setListen(new MsgAdapter.Listen() {
+            @Override public void edit(DoSth goal) { showEditor(goal); }
+            @Override public void toggle(DoSth goal) {
+                DoSth changed = goal.clone();
+                changed.setState(!Boolean.TRUE.equals(goal.getState()));
+                setBusy(true);
+                presenter.updateDoSth(changed);
             }
         });
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.msg_list);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        List<DoSth> list = getArguments().getParcelableArrayList(DATA_LIST);
-        mMsgAdapter = new MsgAdapter();
-        mMsgAdapter.setListen(new MsgAdapter.Listen() {
-            @Override
-            public void updateItem(DoSth doSth, int position) {
-                mPresenter.updateDoSth(doSth, position);
-            }
+        list.setLayoutManager(new LinearLayoutManager(requireContext()));
+        list.setAdapter(adapter);
+        int[] ids = {R.id.goals_all, R.id.goals_pending, R.id.goals_done};
+        for (int i = 0; i < filters.length; i++) {
+            final int value = i;
+            filters[i] = root.findViewById(ids[i]);
+            filters[i].setOnClickListener(v -> { filter = value; render(); });
+        }
+        render();
+    }
+    @Override public void onResume() { super.onResume(); if (presenter != null && !busy) presenter.queryDoSthData(); }
 
-            @Override
-            public void deleteItemById(Long id, int position) {
-                mPresenter.deleteDoSthById(id, position);
-            }
+    private void render() {
+        if (adapter == null) return;
+        int done = 0;
+        for (DoSth goal : goals) if (Boolean.TRUE.equals(goal.getState())) done++;
+        int percent = goals.isEmpty() ? 0 : (int) ((long) done * 100 / goals.size());
+        summary.setText("进行中 " + (goals.size() - done) + "  ·  已完成 " + done);
+        progressText.setText("已完成 " + done + " / " + goals.size() + "  ·  " + percent + "%");
+        progress.setProgress(percent);
+        List<DoSth> visible = new ArrayList<>();
+        for (DoSth goal : goals) {
+            boolean completed = Boolean.TRUE.equals(goal.getState());
+            if (filter == 0 || filter == 1 && !completed || filter == 2 && completed) visible.add(goal);
+        }
+        visible.sort((a, b) -> {
+            int order = Boolean.compare(Boolean.TRUE.equals(a.getState()), Boolean.TRUE.equals(b.getState()));
+            return order != 0 ? order : Long.compare(b.getId(), a.getId());
         });
-        mMsgAdapter.setDoSthList(list);
-        mRecyclerView.setAdapter(mMsgAdapter);
+        adapter.setDoSthList(visible);
+        filters[0].setText("全部 " + goals.size());
+        filters[1].setText("进行中 " + (goals.size() - done));
+        filters[2].setText("已完成 " + done);
+        for (int i = 0; i < filters.length; i++) filters[i].setSelected(filter == i);
+        empty.setVisibility(visible.isEmpty() ? View.VISIBLE : View.GONE);
+        empty.setText(filter == 2 ? "还没有已完成的目标" : filter == 1 ? "暂无进行中的目标" : "还没有目标\n点击“添加目标”开始记录");
     }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.add_sth: {
-                showAddMsgDialog();
-                break;
-            }
-            case R.id.delete_all_sth: {
-                MaterialDialog.Builder builder = new MaterialDialog.Builder(getContext())
-                        .setTitle(R.string.delete_all_msg_dialog_title)
-                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                            mPresenter.deleteAllDoSth();
-                            dialog.dismiss();
-                        })
-                        .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
-                            dialog.dismiss();
-                        });
-                MaterialDialog dialog = builder.create();
-                dialog.show();
-                Resources resources = getContext().getResources();
-                dialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(resources.getColor(R.color.material_blue_700));
-                dialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(resources.getColor(R.color.material_blue_700));
-                break;
-            }
-            case R.id.test_menu_add: {
-                Random random = new Random();
-                int r = 1 + random.nextInt(10);
-                for (int i = 0; i < r; i++) {
-                    DoSth doSth = new DoSth();
-                    doSth.setFuture_content(Utils.getRandomString(random.nextInt(62) + 1));
-                    doSth.setType(random.nextInt(3));
-                    doSth.setState(random.nextBoolean());
-                    mPresenter.addDoSth(doSth);
-                }
-                break;
-            }
-            case R.id.update_app : {
-                PackageInfo packageInfo = Utils.getPackageInfo(getActivity().getApplicationContext());
-                int versionCode = packageInfo.versionCode;
-                final String versionName = packageInfo.versionName;
-                LogUtils.i("versionName = " + versionName + ", versionCode=" + versionCode);
-                VersionService versionService = RetrofitHelper.getInstance().getRetrofitIgCer()
-                        .create(VersionService.class);
-                Call<VersionModel> call = versionService.getServerVersion();
-                call.enqueue(new Callback<VersionModel>() {
-                    @Override
-                    public void onResponse(Call<VersionModel> call, Response<VersionModel> response) {
-                        VersionModel body = response.body();
-                        String version_id = body.getVersion_id();
-                        LogUtils.i("version_id = " + version_id);
-                        if (!versionName.equals(version_id)) {
-                            float resId = Float.parseFloat(version_id);
-                            float currentId = Float.parseFloat(versionName);
-                            if (resId > currentId) {
-                                LogUtils.i("update app");
-                                if (mDownloadBinder != null) {
-                                    mDownloadBinder.startDownload("test/Flashtest.apk");
-                                    return;
-                                }
-                                Intent intent = new Intent("com.ccg.futurerealization.DownloadService");
-                                intent.setPackage(getContext().getPackageName());
-                                getContext().startService(intent);
-                                getContext().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<VersionModel> call, Throwable t) {
-                        LogUtils.e(t.getMessage());
-                    }
-                });
-                break;
-            }
-            default:
-        }
-        return super.onOptionsItemSelected(item);
+    private void showEditor(@Nullable DoSth original) {
+        if (busy) return;
+        LinearLayout content = new LinearLayout(requireContext());
+        content.setOrientation(LinearLayout.VERTICAL);
+        int pad = (int) (24 * getResources().getDisplayMetrics().density);
+        content.setPadding(pad, 0, pad, 0);
+        EditText text = new EditText(requireContext());
+        text.setId(R.id.goal_editor_text);
+        text.setHint("想完成什么？");
+        text.setMinLines(2); text.setMaxLines(5);
+        text.setFilters(new InputFilter[]{new InputFilter.LengthFilter(500)});
+        if (original != null) text.setText(original.getFuture_content());
+        content.addView(text);
+        Spinner type = new Spinner(requireContext());
+        type.setId(R.id.goal_editor_type);
+        type.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, new String[]{"普通目标", "长期目标", "短期目标"}));
+        type.setSelection(original == null || original.getType() == null ? 0 : original.getType());
+        content.addView(type, new LinearLayout.LayoutParams(-1, (int) (56 * getResources().getDisplayMetrics().density)));
+        Switch completed = new Switch(requireContext());
+        completed.setText("已完成");
+        completed.setPadding(0, pad / 2, 0, pad / 2);
+        completed.setChecked(original != null && Boolean.TRUE.equals(original.getState()));
+        content.addView(completed);
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext()).setTitle(original == null ? "添加目标" : "编辑目标")
+                .setView(content).setNegativeButton("取消", null).setPositiveButton("保存", null);
+        if (original != null) builder.setNeutralButton("删除", (d, w) -> new AlertDialog.Builder(requireContext())
+                .setTitle("删除这个目标？").setMessage(original.getFuture_content()).setNegativeButton("保留", null)
+                .setPositiveButton("删除", (dialog, which) -> { setBusy(true); presenter.deleteDoSthById(original.getId()); }).show());
+        editor = builder.create();
+        editor.setOnShowListener(d -> editor.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String value = text.getText().toString().trim();
+            if (value.isEmpty()) { text.setError("请输入目标内容"); return; }
+            DoSth goal = original == null ? new DoSth() : original.clone();
+            goal.setFuture_content(value); goal.setType(type.getSelectedItemPosition()); goal.setState(completed.isChecked());
+            setBusy(true);
+            if (original == null) presenter.addDoSth(goal); else presenter.updateDoSth(goal);
+        }));
+        editor.show();
     }
-
-    @Override
-    public void onDestroy() {
-        mPresenter.destroy();
-        mPresenter = null;
-        mBuilder = null;
-        super.onDestroy();
-    }
-
-    /**
-     * 显示添加msg的dialog
-     */
-    private void showAddMsgDialog() {
-        if (mBuilder == null) {
-            DoSth doSth = new DoSth();
-            LinearLayout linearLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.add_dosth_dialog, null);
-            RadioGroupButton rgType = linearLayout.findViewById(R.id.rg_item_group_type);
-            RadioGroupButton rgState = linearLayout.findViewById(R.id.rg_item_group_state);
-            EditText content = linearLayout.findViewById(R.id.future_content);
-            doSth.setType(0);
-            doSth.setState(false);
-            rgType.setOnGroupBtnClickListener(code -> {
-                doSth.setType(Integer.valueOf(code));
-            });
-            rgState.setOnGroupBtnClickListener(code -> {
-                doSth.setState(Integer.parseInt(code) == 1);
-            });
-            // https://github.com/michael-rapp/AndroidMaterialDialog
-            mBuilder = new MaterialDialog.Builder(getContext())
-                    .setView(linearLayout)
-                    .setTitle(R.string.add_msg_alerdialog_title)
-                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                        LogUtils.d("test content = " + content.getEditableText().toString());
-                        doSth.setFuture_content(content.getEditableText().toString());
-                        mPresenter.addDoSth(doSth);
-                        content.setText("");
-                        dialog.dismiss();
-                    })
-                    .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
-                        dialog.dismiss();
-                    });
-        }
-        MaterialDialog dialog = mBuilder.create();
-        dialog.show();
-        Resources resources = getContext().getResources();
-        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(resources.getColor(R.color.material_blue_700));
-        dialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(resources.getColor(R.color.material_blue_700));
-    }
-
-    @Override
-    public void addMsgSuccess(DoSth doSth) {
-        //修复第二次添加时，更改还是用原来的数据，导致后来的修改都是基于第一次添加的
-        mBuilder = null;
-        mMsgAdapter.addNewMsgItem(doSth);
-    }
-
-    @Override
-    public void refreshAllMsgItem(List<DoSth> list) {
-        mMsgAdapter.setDoSthList(list);
-        if (mSwipeRefreshLayout.isRefreshing()) {
-            mSwipeRefreshLayout.setRefreshing(false);
+    private void setBusy(boolean value) {
+        busy = value;
+        addButton.setEnabled(!value);
+        refresh.setEnabled(!value);
+        adapter.setBusy(value);
+        if (editor != null && editor.isShowing()) {
+            editor.setCancelable(!value);
+            editor.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(!value);
+            editor.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(!value);
+            if (editor.getButton(AlertDialog.BUTTON_NEUTRAL) != null) editor.getButton(AlertDialog.BUTTON_NEUTRAL).setEnabled(!value);
         }
     }
-
-    @Override
-    public void refreshMsgItem(DoSth doSth, int position) {
-        mMsgAdapter.updateMsgItem(doSth, position);
+    private void saved() {
+        setBusy(false);
+        if (editor != null) editor.dismiss();
+        render();
     }
-
-    @Override
-    public void deleteItem(int position) {
-        mMsgAdapter.deleteMsgItem(position);
-        ToastUtils.success(R.string.toast_delete_msg_item_success);
+    @Override public void addMsgSuccess(DoSth goal) { goals.add(goal); saved(); }
+    @Override public void refreshAllMsgItem(List<DoSth> values) { goals.clear(); goals.addAll(values); refresh.setRefreshing(false); render(); }
+    @Override public void refreshMsgItem(DoSth changed) {
+        for (int i = 0; i < goals.size(); i++) if (goals.get(i).getId() == changed.getId()) { goals.set(i, changed); break; }
+        saved();
     }
-
-    @Override
-    public void actionFailed() {
-        ToastUtils.warn(R.string.toast_action_msg_item_failed);
-    }
-
+    @Override public void deleteItem(long id) { goals.removeIf(goal -> goal.getId() == id); saved(); }
+    @Override public void actionFailed() { setBusy(false); refresh.setRefreshing(false); Toast.makeText(requireContext(), "操作失败，内容已保留，请重试", Toast.LENGTH_LONG).show(); }
+    @Override public void onSaveInstanceState(@NonNull Bundle state) { state.putInt("goal_filter", filter); super.onSaveInstanceState(state); }
+    @Override public void onDestroyView() { if (editor != null) editor.dismiss(); presenter.destroy(); presenter = null; adapter = null; super.onDestroyView(); }
 }

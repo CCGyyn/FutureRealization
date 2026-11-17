@@ -1,34 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".view.activity.ReportActivity">
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/fragment_book_keeping_title_height">
-        <com.ccg.futurerealization.view.widget.DateTextView
-            android:id="@+id/date_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="@dimen/book_keeping_title_text_size"
-            android:clickable="true"
-            android:focusable="true"
-            app:only_show_year_month="true"
-
-            android:textColor="@drawable/item_msg_click_selector" />
-
-        <TextView
-            android:id="@+id/account_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="@dimen/book_keeping_title_text_size"
-            android:layout_alignParentEnd="true"/>
-    </RelativeLayout>
-    <com.lwb.piechart.PieChartView
-        android:id="@+id/account_pie_chart"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-</LinearLayout>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true"
+    android:background="@color/ledger_background">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="52dp" android:gravity="center_vertical">
+            <TextView android:id="@+id/report_previous" style="@style/LedgerTextButton" android:text="‹ 上个月" />
+            <TextView android:id="@+id/report_month" android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent"
+                android:gravity="center" android:textSize="18sp" android:textStyle="bold" android:textColor="@color/ledger_text" android:background="?attr/selectableItemBackground" />
+            <TextView android:id="@+id/report_next" style="@style/LedgerTextButton" android:text="下个月 ›" />
+        </LinearLayout>
+        <TextView android:id="@+id/report_this_month" android:layout_width="match_parent" android:layout_height="40dp"
+            android:text="回到本月" android:gravity="center" android:textColor="@color/ledger_accent" android:background="?attr/selectableItemBackground" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:padding="16dp"
+            android:background="@drawable/ledger_card">
+            <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
+                <TextView style="@style/LedgerCaption" android:text="支出" />
+                <TextView android:id="@+id/report_expense" style="@style/LedgerAmount" android:textColor="@color/ledger_accent" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
+                <TextView style="@style/LedgerCaption" android:text="收入" />
+                <TextView android:id="@+id/report_income" style="@style/LedgerAmount" android:textColor="@color/ledger_income" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
+                <TextView style="@style/LedgerCaption" android:text="结余" />
+                <TextView android:id="@+id/report_balance" style="@style/LedgerAmount" android:textColor="@color/ledger_text" />
+            </LinearLayout>
+        </LinearLayout>
+        <TextView android:id="@+id/report_status" style="@style/LedgerCaption" android:paddingTop="16dp" android:paddingBottom="16dp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp" android:background="@drawable/ledger_card">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="48dp">
+                <TextView android:id="@+id/report_expense_tab" style="@style/LedgerFilter" android:text="支出分类" />
+                <TextView android:id="@+id/report_income_tab" style="@style/LedgerFilter" android:text="收入分类" />
+            </LinearLayout>
+            <com.ccg.futurerealization.view.widget.ReportChartView android:id="@+id/account_pie_chart"
+                android:layout_width="match_parent" android:layout_height="228dp" />
+            <LinearLayout android:id="@+id/report_legend" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

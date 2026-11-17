@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Xml;
 
 import com.ccg.futurerealization.R;
+import com.ccg.futurerealization.utils.AccountCategoryStore;
 import com.ccg.futurerealization.bean.Account;
 import com.ccg.futurerealization.bean.AccountCategory;
 import com.ccg.futurerealization.contract.BookKeepingContract;
@@ -32,7 +33,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 public class BookKeepingPresenter extends BookKeepingContract.Present {
     private final AccountCategoryManager categoryManager = AccountCategoryManagerImpl.getInstance();
     private final AccountManager accountManager = AccountManagerImpl.getInstance();
-    private int dayRequest, monthRequest;
+    private int dayRequest, monthRequest, categoryRequest;
 
     public BookKeepingPresenter(BookKeepingContract.View view, Context context) { super(view, context); }
 
@@ -44,11 +45,12 @@ public class BookKeepingPresenter extends BookKeepingContract.Present {
     @Override public void queryAccountCategory() {
         // Capture application context so a detached fragment cannot invalidate a running task.
         Context context = mContext.getApplicationContext();
+        final int request = ++categoryRequest;
         execute(() -> {
             ensureCategories(context);
             return categoryManager.queryAll();
-        }, categories -> mView.loadAccountCategoryData(categories),
-                e -> mView.showBookkeepingError("分类加载失败，请重新进入记账页"));
+        }, categories -> { if (request == categoryRequest) mView.loadAccountCategoryData(categories); },
+                e -> { if (request == categoryRequest) mView.showBookkeepingError("分类加载失败，请重新进入记账页"); });
     }
 
     @Override public void initAccountCategory() { queryAccountCategory(); }
@@ -114,4 +116,9 @@ public class BookKeepingPresenter extends BookKeepingContract.Present {
         }, accounts -> { if (request == dayRequest) mView.loadDayAccounts(date, accounts); },
                 e -> { if (request == dayRequest) mView.showBookkeepingError("当天账单加载失败，请稍后重试"); });
     }
+    @Override public void addCategory(long parentId, String name) {
+        execute(() -> AccountCategoryStore.add(parentId, name), category -> mView.categoryAdded(category, null),
+                e -> mView.categoryAdded(null, e instanceof IllegalArgumentException ? e.getMessage() : "分类保存失败，请重试"));
+    }
+
 }

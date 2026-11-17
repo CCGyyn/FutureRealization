@@ -1,195 +1,74 @@
 package com.ccg.futurerealization.adapter;
 
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.res.Resources;
 import android.graphics.Paint;
+import android.content.res.ColorStateList;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.CheckBox;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.ccg.futurerealization.R;
 import com.ccg.futurerealization.bean.DoSth;
-import com.ccg.futurerealization.view.widget.RadioGroupButton;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import de.mrapp.android.dialog.MaterialDialog;
-
-/**
- * @Description:用于显示DoSth的每一行信息
- * @Author: cgaopeng
- * @CreateDate: 21-12-7 上午11:14
- * @Version: 1.0
- *
- * @update:cgaopeng 21-12-13 添加每行点击可以更改数据
- * @update:cgaopeng 21-12-14 更新修改数据方法，添加不同类型的计划表示
- */
-public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.MsgViewHolder> {
-
-    private List<DoSth> mDoSthList = new ArrayList<>();
-
-    private Listen mListen;
-
-    public MsgAdapter() {
+/** Goal cards. Actions use immutable row identity rather than captured list positions. */
+public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.Holder> {
+    private final List<DoSth> goals = new ArrayList<>();
+    private Listen listener;
+    private boolean busy;
+    public interface Listen { void edit(DoSth goal); void toggle(DoSth goal); }
+    public void setListen(Listen value) { listener = value; }
+    public void setBusy(boolean value) { busy = value; notifyDataSetChanged(); }
+    public void setDoSthList(List<? extends DoSth> values) { goals.clear(); goals.addAll(values); notifyDataSetChanged(); }
+    @NonNull @Override public Holder onCreateViewHolder(@NonNull ViewGroup parent, int type) {
+        return new Holder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_msg_list, parent, false));
     }
-
-    public void setDoSthList(List<? extends DoSth> doSthList) {
-        mDoSthList.clear();
-        mDoSthList.addAll(doSthList);
-        notifyDataSetChanged();
-    }
-
-    public void setListen(Listen listen) {
-        mListen = listen;
-    }
-
-    @NonNull
-    @Override
-    public MsgViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_msg_list, parent, false);
-        return new MsgViewHolder(view);
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull MsgViewHolder holder, int position) {
-        final DoSth doSth = mDoSthList.get(position);
-        int num = position + 1;
-        String text = num + "." + doSth.getFuture_content();
-        TextView msgTextView = holder.msgText;
-        msgTextView.setText(text);
-        //已实现添加删除线
-        if (doSth.getState()) {
-            msgTextView.setPaintFlags(msgTextView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-        } else {
-            //取消删除线
-            msgTextView.setPaintFlags(msgTextView.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-        }
-        msgTextView.setOnClickListener(v -> {
-           showMsgDialog(v.getContext(), doSth, position);
+    @Override public void onBindViewHolder(@NonNull Holder holder, int position) {
+        DoSth goal = goals.get(position);
+        boolean done = Boolean.TRUE.equals(goal.getState());
+        holder.title.setText(goal.getFuture_content());
+        holder.title.setPaintFlags(done ? holder.title.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG : holder.title.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+        holder.title.setTextColor(holder.itemView.getResources().getColor(done ? R.color.ledger_muted : R.color.ledger_text));
+        int type = goal.getType() == null ? 0 : goal.getType();
+        holder.type.setText(type == 1 ? "长期目标" : type == 2 ? "短期目标" : "普通目标");
+        holder.status.setText(done ? "已完成" : "进行中");
+        int textColor = holder.itemView.getResources().getColor(type == 1 ? R.color.goal_long_text : type == 2 ? R.color.goal_short_text : R.color.goal_normal_text);
+        int surfaceColor = holder.itemView.getResources().getColor(type == 1 ? R.color.goal_long_surface : type == 2 ? R.color.goal_short_surface : R.color.goal_normal_surface);
+        int markerColor = holder.itemView.getResources().getColor(type == 1 ? R.color.goal_long_marker : type == 2 ? R.color.goal_short_marker : R.color.goal_normal_marker);
+        GradientDrawable badge = new GradientDrawable();
+        badge.setColor(surfaceColor);
+        badge.setCornerRadius(8 * holder.itemView.getResources().getDisplayMetrics().density);
+        holder.type.setBackground(badge);
+        holder.type.setTextColor(textColor);
+        holder.marker.setBackgroundColor(markerColor);
+        holder.marker.setAlpha(done ? 0.55f : 1f);
+        holder.check.setButtonTintList(ColorStateList.valueOf(textColor));
+        holder.check.setOnCheckedChangeListener(null);
+        holder.check.setChecked(done);
+        holder.check.setEnabled(!busy);
+        holder.check.setContentDescription((done ? "恢复目标：" : "完成目标：") + goal.getFuture_content());
+        holder.check.setOnClickListener(v -> {
+            holder.check.setChecked(done); // Wait for the database before reflecting the new state.
+            if (!busy && listener != null) listener.toggle(goal);
         });
-        switch (doSth.getType()) {
-            case 1:
-                // long term
-                msgTextView.setBackgroundColor(msgTextView.getContext().getResources().getColor(R.color.long_term_color));
-                break;
-            case 2:
-                // short term
-                msgTextView.setBackgroundColor(msgTextView.getContext().getResources().getColor(R.color.short_term_color));
-                break;
-            default:
-                msgTextView.setBackgroundColor(msgTextView.getContext().getResources().getColor(R.color.white));
+        holder.itemView.setOnClickListener(v -> { if (!busy && listener != null) listener.edit(goal); });
+    }
+    @Override public int getItemCount() { return goals.size(); }
+    static class Holder extends RecyclerView.ViewHolder {
+        final TextView title, type, status;
+        final View marker;
+        final CheckBox check;
+        Holder(View view) {
+            super(view);
+            title = view.findViewById(R.id.msg_text);
+            type = view.findViewById(R.id.goal_type);
+            status = view.findViewById(R.id.goal_status);
+            marker = view.findViewById(R.id.goal_type_marker);
+            check = view.findViewById(R.id.goal_check);
         }
-    }
-
-    public void addNewMsgItem(DoSth doSth) {
-        mDoSthList.add(0, doSth);
-        notifyDataSetChanged();
-    }
-
-    /**
-     * 更新某行数据
-     * @param doSth
-     * @param position
-     */
-    public void updateMsgItem(DoSth doSth, int position) {
-        mDoSthList.remove(position);
-        mDoSthList.add(position, doSth);
-        notifyItemChanged(position);
-    }
-
-    /**
-     * 移除某一行
-     * 但是移除后位置不会更新
-     * 4,5,6 移除5后, 剩下的是4,6 后面不会更改位置
-     * 主要用于前面不加序号的
-     * @param position
-     */
-    @Deprecated
-    private void removeMsgItem(int position) {
-        mDoSthList.remove(position);
-        notifyItemRemoved(position);
-    }
-
-    public void deleteMsgItem(int position) {
-        mDoSthList.remove(position);
-        notifyDataSetChanged();
-    }
-
-    /**
-     *
-     * @param context
-     * @param doSth
-     * @param position 用于刷新数据的位置
-     */
-    private void showMsgDialog(Context context, DoSth doSth, int position) {
-        DoSth doSthC = doSth.clone();
-        LinearLayout linearLayout = (LinearLayout) View.inflate(context, R.layout.update_dosth_dialog, null);
-        RadioGroupButton rgType = linearLayout.findViewById(R.id.rg_item_group_type);
-        RadioGroupButton rgState = linearLayout.findViewById(R.id.rg_item_group_state);
-        EditText content = linearLayout.findViewById(R.id.future_content);
-
-        rgType.setDefualtSelected(doSthC.getType());
-        rgState.setDefualtSelected(doSthC.getState() ? 1 : 0);
-        content.setText(doSthC.getFuture_content());
-
-        rgType.setOnGroupBtnClickListener(code -> {
-            doSthC.setType(Integer.valueOf(code));
-        });
-        rgState.setOnGroupBtnClickListener(code -> {
-            doSthC.setState(Integer.parseInt(code) == 1);
-        });
-
-        MaterialDialog.Builder builder = new MaterialDialog.Builder(context)
-                .setTitle(context.getString(R.string.update_msg_alerdialog_title))
-                .setView(linearLayout)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    doSthC.setFuture_content(content.getText().toString());
-                    mListen.updateItem(doSthC, position);
-                    dialog.dismiss();
-                })
-                .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
-                    dialog.dismiss();
-                })
-                .setNeutralButton(R.string.update_dialog_delete_btn, (dialog, which) -> {
-                    mListen.deleteItemById(doSthC.getId(), position);
-                    dialog.dismiss();
-                });
-        MaterialDialog dialog = builder.create();
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.show();
-        Resources resources = context.getResources();
-        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(resources.getColor(R.color.material_blue_700));
-        dialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(resources.getColor(R.color.material_blue_700));
-        dialog.getButton(DialogInterface.BUTTON_NEUTRAL).setTextColor(resources.getColor(R.color.material_blue_700));
-    }
-
-    @Override
-    public int getItemCount() {
-        return mDoSthList.size();
-    }
-
-    public class MsgViewHolder extends RecyclerView.ViewHolder {
-
-        private TextView msgText;
-
-        public MsgViewHolder(@NonNull View itemView) {
-            super(itemView);
-            msgText = (TextView) itemView.findViewById(R.id.msg_text);
-        }
-    }
-
-    public interface Listen {
-        void updateItem(DoSth doSth, int position);
-
-        void deleteItemById(Long id, int position);
     }
 }

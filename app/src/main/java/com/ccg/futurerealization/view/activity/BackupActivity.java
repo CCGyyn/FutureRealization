@@ -35,7 +35,7 @@ public class BackupActivity extends AppCompatActivity {
     @Override protected void onCreate(@Nullable Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.activity_backup);
-        setTitle("记账备份与换机");
+        setTitle("数据备份与换机");
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         exportButton = findViewById(R.id.export_backup);
         importButton = findViewById(R.id.import_backup);
@@ -81,7 +81,7 @@ public class BackupActivity extends AppCompatActivity {
                 }
                 getPreferences(MODE_PRIVATE).edit().putString("last_export", backup.exportedAt).commit();
                 finishWork("备份导出成功：" + backup.data.accounts.size() + " 笔账单、" +
-                        backup.data.categories.size() + " 个分类及搭子设置。\n请将文件另存到电脑、U盘或新手机，确认恢复成功前保留旧手机数据。");
+                        backup.data.categories.size() + " 个分类、" + goalCount(backup) + " 个目标。\n请将文件另存到电脑、U盘或新手机，确认恢复成功前保留旧手机数据。");
             } catch (Exception e) {
                 finishWork("导出失败：" + error(e) + "\n请重新导出，失败产生的文件不能用于恢复。");
             }
@@ -108,10 +108,11 @@ public class BackupActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     if (isFinishing() || isDestroyed()) return;
                     setBusy(false, "备份校验通过，等待确认恢复。");
-                    new AlertDialog.Builder(this).setTitle("恢复这份记账备份？")
+                    new AlertDialog.Builder(this).setTitle("恢复这份备份？")
                             .setMessage("备份时间：" + backup.exportedAt + "\n账单：" + backup.data.accounts.size() +
-                                    " 笔\n分类：" + backup.data.categories.size() + " 个\n搭子：" + backup.data.buddyName +
-                                    "\n\n仅允许恢复到没有账单的记账本，不会覆盖已有账单。此备份不包含心愿清单。")
+                                    " 笔\n分类：" + backup.data.categories.size() + " 个\n目标：" + goalCount(backup) + " 个" +
+                                    (backup.data.goals == null ? "（旧版备份不含目标）" : "") +
+                                    "\n\n账单列表必须为空；备份含目标时，目标列表也需为空。不会覆盖已有数据。")
                             .setNegativeButton("取消", (d, w) -> status.setText("已取消恢复，本地数据未改变。"))
                             .setPositiveButton("确认恢复", (d, w) -> restore(backup)).show();
                 });
@@ -124,10 +125,12 @@ public class BackupActivity extends AppCompatActivity {
         worker.execute(() -> {
             try {
                 int count = LedgerBackupStore.restoreLedger(getApplicationContext(), backup);
-                finishWork("恢复成功：" + count + " 笔账单。\n返回记账页即可查看；旧手机中的备份文件建议继续保留。");
+                finishWork("恢复成功：" + count + " 笔账单、" + goalCount(backup) + " 个目标。\n返回相应页面即可查看；旧手机中的备份文件建议继续保留。");
             } catch (Exception e) { finishWork("恢复未完成：" + error(e)); }
         });
     }
+
+    private static int goalCount(LedgerBackup backup) { return backup.data.goals == null ? 0 : backup.data.goals.size(); }
 
     private static String error(Exception e) {
         return e instanceof IllegalArgumentException || e instanceof java.io.IOException ?

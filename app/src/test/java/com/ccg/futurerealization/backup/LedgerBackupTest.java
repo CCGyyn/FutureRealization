@@ -49,6 +49,30 @@ public class LedgerBackupTest {
         data = fixture(); data.categories.get(1).id = 20; reject(data);
     }
 
+    @Test public void readsOriginalVersionOneFileWithoutNewGoalsField() {
+        String legacy = "{\"format\":\"FutureRealization-Ledger\",\"version\":1,\"exportedAt\":\"2026-11-17\",\"data\":{\"categories\":[],\"accounts\":[],\"buddyName\":\"小伴\",\"buddyStyle\":0},\"sha256\":\"HASH\"}";
+        String payload = "{\"categories\":[],\"accounts\":[],\"buddyName\":\"小伴\",\"buddyStyle\":0}";
+        try {
+            byte[] hash = java.security.MessageDigest.getInstance("SHA-256").digest(payload.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hex = new StringBuilder();
+            for (byte b : hash) hex.append(String.format(java.util.Locale.ROOT, "%02x", b & 255));
+            LedgerBackup read = LedgerBackup.decode(legacy.replace("HASH", hex.toString()).getBytes(StandardCharsets.UTF_8));
+            assertNull(read.data.goals);
+            assertEquals(1, read.version);
+        } catch (java.security.NoSuchAlgorithmException e) { throw new AssertionError(e); }
+    }
+
+    @Test public void newBackupPreservesGoalsAndRejectsIncompleteGoalRecords() {
+        LedgerBackup.Data data = fixture(); data.goals = new java.util.ArrayList<>();
+        LedgerBackup.Goal goal = new LedgerBackup.Goal();
+        goal.content = "每天读书"; goal.completed = false; goal.type = 1; data.goals.add(goal);
+        LedgerBackup read = LedgerBackup.decode(LedgerBackup.encode(data, "2026-11-17"));
+        assertEquals(2, read.version);
+        assertEquals("每天读书", read.data.goals.get(0).content);
+        assertFalse(read.data.goals.get(0).completed);
+        goal.completed = null; reject(data);
+    }
+
     private void reject(LedgerBackup.Data data) {
         try { LedgerBackup.encode(data, "2026-11-17"); fail("Accepted invalid backup"); }
         catch (IllegalArgumentException expected) { }

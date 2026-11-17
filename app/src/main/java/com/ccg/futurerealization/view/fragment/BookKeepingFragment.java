@@ -2,7 +2,6 @@ package com.ccg.futurerealization.view.fragment;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.view.LayoutInflater;
@@ -53,14 +52,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Offline chat-style ledger. Account is the source of truth; no schema migration is needed. */
+/** Local ledger using the existing account schema. */
 public class BookKeepingFragment extends EventBusFragment implements BookKeepingContract.View {
-    public static final String BUDDY_PREFS = "bookkeeping_buddy";
     private RecyclerView messages;
     private ChatAdapter chat;
     private EditText input;
     private Button send;
-    private TextView categoryButton, remarkButton, buddyTitle, daySummary;
+    private TextView categoryButton, remarkButton, daySummary;
     private TextView incomeText, expenseText, balanceText;
     private DateTextView date;
     private View categoryPanel;
@@ -71,8 +69,10 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
     private AccountCategory selected;
     private String remark = "";
     private boolean busy;
-    private long deletingId;
-    private SharedPreferences preferences;
+    private View emptyView, addCategoryButton;
+    private final List<AccountCategory> rootCategories = new ArrayList<>();
+    private AlertDialog categoryDialog;
+    private EditText categoryName;
 
     public static BookKeepingFragment newInstance(String param1, String param2) {
         return new BookKeepingFragment();
@@ -86,18 +86,19 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
     @Override protected int getContentViewId() { return R.layout.fragment_book_keeping; }
 
     @Override protected void onCreateViewInit(View root) {
-        preferences = requireContext().getSharedPreferences(BUDDY_PREFS, Context.MODE_PRIVATE);
         messages = root.findViewById(R.id.chat_msg_list);
         chat = new ChatAdapter();
         LinearLayoutManager manager = new LinearLayoutManager(requireContext());
-        manager.setStackFromEnd(true);
+        manager.setStackFromEnd(false);
         messages.setLayoutManager(manager);
         messages.setAdapter(chat);
         input = root.findViewById(R.id.send_msg);
         send = root.findViewById(R.id.send_btn);
         categoryButton = root.findViewById(R.id.book_keep_type);
         remarkButton = root.findViewById(R.id.remark_msg);
-        buddyTitle = root.findViewById(R.id.buddy_title);
+        emptyView = root.findViewById(R.id.ledger_empty);
+        addCategoryButton = root.findViewById(R.id.add_category_btn);
+        addCategoryButton.setOnClickListener(v -> showAddCategory());
         daySummary = root.findViewById(R.id.day_summary);
         incomeText = root.findViewById(R.id.month_income);
         expenseText = root.findViewById(R.id.month_expense);
@@ -109,8 +110,6 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
         categories.clear();
         selected = null;
         busy = false;
-        updateBuddyTitle();
-        buddyTitle.setOnClickListener(v -> showBuddySettings());
         root.findViewById(R.id.backup_btn).setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), BackupActivity.class)));
         root.findViewById(R.id.calendar_img_btn).setOnClickListener(v ->
@@ -141,7 +140,6 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
     @Override public void onResume() {
         super.onResume();
         if (presenter != null && date != null && !busy) {
-            updateBuddyTitle();
             if (!categories.isEmpty()) presenter.queryAccountCategory();
             presenter.queryCurrentMonthAccount();
             presenter.queryDayAccounts(date.getText().toString());
@@ -206,6 +204,7 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
         date.setEnabled(!value);
         categoryButton.setEnabled(!value);
         remarkButton.setEnabled(!value);
+        addCategoryButton.setEnabled(!value);
         send.setText(value ? "保存中" : "记一笔");
     }
 
@@ -213,7 +212,7 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
         if (busy) return;
         EditText edit = new EditText(requireContext());
         edit.setText(remark);
-        edit.setHint("这笔钱背后的小故事（可选）");
+        edit.setHint("备注（可选）");
         edit.setFilters(new InputFilter[]{new InputFilter.LengthFilter(200)});
         new AlertDialog.Builder(requireContext()).setTitle("账单备注").setView(edit)
                 .setNegativeButton("取消", null)
@@ -223,53 +222,58 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
                 }).show();
     }
 
-    private void showBuddySettings() {
+    private void showAddCategory() {
+        if (busy || rootCategories.isEmpty()) { toast("分类正在加载，请稍后再试"); return; }
         LinearLayout layout = new LinearLayout(requireContext());
         layout.setOrientation(LinearLayout.VERTICAL);
-        int padding = (int) (24 * getResources().getDisplayMetrics().density);
-        layout.setPadding(padding, 0, padding, 0);
-        EditText name = new EditText(requireContext());
-        name.setSingleLine(true);
-        name.setHint("搭子的名字");
-        name.setText(buddyName());
-        name.setFilters(new InputFilter[]{new InputFilter.LengthFilter(12)});
-        layout.addView(name);
-        TextView note = new TextView(requireContext());
-        note.setText("只在本地陪你记账，不联网聊天。\n选一种你喜欢的回应语气：");
-        note.setPadding(0, padding / 2, 0, padding / 2);
-        layout.addView(note);
-        android.widget.RadioGroup styles = new android.widget.RadioGroup(requireContext());
-        String[] labels = {"温柔鼓励", "元气搭子", "简洁理性"};
-        int current = preferences.getInt("style", 0);
-        for (int i = 0; i < labels.length; i++) {
-            android.widget.RadioButton button = new android.widget.RadioButton(requireContext());
-            button.setId(100 + i);
-            button.setText(labels[i]);
-            styles.addView(button);
+        int pad = (int) (24 * getResources().getDisplayMetrics().density);
+        layout.setPadding(pad, 0, pad, 0);
+        android.widget.Spinner group = new android.widget.Spinner(requireContext());
+        List<String> labels = new ArrayList<>();
+        int index = 0;
+        for (int i = 0; i < rootCategories.size(); i++) {
+            AccountCategory root = rootCategories.get(i);
+            labels.add((root.getType() == 0 ? "收入" : "支出") + " · " + root.getCategory());
+            if (selected != null && selected.getPid().equals(root.getId())) index = i;
         }
-        styles.check(100 + current);
-        layout.addView(styles);
-        new AlertDialog.Builder(requireContext()).setTitle("我的记账搭子").setView(layout)
-                .setNegativeButton("取消", null).setPositiveButton("就这样", (d, w) -> {
-                    String value = name.getText().toString().trim();
-                    preferences.edit().putString("name", value.isEmpty() ? "小伴" : value)
-                            .putInt("style", styles.getCheckedRadioButtonId() - 100).apply();
-                    updateBuddyTitle();
-                    presenter.queryDayAccounts(date.getText().toString());
-                }).show();
+        android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, labels);
+        group.setId(R.id.category_editor_group);
+        group.setAdapter(adapter);
+        group.setSelection(index);
+        layout.addView(group, new LinearLayout.LayoutParams(-1, (int) (52 * getResources().getDisplayMetrics().density)));
+        categoryName = new EditText(requireContext());
+        categoryName.setId(R.id.category_editor_text);
+        categoryName.setHint("分类名称，例如 下午茶");
+        categoryName.setSingleLine(true);
+        categoryName.setFilters(new InputFilter[]{new InputFilter.LengthFilter(20)});
+        layout.addView(categoryName);
+        categoryDialog = new AlertDialog.Builder(requireContext()).setTitle("添加记账分类").setView(layout)
+                .setNegativeButton("取消", null).setPositiveButton("添加", null).create();
+        categoryDialog.setOnShowListener(d -> categoryDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String name = categoryName.getText().toString().trim();
+            if (name.isEmpty()) { categoryName.setError("请输入分类名称"); return; }
+            setBusy(true);
+            categoryDialog.setCancelable(false);
+            categoryDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+            categoryDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(false);
+            presenter.addCategory(rootCategories.get(group.getSelectedItemPosition()).getId(), name);
+        }));
+        categoryDialog.show();
     }
 
-    private String buddyName() { return preferences.getString("name", "小伴"); }
-    private void updateBuddyTitle() { buddyTitle.setText(buddyName() + " · 陪你记账  ›"); }
-
-    private String companionReply(Account account) {
-        String amount = "¥" + BookkeepingInput.format(account.getAmount());
-        int style = preferences.getInt("style", 0);
-        if (style == 2) return "已保存" + (account.getType() == 0 ? "收入 " : "支出 ") + amount + "。长按账单可删除。";
-        if (account.getType() == 0) return style == 1 ? "叮！" + amount + " 进账啦，一起攒下小目标！" : "这笔 " + amount + " 收入记好啦。每一份努力都值得被记录。";
-        String category = account.getAccountCategory().getCategory();
-        if (category.contains("餐") || category.contains("早餐")) return style == 1 ? "吃饱才有力气追梦！这顿 " + amount + " 我记下啦。" : "这顿 " + amount + " 记好了，忙碌的时候也要好好吃饭。";
-        return style == 1 ? "收到！" + amount + " 已记好，今天又认真生活了一点点。" : "已经记下 " + amount + "。慢慢记录，钱花在哪里就更清楚了。";
+    @Override public void categoryAdded(AccountCategory category, String error) {
+        setBusy(false);
+        if (category != null) {
+            if (categoryDialog != null) categoryDialog.dismiss();
+            selectCategory(category);
+            presenter.queryAccountCategory();
+            toast("分类已添加");
+        } else if (categoryDialog != null && categoryDialog.isShowing()) {
+            categoryDialog.setCancelable(true);
+            categoryDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+            categoryDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(true);
+            categoryName.setError(error);
+        }
     }
 
     private static String formatAccount(Account account) {
@@ -311,9 +315,8 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
         new AlertDialog.Builder(requireContext()).setTitle("删除这笔账？")
                 .setMessage(msg.getMsg()).setNegativeButton("保留", null)
                 .setPositiveButton("删除", (d, w) -> {
-                    deletingId = msg.getAccountId();
                     setBusy(true);
-                    presenter.deleteAccount(deletingId);
+                    presenter.deleteAccount(msg.getAccountId());
                 }).show();
     }
 
@@ -332,6 +335,8 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
     }
 
     @Override public void loadAccountCategoryData(List<AccountCategory> titles, Map<Long, List<AccountCategory>> map) {
+        rootCategories.clear();
+        rootCategories.addAll(titles);
         categories.clear();
         List<Fragment> fragments = new ArrayList<>();
         List<AccountCategory> nonempty = new ArrayList<>();
@@ -350,6 +355,9 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
                 if (selected != null && category.getId().equals(selected.getId())) next = category;
             }
             selectCategory(next);
+            for (int i = 0; i < nonempty.size(); i++) {
+                if (nonempty.get(i).getId().equals(next.getPid())) categoryPager.setCurrentItem(i, false);
+            }
         }
         else toast("暂无可用分类，请重新打开页面");
     }
@@ -379,16 +387,16 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
     @Override public void loadDayAccounts(String selectedDate, List<Account> accounts) {
         if (!selectedDate.equals(date.getText().toString())) return;
         List<ChatMsgEntity> list = new ArrayList<>();
-        list.add(message("我是" + buddyName() + "，今天也陪你认真生活。\n选分类输入金额，或试试“午餐25元”。", ChatType.RECEIVE_MSG, null));
         long income = 0, expense = 0;
         for (Account account : accounts) {
             list.add(message(formatAccount(account), ChatType.SEND_MSG, account.getId()));
-            list.add(message(companionReply(account), ChatType.RECEIVE_MSG, null));
             if (account.getType() == 0) income += account.getAmount(); else expense += account.getAmount();
         }
-        daySummary.setText(accounts.isEmpty() ? "这天还没有账单，记下第一笔吧" : accounts.size() + " 笔 · 收入 " + BookkeepingInput.format(income) + " · 支出 " + BookkeepingInput.format(expense));
+        daySummary.setVisibility(accounts.isEmpty() ? View.GONE : View.VISIBLE);
+        daySummary.setText(accounts.isEmpty() ? "暂无账单" : accounts.size() + " 笔 · 收入 " + BookkeepingInput.format(income) + " · 支出 " + BookkeepingInput.format(expense));
         chat.setChatMsgs(list);
-        messages.scrollToPosition(list.size() - 1);
+        emptyView.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
+        if (!list.isEmpty()) messages.scrollToPosition(list.size() - 1);
     }
 
     @Override public void loadDeleteAccountState(Integer deleted) {
@@ -409,6 +417,7 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
     }
 
     @Override public void onDestroyView() {
+        if (categoryDialog != null) categoryDialog.dismiss();
         presenter.destroy();
         presenter = null;
         messages.setAdapter(null);

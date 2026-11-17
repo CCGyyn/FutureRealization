@@ -29,8 +29,17 @@ public final class LedgerBackup {
     public static class Data {
         public List<Category> categories = new ArrayList<>();
         public List<Entry> accounts = new ArrayList<>();
-        public String buddyName = "小伴";
+        // Null distinguishes legacy ledger-only backups and keeps their checksum unchanged.
+        public List<Goal> goals;
+        // Retained solely for reading old backups; the companion feature has been removed.
+        public String buddyName;
         public int buddyStyle;
+    }
+
+    public static class Goal {
+        public String content;
+        public Boolean completed;
+        public Integer type;
     }
 
     public static class Category {
@@ -52,7 +61,7 @@ public final class LedgerBackup {
         validate(data);
         LedgerBackup backup = new LedgerBackup();
         backup.format = "FutureRealization-Ledger";
-        backup.version = 1;
+        backup.version = data.goals == null ? 1 : 2;
         backup.data = data;
         backup.exportedAt = exportedAt;
         backup.sha256 = digest(GSON.toJson(data));
@@ -69,10 +78,11 @@ public final class LedgerBackup {
         } catch (RuntimeException e) {
             throw new IllegalArgumentException("文件内容损坏，无法读取备份");
         }
-        require(backup != null && "FutureRealization-Ledger".equals(backup.format) && backup.version == 1,
-                "不是受支持的记账备份，请使用本应用导出的版本1备份");
+        require(backup != null && "FutureRealization-Ledger".equals(backup.format) && (backup.version == 1 || backup.version == 2),
+                "不是受支持的备份，请使用本应用导出的备份文件");
         require(backup.data != null && backup.sha256 != null && backup.sha256.equals(digest(GSON.toJson(backup.data))),
                 "备份完整性校验失败，文件可能已被修改或损坏");
+        require(backup.version == 1 ? backup.data.goals == null : backup.data.goals != null, "备份版本与内容不一致");
         validate(backup.data);
         require(backup.exportedAt != null && backup.exportedAt.length() <= 40, "备份时间无效");
         return backup;
@@ -81,8 +91,11 @@ public final class LedgerBackup {
     public static void validate(Data data) {
         require(data != null && data.categories != null && data.accounts != null, "备份缺少账目或分类");
         require(data.categories.size() <= 10000 && data.accounts.size() <= 100000, "备份记录数量超出支持范围");
-        require(data.buddyName != null && !data.buddyName.trim().isEmpty() && data.buddyName.length() <= 12 &&
-                data.buddyStyle >= 0 && data.buddyStyle <= 2, "搭子设置无效");
+        if (data.goals != null) {
+            require(data.goals.size() <= 100000, "目标记录数量超出支持范围");
+            for (Goal goal : data.goals) require(goal != null && goal.content != null && goal.content.length() <= 10000 &&
+                    goal.completed != null && goal.type != null && goal.type >= 0 && goal.type <= 2, "目标信息无效");
+        }
         Map<Long, Category> categories = new HashMap<>();
         for (Category c : data.categories) {
             require(c != null && c.id > 0 && c.parentId >= 0 && (c.type == 0 || c.type == 1) &&

@@ -22,9 +22,9 @@ public interface MainFragmentContract {
 
         void refreshAllMsgItem(List<DoSth> list);
 
-        void refreshMsgItem(DoSth doSth, int position);
+        void refreshMsgItem(DoSth doSth);
 
-        void deleteItem(int position);
+        void deleteItem(long id);
 
         void actionFailed();
     }
@@ -39,9 +39,9 @@ public interface MainFragmentContract {
 
         abstract public void queryDoSthData();
 
-        abstract public void updateDoSth(DoSth doSth, int position);
+        abstract public void updateDoSth(DoSth doSth);
 
-        abstract public void deleteDoSthById(@NonNull Long id, int position);
+        abstract public void deleteDoSthById(@NonNull Long id);
 
         @Override
         public void destroy() {

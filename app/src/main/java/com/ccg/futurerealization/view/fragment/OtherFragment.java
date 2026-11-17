@@ -30,6 +30,7 @@ public class OtherFragment extends BaseFragment {
 
     @Override
     protected void onCreateViewInit(View rootView) {
-
+        rootView.findViewById(R.id.open_backup).setOnClickListener(v -> startActivity(new android.content.Intent(requireContext(),
+                com.ccg.futurerealization.view.activity.BackupActivity.class)));
     }
 }

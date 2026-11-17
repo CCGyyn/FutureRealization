@@ -1,223 +1,153 @@
 package com.ccg.futurerealization.view.activity;
 
-import android.graphics.Color;
-import android.os.Handler;
-import android.os.Message;
+import android.os.Bundle;
+import android.graphics.drawable.GradientDrawable;
+import android.view.Gravity;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-
+import android.widget.Toast;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import com.ccg.futurerealization.R;
-import com.ccg.futurerealization.base.BaseActivity;
 import com.ccg.futurerealization.bean.Account;
 import com.ccg.futurerealization.bean.AccountCategory;
 import com.ccg.futurerealization.contract.ReportContract;
 import com.ccg.futurerealization.present.ReportPresent;
-import com.ccg.futurerealization.utils.LogUtils;
-import com.ccg.futurerealization.utils.Utils;
-import com.ccg.futurerealization.view.widget.DateTextView;
-import com.lwb.piechart.PieChartView;
-
-import java.lang.ref.WeakReference;
-import java.util.Date;
+import com.ccg.futurerealization.utils.BookkeepingInput;
+import com.ccg.futurerealization.utils.ReportTotals;
+import com.ccg.futurerealization.view.widget.ReportChartView;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Random;
 
-public class ReportActivity extends BaseActivity implements ReportContract.View {
+public class ReportActivity extends AppCompatActivity implements ReportContract.View {
+    private ReportPresent presenter;
+    private final Calendar month = Calendar.getInstance();
+    private final Map<Long, AccountCategory> roots = new HashMap<>();
+    private List<Account> accounts = new ArrayList<>();
+    private boolean income, loading;
+    private String loadError;
+    private TextView monthText, status, incomeButton, expenseButton;
+    private LinearLayout legend;
+    private ReportChartView chart;
 
-    private static final int MSG_LOAD_DATA = 100;
-
-    private Boolean IS_FINISH_CATEGORY_LOAD = false;
-
-    private DateTextView mDateText;
-    private TextView mAccountText;
-
-    private PieChartView mPieChartView;
-
-    private ReportContract.Present mPresent;
-
-    private Map<Long, AccountCategory> mRootCategoryMap;
-
-    private LoadDataObservable mLoadDataObservable;
-
-    /**
-     * key="yyyy-MM"
-     */
-    private Map<String, List<Account>> mAccountMap;
-
-    private Handler mHandler = new MyHandler(this);
-
-    @Override
-    public int getLayoutId() {
-        return R.layout.activity_report;
+    @Override protected void onCreate(@Nullable Bundle state) {
+        super.onCreate(state);
+        setContentView(R.layout.activity_report);
+        setTitle("收支报表");
+        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        month.set(Calendar.DAY_OF_MONTH, 1);
+        if (state != null) { month.setTimeInMillis(state.getLong("month", month.getTimeInMillis())); income = state.getBoolean("income"); }
+        presenter = new ReportPresent(this);
+        monthText = findViewById(R.id.report_month);
+        status = findViewById(R.id.report_status);
+        legend = findViewById(R.id.report_legend);
+        chart = findViewById(R.id.account_pie_chart);
+        incomeButton = findViewById(R.id.report_income_tab);
+        expenseButton = findViewById(R.id.report_expense_tab);
+        monthText.setOnClickListener(v -> chooseMonth());
+        findViewById(R.id.report_previous).setOnClickListener(v -> changeMonth(-1));
+        findViewById(R.id.report_next).setOnClickListener(v -> changeMonth(1));
+        findViewById(R.id.report_this_month).setOnClickListener(v -> {
+            month.setTimeInMillis(System.currentTimeMillis()); month.set(Calendar.DAY_OF_MONTH, 1); loadMonth();
+        });
+        incomeButton.setOnClickListener(v -> { income = true; render(); });
+        expenseButton.setOnClickListener(v -> { income = false; render(); });
+        presenter.queryCategoryByPid(0L);
+        loadMonth();
     }
 
-    @Override
-    protected void initViews() {
-        mDateText = findViewById(R.id.date_text);
-        mAccountText = findViewById(R.id.account_text);
-        mPieChartView = findViewById(R.id.account_pie_chart);
+    private String monthKey() { return String.format(Locale.ROOT, "%04d-%02d", month.get(Calendar.YEAR), month.get(Calendar.MONTH) + 1); }
+    private void changeMonth(int amount) {
+        month.add(Calendar.MONTH, amount);
+        loadMonth();
+    }
+    private void loadMonth() {
+        monthText.setText(String.format(Locale.CHINA, "%d年%02d月 ▾", month.get(Calendar.YEAR), month.get(Calendar.MONTH) + 1));
+        accounts = new ArrayList<>();
+        loading = true;
+        loadError = null;
+        render();
+        presenter.queryAccountByMonth(monthKey());
     }
 
-    @Override
-    protected void initData() {
-        mPresent = new ReportPresent(this);
-        mRootCategoryMap = new HashMap<>();
-        mAccountMap = new HashMap<>();
-        mPieChartView.setCell(5);            //设置环形图的间距
-        mPieChartView.setInnerRadius(0.4f);  //设置环形图内环半径比例 0 - 1.0f
-        mPresent.queryCategoryByPid(0L);
-        mPresent.queryAccountByMonth(Utils.getYearMonthStrByDate(new Date()));
+    private void chooseMonth() {
+        LinearLayout row = new LinearLayout(this);
+        row.setGravity(Gravity.CENTER);
+        NumberPicker year = new NumberPicker(this), number = new NumberPicker(this);
+        year.setMinValue(1900); year.setMaxValue(2200); year.setValue(month.get(Calendar.YEAR));
+        number.setMinValue(1); number.setMaxValue(12); number.setValue(month.get(Calendar.MONTH) + 1);
+        year.setWrapSelectorWheel(false); number.setWrapSelectorWheel(false);
+        row.addView(year); row.addView(number);
+        new AlertDialog.Builder(this).setTitle("选择年月").setView(row).setNegativeButton("取消", null)
+                .setPositiveButton("查看", (d, w) -> {
+                    year.clearFocus(); number.clearFocus();
+                    month.set(year.getValue(), number.getValue() - 1, 1);
+                    loadMonth();
+                }).show();
     }
 
-    @Override
-    protected void initAction() {
+    @Override public void loadAccountDataByMonth(String key, List<Account> list) {
+        if (!key.equals(monthKey())) return;
+        accounts = list;
+        loading = false;
+        loadError = null;
+        render();
+    }
+    @Override public void loadRootCategory(List<AccountCategory> list) {
+        roots.clear();
+        for (AccountCategory category : list) roots.put(category.getId(), category);
+        render();
+    }
+    @Override public void reportError(String message) {
+        loading = false;
+        loadError = message;
+        status.setText(message);
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    protected void onDestroy() {
-        if (null != mPresent) {
-            mPresent.destroy();
-            mPresent = null;
-        }
-        if (null != mLoadDataObservable) {
-            mLoadDataObservable = null;
-        }
-        if (null != mHandler) {
-            mHandler.removeCallbacksAndMessages(null);
-            mHandler = null;
-        }
-        super.onDestroy();
-    }
-
-    private void setPieChartView(String date) {
-        List<Account> accounts = mAccountMap.get(Utils.getYearMonthStrByDate(date));
-        if (accounts.size() > 0) {
-            //收入
-            Map<String, Integer> incomeMap = new HashMap<>();
-            //支出
-            Map<String, Integer> overMap = new HashMap<>();
-            for (Account account:accounts
-                 ) {
-                AccountCategory ac = account.getAccountCategory();
-                AccountCategory accountCategory = mRootCategoryMap.get(ac.getPid());
-                String category = accountCategory.getCategory();
-                Integer money;
-                if (account.getType() == 0) {
-                    money = incomeMap.getOrDefault(category, 0);
-                    money += account.getAmount();
-                    incomeMap.put(category, money);
-                } else {
-                    money = overMap.getOrDefault(category, 0);
-                    money += account.getAmount();
-                    overMap.put(category, money);
-                }
-            }
-            for (String key:overMap.keySet()
-                 ) {
-                Integer money = overMap.get(key);
-                int color = getRandomColor();
-                mPieChartView.addItemType(new PieChartView.ItemType(key, money / 100, color));
-            }
+    private void render() {
+        ReportTotals totals = new ReportTotals(accounts, roots);
+        ((TextView) findViewById(R.id.report_income)).setText("¥" + BookkeepingInput.format(totals.income));
+        ((TextView) findViewById(R.id.report_expense)).setText("¥" + BookkeepingInput.format(totals.expense));
+        ((TextView) findViewById(R.id.report_balance)).setText("¥" + BookkeepingInput.format(totals.income - totals.expense));
+        status.setText(loadError != null ? loadError : loading ? "正在加载…" : accounts.isEmpty() ? "这个月暂无账单" : "本月共 " + accounts.size() + " 笔账单");
+        incomeButton.setSelected(income);
+        expenseButton.setSelected(!income);
+        List<ReportTotals.Part> parts = totals.breakdown(income);
+        chart.setParts(parts, income ? "收入" : "支出");
+        legend.removeAllViews();
+        long positiveTotal = 0;
+        for (ReportTotals.Part part : parts) if (part.cents > 0) positiveTotal += part.cents;
+        for (ReportTotals.Part part : parts) {
+            LinearLayout row = new LinearLayout(this);
+            row.setGravity(Gravity.CENTER_VERTICAL);
+            row.setPadding(0, dp(12), 0, dp(12));
+            View dot = new View(this);
+            GradientDrawable color = new GradientDrawable(); color.setShape(GradientDrawable.OVAL); color.setColor(ReportChartView.colorFor(part.name));
+            dot.setBackground(color);
+            row.addView(dot, new LinearLayout.LayoutParams(dp(9), dp(9)));
+            TextView name = new TextView(this); name.setText(part.name); name.setTextSize(15); name.setTextColor(getResources().getColor(R.color.ledger_text)); name.setPadding(dp(12), 0, dp(8), 0);
+            row.addView(name, new LinearLayout.LayoutParams(0, -2, 1));
+            TextView amount = new TextView(this);
+            amount.setText("¥" + BookkeepingInput.format(part.cents) + "  ·  " + String.format(Locale.CHINA, "%.1f%%", positiveTotal > 0 ? Math.max(0, part.cents) * 100d / positiveTotal : 0));
+            amount.setTextSize(14); amount.setTextColor(getResources().getColor(R.color.ledger_muted));
+            row.addView(amount);
+            legend.addView(row);
         }
     }
-
-    /**
-     * 随机颜色
-     * @return
-     */
-    private int getRandomColor() {
-        Random random = new Random();
-        int color = Color.argb(255, random.nextInt(256), random.nextInt(256), random.nextInt(256));
-        return color;
-    }
-
-    /**
-     * 根据月份查询数据
-     * @param accountList
-     */
-    @Override
-    public void loadAccountDataByMonth(List<Account> accountList) {
-        if (null == accountList || accountList.size() == 0) {
-            return;
-        }
-        String date = accountList.get(0).getDate();
-        mAccountMap.put(Utils.getYearMonthStrByDate(date), accountList);
-        if (IS_FINISH_CATEGORY_LOAD) {
-            setPieChartView(date);
-            return;
-        }
-        if (null == mLoadDataObservable) {
-            mLoadDataObservable = new LoadDataObservable();
-        }
-        LoadDataObserver observer = new LoadDataObserver(date);
-        mLoadDataObservable.addObserver(observer);
-    }
-
-    /**
-     * 加载根目录
-     *
-     * @param accountCategories
-     */
-    @Override
-    public void loadRootCategory(List<AccountCategory> accountCategories) {
-        for (AccountCategory ac:accountCategories
-             ) {
-            mRootCategoryMap.put(ac.getId(), ac);
-        }
-        IS_FINISH_CATEGORY_LOAD = true;
-        if (null != mLoadDataObservable) {
-            mLoadDataObservable.notifySetData();
-        }
-    }
-
-    private class LoadDataObserver implements Observer {
-
-        private String date;
-
-        public LoadDataObserver(String date) {
-            this.date = date;
-        }
-
-        @Override
-        public void update(Observable o, Object arg) {
-            LogUtils.v("update");
-            setPieChartView(date);
-        }
-    }
-
-    private class LoadDataObservable extends Observable {
-
-        public void notifySetData() {
-            LogUtils.v("notifyObservers");
-            setChanged();
-            notifyObservers();
-            deleteObservers();
-        }
-    }
-
-    private static class MyHandler extends Handler {
-        private WeakReference<ReportActivity> mWeakReference;
-
-        public MyHandler(ReportActivity activity) {
-            mWeakReference = new WeakReference<>(activity);
-        }
-
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            super.handleMessage(msg);
-            ReportActivity activity = mWeakReference.get();
-            if (activity == null) {
-                return;
-            }
-            switch (msg.what) {
-                default:
-                    break;
-            }
-        }
+    private int dp(int value) { return (int) (getResources().getDisplayMetrics().density * value); }
+    @Override protected void onSaveInstanceState(Bundle out) { out.putLong("month", month.getTimeInMillis()); out.putBoolean("income", income); super.onSaveInstanceState(out); }
+    @Override protected void onDestroy() { presenter.destroy(); super.onDestroy(); }
+    @Override public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) { finish(); return true; }
+        return super.onOptionsItemSelected(item);
     }
 }

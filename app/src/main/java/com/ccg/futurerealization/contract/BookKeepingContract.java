@@ -45,6 +45,8 @@ public interface BookKeepingContract {
         void loadDayAccounts(String date, List<Account> accounts);
 
         void showBookkeepingError(String message);
+
+        void categoryAdded(AccountCategory category, String error);
     }
 
     abstract class Present extends BaseApiSubscriber implements BasePresenter {
@@ -71,6 +73,8 @@ public interface BookKeepingContract {
         abstract public void queryCurrentMonthAccount();
 
         abstract public void queryDayAccounts(String date);
+
+        abstract public void addCategory(long parentId, String name);
 
         @Override
         public void destroy() {

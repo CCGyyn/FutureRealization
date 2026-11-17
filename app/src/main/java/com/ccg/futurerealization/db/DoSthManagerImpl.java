@@ -46,8 +46,11 @@ public class DoSthManagerImpl implements DoSthManager {
 
     @Override
     public Integer updateInfo(DoSth info) {
-        int update = info.update(info.getId());
-        return update;
+        android.content.ContentValues values = new android.content.ContentValues();
+        values.put("future_content", info.getFuture_content());
+        values.put("state", Boolean.TRUE.equals(info.getState()) ? 1 : 0);
+        values.put("type", info.getType() == null ? 0 : info.getType());
+        return LitePal.update(DoSth.class, values, info.getId());
     }
 
     @Override

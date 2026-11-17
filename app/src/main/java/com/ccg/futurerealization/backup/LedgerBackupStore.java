@@ -1,12 +1,11 @@
 package com.ccg.futurerealization.backup;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.ccg.futurerealization.bean.Account;
 import com.ccg.futurerealization.bean.AccountCategory;
-import com.ccg.futurerealization.view.fragment.BookKeepingFragment;
+import com.ccg.futurerealization.bean.DoSth;
 
 import org.litepal.LitePal;
 import org.litepal.crud.LitePalSupport;
@@ -24,6 +23,7 @@ public final class LedgerBackupStore {
 
     public static byte[] exportLedger(Context context) {
         LedgerBackup.Data data = new LedgerBackup.Data();
+        data.goals = new java.util.ArrayList<>();
         // Match LitePal's lock order for multi-operation transactions.
         synchronized (LitePalSupport.class) {
             SQLiteDatabase db = LitePal.getDatabase();
@@ -47,14 +47,18 @@ public final class LedgerBackupStore {
                     row.categoryId = account.getAccountCategory().getId();
                     data.accounts.add(row);
                 }
+                for (DoSth goal : LitePal.findAll(DoSth.class)) {
+                    LedgerBackup.Goal row = new LedgerBackup.Goal();
+                    row.content = goal.getFuture_content() == null ? "" : goal.getFuture_content();
+                    row.completed = Boolean.TRUE.equals(goal.getState());
+                    row.type = goal.getType() == null ? 0 : goal.getType();
+                    data.goals.add(row);
+                }
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
             }
         }
-        SharedPreferences prefs = context.getSharedPreferences(BookKeepingFragment.BUDDY_PREFS, Context.MODE_PRIVATE);
-        data.buddyName = prefs.getString("name", "小伴");
-        data.buddyStyle = prefs.getInt("style", 0);
         return LedgerBackup.encode(data, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ROOT).format(new Date()));
     }
 
@@ -66,6 +70,8 @@ public final class LedgerBackupStore {
             db.beginTransaction();
             try {
                 if (LitePal.count(Account.class) != 0) throw new IllegalArgumentException("当前已有账单。为防止覆盖或重复导入，请在新手机的空记账本恢复。");
+                if (backup.data.goals != null && !backup.data.goals.isEmpty() && LitePal.count(DoSth.class) != 0)
+                    throw new IllegalArgumentException("备份包含目标，当前目标列表已有数据。请在新手机的空目标列表恢复，避免重复或覆盖。");
                 Map<Long, AccountCategory> restored = new HashMap<>();
                 List<AccountCategory> existing = LitePal.findAll(AccountCategory.class);
                 for (int level = 0; level < 2; level++) {
@@ -99,13 +105,18 @@ public final class LedgerBackupStore {
                     account.setAccountCategory(restored.get(row.categoryId));
                     if (!account.save()) throw new IllegalStateException("账单恢复失败，已回滚");
                 }
+                if (backup.data.goals != null) for (LedgerBackup.Goal row : backup.data.goals) {
+                    DoSth goal = new DoSth();
+                    goal.setFuture_content(row.content);
+                    goal.setState(row.completed);
+                    goal.setType(row.type);
+                    if (!goal.save()) throw new IllegalStateException("目标恢复失败，已回滚");
+                }
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
             }
         }
-        context.getSharedPreferences(BookKeepingFragment.BUDDY_PREFS, Context.MODE_PRIVATE).edit()
-                .putString("name", backup.data.buddyName).putInt("style", backup.data.buddyStyle).commit();
         return backup.data.accounts.size();
     }
 }

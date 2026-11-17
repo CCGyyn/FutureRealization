@@ -2,9 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="wrap_content"
     android:paddingTop="6dp" android:paddingBottom="6dp"
-    android:gravity="end" android:orientation="vertical">
-    <TextView android:id="@+id/msg_text" android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:maxWidth="288dp" android:padding="14dp" android:lineSpacingExtra="4dp"
-        android:background="@drawable/ledger_bubble_right" android:textSize="15sp" android:textColor="@color/ledger_text"
+    android:gravity="start" android:orientation="vertical">
+    <TextView android:id="@+id/msg_text" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:padding="14dp" android:lineSpacingExtra="4dp"
+        android:background="@drawable/ledger_card" android:textSize="15sp" android:textColor="@color/ledger_text"
         android:longClickable="true" />
 </LinearLayout>
