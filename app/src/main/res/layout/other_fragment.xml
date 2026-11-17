@@ -13,5 +13,7 @@
             android:textSize="14sp" android:textColor="@color/ledger_muted" />
         <Button android:id="@+id/open_backup" android:layout_width="match_parent" android:layout_height="52dp" android:layout_marginTop="20dp"
             android:text="备份 / 恢复数据" android:textColor="@color/white" app:backgroundTint="@color/ledger_accent" />
+        <Button android:id="@+id/open_xls_import" android:layout_width="match_parent" android:layout_height="52dp" android:layout_marginTop="8dp"
+            android:text="导入其他 App 账单（XLS）" android:textColor="@color/ledger_accent" app:backgroundTint="@color/ledger_soft" />
     </LinearLayout>
 </LinearLayout>

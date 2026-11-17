@@ -12,6 +12,8 @@
             android:layout_marginTop="24dp" android:text="导出全部数据" android:textColor="@color/white" app:backgroundTint="@color/ledger_accent" />
         <Button android:id="@+id/import_backup" android:layout_width="match_parent" android:layout_height="56dp"
             android:layout_marginTop="8dp" android:text="从文件恢复到新手机" android:textColor="@color/ledger_accent" app:backgroundTint="@color/ledger_soft" />
+        <Button android:id="@+id/open_xls_import" android:layout_width="match_parent" android:layout_height="56dp"
+            android:layout_marginTop="8dp" android:text="导入其他 App 账单（XLS）" android:textColor="@color/ledger_accent" app:backgroundTint="@color/ledger_soft" />
         <TextView android:id="@+id/backup_status" android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="16dp" android:padding="16dp" android:background="@drawable/ledger_card"
             android:textSize="14sp" android:lineSpacingExtra="5dp" android:textColor="@color/ledger_text" android:textIsSelectable="true" />

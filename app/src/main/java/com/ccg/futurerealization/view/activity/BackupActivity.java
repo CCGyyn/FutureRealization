@@ -40,6 +40,7 @@ public class BackupActivity extends AppCompatActivity {
         exportButton = findViewById(R.id.export_backup);
         importButton = findViewById(R.id.import_backup);
         status = findViewById(R.id.backup_status);
+        findViewById(R.id.open_xls_import).setOnClickListener(v -> { if (!busy) startActivity(new Intent(this, XlsImportActivity.class)); });
         String last = getPreferences(MODE_PRIVATE).getString("last_export", "");
         status.setText(last.isEmpty() ? "尚未导出备份。建议每周备份一次，换机前再备份一次。" : "上次成功导出：" + last);
         exportButton.setOnClickListener(v -> {
