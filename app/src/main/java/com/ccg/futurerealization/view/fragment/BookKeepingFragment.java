@@ -268,6 +268,7 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
             if (categoryDialog != null) categoryDialog.dismiss();
             selectCategory(category);
             presenter.queryAccountCategory();
+            focusAmountInput();
             toast("分类已添加");
         } else if (categoryDialog != null && categoryDialog.isShowing()) {
             categoryDialog.setCancelable(true);
@@ -300,7 +301,19 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
         if (busy || categoryButton == null) return;
         selectCategory(event.getAccountCategory());
         categoryPanel.setVisibility(View.GONE);
-        input.requestFocus();
+        focusAmountInput();
+    }
+
+    private void focusAmountInput() {
+        final EditText amount = input;
+        categoryPanel.setVisibility(View.GONE);
+        amount.requestFocus();
+        // Wait until the category panel has closed before requesting the IME.
+        amount.post(() -> {
+            if (!isAdded() || input != amount || !amount.isAttachedToWindow() || !amount.isShown() || !amount.hasWindowFocus() || !amount.hasFocus()) return;
+            InputMethodManager imm = (InputMethodManager) amount.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) imm.showSoftInput(amount, InputMethodManager.SHOW_IMPLICIT);
+        });
     }
 
     private void selectCategory(AccountCategory category) {

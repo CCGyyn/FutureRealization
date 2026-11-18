@@ -87,6 +87,37 @@ public class BookkeepingFlowTest {
         assertEquals("", account.getRemark());
     }
 
+    @Test @androidx.test.filters.SdkSuppress(minSdkVersion = 30)
+    public void selectingCategoriesRefocusesAmountAndShowsNumericKeyboard() throws Exception {
+        activity = instrumentation.startActivitySync(new Intent(context, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+        waitUntil(() -> uiText(R.id.book_keep_type).contains("早餐"));
+        instrumentation.runOnMainSync(() -> ((EditText) activity.findViewById(R.id.send_msg)).setText("12.50"));
+        for (String category : new String[]{"午餐", "晚餐"}) {
+            instrumentation.runOnMainSync(() -> activity.findViewById(R.id.book_keep_type).performClick());
+            waitUntil(() -> !amountKeyboardVisible());
+            clickDialog(category);
+            waitUntil(() -> uiText(R.id.book_keep_type).contains(category) && amountKeyboardVisible());
+            instrumentation.runOnMainSync(() -> {
+                EditText amount = activity.findViewById(R.id.send_msg);
+                assertTrue(amount.hasFocus());
+                assertEquals(android.view.View.GONE, activity.findViewById(R.id.category_panel).getVisibility());
+                assertEquals(android.text.InputType.TYPE_CLASS_NUMBER, amount.getInputType() & android.text.InputType.TYPE_MASK_CLASS);
+                assertTrue((amount.getInputType() & android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL) != 0);
+                assertEquals("12.50", amount.getText().toString());
+            });
+        }
+        assertEquals(0, LitePal.count(Account.class));
+    }
+
+    private boolean amountKeyboardVisible() {
+        boolean[] visible = {false};
+        instrumentation.runOnMainSync(() -> {
+            android.view.WindowInsets insets = activity.findViewById(R.id.send_msg).getRootWindowInsets();
+            visible[0] = insets != null && insets.isVisible(android.view.WindowInsets.Type.ime());
+        });
+        return visible[0];
+    }
+
     @Test public void selectedBackupFileIsValidatedConfirmedAndRestored() throws Exception {
         LedgerBackup.Data data = new LedgerBackup.Data();
         LedgerBackup.Category parent = new LedgerBackup.Category();
