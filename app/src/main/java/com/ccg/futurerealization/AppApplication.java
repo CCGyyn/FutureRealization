@@ -24,6 +24,7 @@ public class AppApplication extends LitePalApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
         //不继承LitePalApplication的话则使用这个
         //LitePal.initialize(this);
         //任意地方调一次此方法即创建数据库

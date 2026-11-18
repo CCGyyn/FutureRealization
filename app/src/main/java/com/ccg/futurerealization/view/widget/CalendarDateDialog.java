@@ -100,7 +100,7 @@ final class CalendarDateDialog {
         for (TextView cell : cells) {
             boolean checked = key.equals(cell.getTag());
             cell.setSelected(checked);
-            cell.setTextColor(color(checked ? R.color.white : R.color.ledger_text));
+            cell.setTextColor(color(checked ? R.color.ledger_on_accent : R.color.ledger_text));
             GradientDrawable background = new GradientDrawable(); background.setCornerRadius(dp(12));
             background.setColor(checked ? color(R.color.ledger_accent) : android.graphics.Color.TRANSPARENT);
             cell.setBackground(background);

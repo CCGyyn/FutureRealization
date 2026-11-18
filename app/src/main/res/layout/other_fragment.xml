@@ -12,7 +12,7 @@
             android:text="导出账单、分类、目标和随身笔记，保存到本地文件。换机后可恢复目标内容、完成／放弃状态和笔记。" android:lineSpacingExtra="6dp"
             android:textSize="14sp" android:textColor="@color/ledger_muted" />
         <Button android:id="@+id/open_backup" android:layout_width="match_parent" android:layout_height="52dp" android:layout_marginTop="20dp"
-            android:text="备份 / 恢复数据" android:textColor="@color/white" app:backgroundTint="@color/ledger_accent" />
+            android:text="备份 / 恢复数据" android:textColor="@color/ledger_on_accent" app:backgroundTint="@color/ledger_accent" />
         <Button android:id="@+id/open_xls_import" android:layout_width="match_parent" android:layout_height="52dp" android:layout_marginTop="8dp"
             android:text="导入其他 App 账单（XLS）" android:textColor="@color/ledger_accent" app:backgroundTint="@color/ledger_soft" />
     </LinearLayout>

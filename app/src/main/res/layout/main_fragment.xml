@@ -5,7 +5,7 @@
         <TextView android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
             android:text="我的目标" android:textSize="25sp" android:textStyle="bold" android:textColor="@color/ledger_text" />
         <Button android:id="@+id/add_goal" android:layout_width="116dp" android:layout_height="48dp" android:text="＋ 添加目标"
-            android:textSize="13sp" android:textColor="@color/white" app:backgroundTint="@color/ledger_accent" />
+            android:textSize="13sp" android:textColor="@color/ledger_on_accent" app:backgroundTint="@color/ledger_accent" />
     </LinearLayout>
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:layout_marginEnd="16dp"
         android:padding="20dp" android:orientation="vertical" android:background="@drawable/ledger_card">

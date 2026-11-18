@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical">
+    android:orientation="vertical" android:background="@color/ledger_background">
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -16,9 +16,17 @@
             <com.haibin.calendarview.CalendarView
                 android:id="@+id/calendar_view"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:background="@color/ledger_surface"
+                app:week_background="@color/ledger_surface" app:week_text_color="@color/ledger_text" app:week_line_background="@color/ledger_border"
+                app:current_month_text_color="@color/ledger_text" app:current_month_lunar_text_color="@color/ledger_muted"
+                app:other_month_text_color="@color/ledger_muted" app:other_month_lunar_text_color="@color/ledger_muted"
+                app:current_day_text_color="@color/ledger_accent" app:current_day_lunar_text_color="@color/ledger_accent"
+                app:selected_theme_color="@color/ledger_accent" app:selected_text_color="@color/ledger_on_accent" app:selected_lunar_text_color="@color/ledger_on_accent"
+                app:year_view_background="@color/ledger_surface" app:year_view_month_text_color="@color/ledger_text" app:year_view_day_text_color="@color/ledger_text" app:year_view_week_text_color="@color/ledger_muted" />
 
             <androidx.cardview.widget.CardView
+                app:cardBackgroundColor="@color/ledger_surface"
                 android:layout_gravity="center"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

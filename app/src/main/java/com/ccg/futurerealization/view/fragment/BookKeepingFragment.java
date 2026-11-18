@@ -67,6 +67,7 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
     private BookKeepingContract.Present presenter;
     private final List<AccountCategory> categories = new ArrayList<>();
     private AccountCategory selected;
+    private long selectedCategoryId;
     private String remark = "";
     private boolean busy;
     private View emptyView, addCategoryButton;
@@ -80,6 +81,7 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
 
     @Override protected void onCreateViewBefore(@NonNull LayoutInflater inflater,
             @Nullable ViewGroup container, @Nullable Bundle state) {
+        if (state != null) selectedCategoryId = state.getLong("selected_category", 0);
         presenter = new BookKeepingPresenter(this, requireContext());
     }
 
@@ -318,6 +320,7 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
 
     private void selectCategory(AccountCategory category) {
         selected = category;
+        selectedCategoryId = category.getId();
         categoryButton.setText((category.getType() == 0 ? "收 · " : "支 · ") + category.getCategory() + " ▾");
     }
 
@@ -366,7 +369,7 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
         if (!categories.isEmpty()) {
             AccountCategory next = categories.get(0);
             for (AccountCategory category : categories) {
-                if (selected != null && category.getId().equals(selected.getId())) next = category;
+                if (category.getId() == selectedCategoryId) next = category;
             }
             selectCategory(next);
             for (int i = 0; i < nonempty.size(); i++) {
@@ -428,6 +431,11 @@ public class BookKeepingFragment extends EventBusFragment implements BookKeeping
         InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
         input.clearFocus();
+    }
+
+    @Override public void onSaveInstanceState(@NonNull Bundle state) {
+        state.putLong("selected_category", selectedCategoryId);
+        super.onSaveInstanceState(state);
     }
 
     @Override public void onDestroyView() {

@@ -8,12 +8,12 @@
             android:text="选择包含“支出记录／收入记录”工作表的原始 .xls 文件。账目会追加到本机，缺少的一级分组和二级分类会自动添加。"
             android:textSize="14sp" android:lineSpacingExtra="6dp" android:textColor="@color/ledger_muted" />
         <Button android:id="@+id/choose_xls" android:layout_width="match_parent" android:layout_height="56dp" android:layout_marginTop="20dp"
-            android:text="选择 XLS 账单文件" android:textColor="@color/white" app:backgroundTint="@color/ledger_accent" />
+            android:text="选择 XLS 账单文件" android:textColor="@color/ledger_on_accent" app:backgroundTint="@color/ledger_accent" />
         <TextView android:id="@+id/xls_import_status" android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="16dp" android:padding="16dp" android:background="@drawable/ledger_card" android:text="选择文件后会先展示日期、收支汇总和需要补齐的分类，确认前不会写入账目。"
             android:textSize="14sp" android:lineSpacingExtra="6dp" android:textColor="@color/ledger_text" android:textIsSelectable="true" />
         <Button android:id="@+id/confirm_xls_import" android:layout_width="match_parent" android:layout_height="56dp" android:layout_marginTop="16dp"
-            android:visibility="gone" android:text="确认导入" android:textColor="@color/white" app:backgroundTint="@color/ledger_accent" />
+            android:visibility="gone" android:text="确认导入" android:textColor="@color/ledger_on_accent" app:backgroundTint="@color/ledger_accent" />
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="20dp"
             android:text="仅在本机读取和导入，不上传文件。重复导入会跳过已存在的完整记录，原有账单和目标会保留。导入前也可以先到备份页导出本机数据。"
             android:textSize="12sp" android:lineSpacingExtra="4dp" android:textColor="@color/ledger_muted" />

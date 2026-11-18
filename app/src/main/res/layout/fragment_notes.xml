@@ -11,5 +11,5 @@
 点击右下角 ＋ 新建笔记" android:textSize="16sp" android:lineSpacingExtra="10dp" android:textColor="@color/notes_secondary" android:visibility="gone" />
         </FrameLayout>
     </LinearLayout>
-    <com.google.android.material.floatingactionbutton.FloatingActionButton android:id="@+id/add_note" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="bottom|end" android:layout_margin="24dp" android:contentDescription="新建笔记" android:src="@drawable/ic_notes_add" app:backgroundTint="@color/notes_yellow" app:tint="@color/notes_ink" app:borderWidth="0dp" app:elevation="4dp" app:fabSize="normal" />
+    <com.google.android.material.floatingactionbutton.FloatingActionButton android:id="@+id/add_note" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="bottom|end" android:layout_margin="24dp" android:contentDescription="新建笔记" android:src="@drawable/ic_notes_add" app:backgroundTint="@color/notes_yellow" app:tint="@color/notes_add_ink" app:borderWidth="0dp" app:elevation="4dp" app:fabSize="normal" />
 </FrameLayout>

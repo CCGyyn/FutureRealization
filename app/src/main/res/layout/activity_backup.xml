@@ -9,7 +9,7 @@
             android:text="数据保存在本机。备份包含全部账单、自定义分类、目标（含完成／放弃状态）和随身笔记。卸载应用会删除本地数据，请先导出备份。"
             android:textSize="14sp" android:lineSpacingExtra="6dp" android:textColor="@color/ledger_muted" />
         <Button android:id="@+id/export_backup" android:layout_width="match_parent" android:layout_height="56dp"
-            android:layout_marginTop="24dp" android:text="导出全部数据" android:textColor="@color/white" app:backgroundTint="@color/ledger_accent" />
+            android:layout_marginTop="24dp" android:text="导出全部数据" android:textColor="@color/ledger_on_accent" app:backgroundTint="@color/ledger_accent" />
         <Button android:id="@+id/email_backup" android:layout_width="match_parent" android:layout_height="56dp"
             android:layout_marginTop="8dp" android:text="发送备份到邮箱" android:textColor="@color/ledger_accent" app:backgroundTint="@color/ledger_soft" />
         <Button android:id="@+id/import_backup" android:layout_width="match_parent" android:layout_height="56dp"

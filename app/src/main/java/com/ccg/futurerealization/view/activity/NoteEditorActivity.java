@@ -33,8 +33,6 @@ public class NoteEditorActivity extends AppCompatActivity {
         super.onCreate(state);
         if (getSupportActionBar() != null) getSupportActionBar().hide();
         setContentView(R.layout.activity_note_editor);
-        getWindow().setStatusBarColor(getResources().getColor(R.color.white));
-        getWindow().getDecorView().setSystemUiVisibility(getWindow().getDecorView().getSystemUiVisibility() | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         title = findViewById(R.id.note_title); content = findViewById(R.id.note_content); metadata = findViewById(R.id.note_metadata);
         save = findViewById(R.id.note_save); delete = findViewById(R.id.note_delete); back = findViewById(R.id.note_back);
         id = state == null ? getIntent().getLongExtra("noteId", 0) : state.getLong("noteId");

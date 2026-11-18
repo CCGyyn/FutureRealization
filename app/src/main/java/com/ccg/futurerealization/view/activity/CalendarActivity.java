@@ -189,6 +189,7 @@ public class CalendarActivity extends BaseActivity implements CalendarContract.V
     public void addAccountDataByDay(List<Account> accountList) {
         if (accountList.size() == 0) {
             setAccountText(accountList, null);
+            return;
         }
         for (Account account:accountList
              ) {

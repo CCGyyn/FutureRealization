@@ -17,6 +17,13 @@
     <color name="goal_normal_text">#606C7D</color>
     <color name="goal_normal_surface">#F0F2F5</color>
     <color name="goal_normal_marker">#D5DAE0</color>
+    <color name="ledger_on_accent">#FFFFFF</color>
+    <color name="ledger_border">#EDE8E3</color>
+    <color name="chart_track">#EEE9E5</color>
+    <color name="app_toolbar_background">@color/ledger_accent</color>
+    <color name="app_toolbar_text">#FFFFFF</color>
+    <color name="system_bar_background">@color/ledger_accent</color>
+    <bool name="light_navigation_icons">true</bool>
     <style name="LedgerAmount">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>

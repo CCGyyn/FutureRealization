@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="5dp" android:padding="16dp" android:orientation="vertical" android:background="@drawable/ledger_card" android:clickable="true" android:focusable="true" android:foreground="?attr/selectableItemBackground">
     <TextView android:id="@+id/note_card_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="17sp" android:textStyle="bold" android:textColor="@color/notes_ink" android:maxLines="3" android:ellipsize="end" />
-    <TextView android:id="@+id/note_card_body" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:textSize="14sp" android:textColor="#606060" android:lineSpacingExtra="5dp" android:maxLines="8" android:ellipsize="end" />
+    <TextView android:id="@+id/note_card_body" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:textSize="14sp" android:textColor="@color/notes_body" android:lineSpacingExtra="5dp" android:maxLines="8" android:ellipsize="end" />
     <TextView android:id="@+id/note_card_date" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp" android:textSize="11sp" android:textColor="@color/notes_secondary" />
 </LinearLayout>

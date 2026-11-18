@@ -4,4 +4,11 @@
     <color name="notes_ink">#252525</color>
     <color name="notes_secondary">#858585</color>
     <color name="notes_yellow">#FFCA28</color>
+    <color name="notes_editor_surface">#FFFFFF</color>
+    <color name="notes_body">#606060</color>
+    <color name="notes_hint">#B0B0B0</color>
+    <color name="notes_search_surface">#EAEAEA</color>
+    <color name="notes_save">#A57000</color>
+    <color name="notes_add_ink">#252525</color>
+    <bool name="notes_light_system_bars">true</bool>
 </resources>

@@ -36,12 +36,22 @@ import androidx.viewpager.widget.ViewPager;
  */
 public class MainActivity extends BaseActivity implements MainActivityContract.View {
 
-    private final int CURRENT_ITEM = 1;
+    private int currentItem = 1;
     private TabLayout mTabLayout;
     private ViewPager mViewPager;
     private List<Fragment> mFragmentList;
     private List<String> mTitles;
     private MainActivityContract.Presenter mPresenter;
+
+    @Override protected void onCreate(android.os.Bundle state) {
+        if (state != null) currentItem = state.getInt("selected_tab", 1);
+        super.onCreate(state);
+    }
+
+    @Override protected void onSaveInstanceState(@NonNull android.os.Bundle state) {
+        state.putInt("selected_tab", mViewPager == null ? currentItem : mViewPager.getCurrentItem());
+        super.onSaveInstanceState(state);
+    }
 
     @Override
     public int getLayoutId() {
@@ -104,7 +114,7 @@ public class MainActivity extends BaseActivity implements MainActivityContract.V
         mViewPager.setAdapter(msgPageAdapter);
         mTabLayout.setupWithViewPager(mViewPager);
         //设置默认位置
-        mViewPager.setCurrentItem(CURRENT_ITEM);
+        mViewPager.setCurrentItem(currentItem);
         //解决切换页面时数据丢失 还有一种就是将FragmentPagerAdapter换为FragmentStatePagerAdapter
         mViewPager.setOffscreenPageLimit(3);
         //解决页面1呼出键盘，滑动到页面2键盘不显示的问题

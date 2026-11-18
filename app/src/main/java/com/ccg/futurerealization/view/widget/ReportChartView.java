@@ -2,7 +2,7 @@ package com.ccg.futurerealization.view.widget;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
+import com.ccg.futurerealization.R;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
@@ -37,7 +37,7 @@ public class ReportChartView extends View {
         RectF circle = new RectF(cx - radius, cy - radius, cx + radius, cy + radius);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(stroke);
-        paint.setColor(0xffeee9e5);
+        paint.setColor(getResources().getColor(R.color.chart_track));
         canvas.drawOval(circle, paint);
         long positiveTotal = 0;
         for (ReportTotals.Part part : parts) if (part.cents > 0) positiveTotal += part.cents;
@@ -51,10 +51,10 @@ public class ReportChartView extends View {
         }
         paint.setStyle(Paint.Style.FILL);
         paint.setTextAlign(Paint.Align.CENTER);
-        paint.setColor(0xff302f35);
+        paint.setColor(getResources().getColor(R.color.ledger_text));
         paint.setTextSize(20 * getResources().getDisplayMetrics().scaledDensity);
         canvas.drawText(positiveTotal == 0 ? "暂无数据" : label + "占比", cx, cy, paint);
-        paint.setColor(0xff77747c);
+        paint.setColor(getResources().getColor(R.color.ledger_muted));
         paint.setTextSize(12 * getResources().getDisplayMetrics().scaledDensity);
         canvas.drawText(parts.size() + " 个分类", cx, cy + 25 * density, paint);
     }

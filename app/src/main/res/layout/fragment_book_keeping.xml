@@ -84,7 +84,7 @@
                 android:textSize="15sp" android:inputType="numberDecimal" android:digits="0123456789."
                 android:imeOptions="actionSend" android:singleLine="true" android:maxLength="20" />
             <Button android:id="@+id/send_btn" android:layout_width="84dp" android:layout_height="48dp"
-                android:layout_marginStart="8dp" android:text="记一笔" android:textSize="14sp" android:textColor="@color/white"
+                android:layout_marginStart="8dp" android:text="记一笔" android:textSize="14sp" android:textColor="@color/ledger_on_accent"
                 app:backgroundTint="@color/ledger_accent" android:insetTop="0dp" android:insetBottom="0dp" />
         </LinearLayout>
     </LinearLayout>
